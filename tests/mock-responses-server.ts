@@ -82,6 +82,27 @@ export class MockResponsesServer {
     ]);
   }
 
+  enqueueFunctionCall(
+    name: string,
+    argumentsValue: Record<string, unknown>,
+    callId: string,
+    responseId: string,
+  ): void {
+    this.enqueue([
+      responseCreated(responseId),
+      {
+        type: "response.output_item.done",
+        item: {
+          type: "function_call",
+          call_id: callId,
+          name,
+          arguments: JSON.stringify(argumentsValue),
+        },
+      },
+      responseCompleted(responseId),
+    ]);
+  }
+
   private enqueue(events: readonly ResponsesEvent[]): void {
     this.responses.push(
       events

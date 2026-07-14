@@ -17,6 +17,9 @@ import {
   protocolMetadata,
   resolveCodexBinary,
 } from "../src";
+import type {
+  CommandExecutionRequestApprovalParams,
+} from "../src/generated/protocol/v2/CommandExecutionRequestApprovalParams";
 import { MockResponsesServer } from "./mock-responses-server";
 
 const temporaryDirectories: string[] = [];
@@ -201,6 +204,84 @@ describe("codex app-server integration", () => {
   );
 
   it(
+    "handles a real app-server command approval without executing the declined command",
+    async () => {
+      const root = mkdtempSync(join(tmpdir(), "codex-app-server-client-approval-test-"));
+      temporaryDirectories.push(root);
+      const codexHome = join(root, "codex-home");
+      const workspace = join(root, "workspace");
+      const marker = join(workspace, "declined-command-must-not-run");
+      mkdirSync(codexHome);
+      mkdirSync(workspace);
+
+      const responses = new MockResponsesServer();
+      await responses.start();
+      responses.enqueueFunctionCall(
+        "shell_command",
+        {
+          command: `touch ${JSON.stringify(marker)}`,
+          timeout_ms: 5_000,
+          workdir: workspace,
+        },
+        "call-decline",
+        "approval-1",
+      );
+      responses.enqueueAssistantMessage("The command was declined safely.", "approval-2");
+      writeFileSync(
+        join(codexHome, "config.toml"),
+        mockProviderConfig(responses.origin, "untrusted", "user"),
+      );
+
+      const client = new CodexAppServerClient({
+        cwd: workspace,
+        env: {
+          CODEX_APP_SERVER_DISABLE_MANAGED_CONFIG: "1",
+          CODEX_HOME: codexHome,
+          RUST_LOG: "warn",
+        },
+        requestTimeoutMs: 10_000,
+      });
+      let approval: CommandExecutionRequestApprovalParams | null = null;
+      client.onServerRequest("item/commandExecution/requestApproval", (params) => {
+        approval = params;
+        return { decision: "decline" };
+      });
+
+      try {
+        await client.connect();
+        const thread = await client.createThread({
+          approvalPolicy: "untrusted",
+          approvalsReviewer: "user",
+          cwd: workspace,
+        });
+        const result = await thread.run("try the mocked command");
+
+        expect(approval).toMatchObject({
+          command: expect.stringContaining("declined-command-must-not-run"),
+          itemId: "call-decline",
+          threadId: thread.id,
+        });
+        expect(result.finalResponse).toBe("The command was declined safely.");
+        expect(result.items).toContainEqual(
+          expect.objectContaining({
+            aggregatedOutput: null,
+            exitCode: null,
+            id: "call-decline",
+            status: "declined",
+            type: "commandExecution",
+          }),
+        );
+        expect(existsSync(marker)).toBe(false);
+        expect(responses.requests).toHaveLength(2);
+      } finally {
+        await client.close();
+        await responses.close();
+      }
+    },
+    30_000,
+  );
+
+  it(
     "initializes through the real app-server Unix control socket",
     async () => {
       const codexHome = mkdtempSync(join(tmpdir(), "codex-app-server-client-unix-test-"));
@@ -347,10 +428,17 @@ function delay(milliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
-function mockProviderConfig(origin: string): string {
+function mockProviderConfig(
+  origin: string,
+  approvalPolicy = "never",
+  approvalsReviewer?: "user",
+): string {
+  const approvalsReviewerLine = approvalsReviewer
+    ? `approvals_reviewer = "${approvalsReviewer}"\n`
+    : "";
   return `model = "mock-model"
-approval_policy = "never"
-sandbox_mode = "read-only"
+approval_policy = "${approvalPolicy}"
+${approvalsReviewerLine}sandbox_mode = "read-only"
 model_provider = "mock_provider"
 
 [model_providers.mock_provider]

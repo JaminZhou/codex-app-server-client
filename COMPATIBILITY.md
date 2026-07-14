@@ -57,7 +57,7 @@ experiments.
 | Threads | start, resume, fork, list, read, archive, unarchive, name, compact | Complete `call()` surface |
 | Turns | start, steer, interrupt, event stream, collected result | Complete `call()` surface; collected and manually streamed turns are exercised through the real pinned app-server against a local mock Responses provider |
 | Thread goals | get, set, clear, logical continuation stream, collected result, pause | Complete `call()` surface |
-| Approvals and other server requests | Explicit typed handler registration; no implicit approval | Complete handler surface |
+| Approvals and other server requests | Explicit typed handler registration; no implicit approval | Complete handler surface; a real pinned app-server command request is declined end to end and verified not to execute |
 | Models | list | Complete `call()` surface |
 | Account and login flows | API key, browser, device code, auth tokens, completion wait/cancel, account read, logout | Complete `call()` surface |
 | MCP, apps, plugins, skills, config, review, processes, and remote control | No area-specific wrappers yet | Complete `call()` surface |
@@ -71,7 +71,9 @@ The real-turn integration test uses an isolated temporary `CODEX_HOME`, disables
 sets retries to zero, and routes the model provider exclusively to a loopback HTTP server. It
 asserts the outbound Responses request as well as real `turn/started`, agent-message delta,
 `item/completed`, token-usage, and `turn/completed` notifications without authenticating or
-consuming model usage.
+consuming model usage. A second real-runtime scenario sends a public `shell_command` model item,
+handles the resulting typed `item/commandExecution/requestApproval` server request, declines it,
+and verifies the command item is completed as `declined` without executing the command.
 
 ## Remaining parity work
 

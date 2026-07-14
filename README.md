@@ -34,6 +34,8 @@ Current protocol baseline: `codex-cli 0.144.4`, including its generated experime
 - Provides high-level `CodexThread` and `CodexTurn` handles with async event streaming.
 - Exercises collected and manually streamed turns through a real app-server against an isolated
   local Responses provider, so the end-to-end test cannot consume model usage.
+- Exercises a real app-server command-approval callback and verifies that a declined command is
+  represented as declined without being executed.
 - Provides browser and device-code login handles with race-safe completion routing.
 - Exposes persisted thread-goal CRUD and coalesces automatic goal continuations into one logical
   turn stream.
