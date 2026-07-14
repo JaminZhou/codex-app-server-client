@@ -39,6 +39,7 @@ Current protocol baseline: `codex-cli 0.144.4`, including its generated experime
 - Maps JSON-RPC errors into typed errors and includes bounded overload retry support.
 - Preserves the public W3C trace context and classifies documented `-32001` ingress overloads.
 - Preserves 64-bit JSON integer precision, using `number` when safe and `bigint` otherwise.
+- Validates known public-protocol traffic at runtime against the pinned generated JSON Schema.
 - Handles request cancellation, timeouts, ordered writes, bounded stderr capture, and process shutdown.
 - Verifies generated TypeScript, JSON Schema, and request/response maps in CI.
 
@@ -137,6 +138,31 @@ await client.call("account/logout");
 ```
 
 For forward compatibility or deliberately untyped extensions, `request<T>(method, params)` remains available as a raw escape hatch.
+
+## Runtime protocol validation
+
+Generated Schema validation is enabled by default. Before writing, known client requests and
+notifications are checked against the pinned protocol. Incoming known responses, notifications,
+server requests, and typed server-request handler results are checked before they enter high-level
+routing. A malformed known response or notification closes the mismatched connection instead of
+letting invalid data contaminate client state.
+
+Unknown method names remain available to generic handlers and raw `request()` calls without being
+rejected, preserving a deliberate forward-compatibility path. Disable validation only for explicit
+version-skew experiments:
+
+```ts
+const client = new CodexAppServerClient({
+  protocolValidation: "off",
+});
+```
+
+Validation converts `bigint` values only in its private comparison copy; the value sent to or
+received from app-server remains lossless. The upstream generator does not currently export
+response Schema for three deprecated compatibility methods: `getAuthStatus`,
+`getConversationSummary`, and `gitDiffToRemote`. Their request parameters remain validated and
+their responses remain statically typed, but their response payloads are the explicit runtime
+validation exceptions reported by `protocolValidationMetadata`.
 
 ## Account and login workflows
 

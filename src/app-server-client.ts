@@ -5,6 +5,7 @@ import {
   AppServerConnectionClosedError,
   AppServerInvalidRequestError,
   AppServerProtocolError,
+  AppServerProtocolValidationError,
   AppServerServerRequestError,
 } from "./errors";
 import type {
@@ -74,6 +75,11 @@ import {
 } from "./login";
 import { KeyedOperationCoordinator } from "./operation-coordinator";
 import {
+  loadProtocolValidator,
+  type ProtocolValidationMode,
+  type ProtocolValidator,
+} from "./protocol-validator";
+import {
   CodexThread,
   CodexTurn,
   normalizeTurnInput,
@@ -116,6 +122,7 @@ export interface CodexAppServerClientOptions {
   cwd?: string;
   env?: NodeJS.ProcessEnv;
   onUnhandledError?: (error: Error) => void;
+  protocolValidation?: ProtocolValidationMode;
   requestTimeoutMs?: number;
   stderrBufferLines?: number;
   transport?: AppServerClientTransportOptions;
@@ -157,6 +164,7 @@ export class CodexAppServerClient {
   private closePromise: Promise<void> | null = null;
   private connectAbortController: AbortController | null = null;
   private peer: JsonRpcPeer | null = null;
+  private protocolValidator: ProtocolValidator | null = null;
   private connectPromise: Promise<InitializeResponse> | null = null;
   private initializeResponse: InitializeResponse | null = null;
   private serverRequestHandler: ServerRequestHandler | null = null;
@@ -214,7 +222,20 @@ export class CodexAppServerClient {
     params?: unknown,
     options: RequestOptions = {},
   ): Promise<T> {
-    return this.requirePeer().request<T>(method, params, this.withDefaultTimeout(options));
+    const peer = this.requirePeer();
+    const validator = this.protocolValidator;
+    validator?.assertClientRequest(method, params);
+    const response = peer.request<T>(method, params, this.withDefaultTimeout(options));
+    if (!validator) return response;
+    return response.then((result) => {
+      try {
+        validator.assertResponse(method, result);
+        return result;
+      } catch (error) {
+        peer.dispose(asError(error));
+        throw error;
+      }
+    });
   }
 
   call<M extends AppServerMethod>(
@@ -564,7 +585,9 @@ export class CodexAppServerClient {
   }
 
   notify(method: string, params?: unknown): Promise<void> {
-    return this.requirePeer().notify(method, params);
+    const peer = this.requirePeer();
+    this.protocolValidator?.assertClientNotification(method, params);
+    return peer.notify(method, params);
   }
 
   onNotification(handler: NotificationHandler): () => void;
@@ -694,20 +717,30 @@ export class CodexAppServerClient {
     const abortController = new AbortController();
     this.connectAbortController = abortController;
     try {
+      this.protocolValidator =
+        this.options.protocolValidation === "off" ? null : await loadProtocolValidator();
+      if (abortController.signal.aborted) {
+        throw asError(
+          abortController.signal.reason ?? new AppServerConnectionClosedError(),
+        );
+      }
       const peer = await this.openPeer(abortController.signal);
       this.peer = peer;
       this.configurePeer(peer);
 
-      const response = validateInitializeResponse(
-        await peer.request<unknown>(
-          "initialize",
-          {
-            capabilities: { ...DEFAULT_CAPABILITIES, ...this.options.capabilities },
-            clientInfo: this.options.clientInfo ?? DEFAULT_CLIENT_INFO,
-          },
-          this.withDefaultTimeout({}),
-        ),
+      const initializeParams = {
+        capabilities: { ...DEFAULT_CAPABILITIES, ...this.options.capabilities },
+        clientInfo: this.options.clientInfo ?? DEFAULT_CLIENT_INFO,
+      };
+      this.protocolValidator?.assertClientRequest("initialize", initializeParams);
+      const rawResponse = await peer.request<unknown>(
+        "initialize",
+        initializeParams,
+        this.withDefaultTimeout({}),
       );
+      this.protocolValidator?.assertResponse("initialize", rawResponse);
+      const response = validateInitializeResponse(rawResponse);
+      this.protocolValidator?.assertClientNotification("initialized", undefined);
       await peer.notify("initialized");
       this.initializeResponse = response;
       this.currentState = "connected";
@@ -783,6 +816,12 @@ export class CodexAppServerClient {
   private configurePeer(peer: JsonRpcPeer): void {
     peer.onClose((reason) => this.handlePeerClose(peer, reason));
     peer.onNotification(async (notification) => {
+      try {
+        this.protocolValidator?.assertServerNotification(notification);
+      } catch (error) {
+        peer.dispose(asError(error));
+        return;
+      }
       const typed = notification as ServerNotification;
       this.loginEvents.route(typed);
       if (!this.goalEvents.route(typed)) this.turnEvents.route(notification);
@@ -791,16 +830,34 @@ export class CodexAppServerClient {
         await handler(notification.params, typed);
       }
     });
-    peer.onServerRequest((request) => {
+    peer.onServerRequest(async (request) => {
+      try {
+        this.protocolValidator?.assertServerRequest(request);
+      } catch (error) {
+        if (error instanceof AppServerProtocolValidationError) {
+          throw new AppServerServerRequestError(error.message, -32602);
+        }
+        throw error;
+      }
       const typedHandler = this.typedServerRequestHandlers.get(request.method);
-      if (typedHandler) return typedHandler(request);
-      if (!this.serverRequestHandler) {
+      let result: JsonValue;
+      if (typedHandler) result = await typedHandler(request);
+      else if (this.serverRequestHandler) result = await this.serverRequestHandler(request);
+      else {
         throw new AppServerServerRequestError(
           `Unsupported server request: ${request.method}`,
           -32601,
         );
       }
-      return this.serverRequestHandler(request);
+      try {
+        this.protocolValidator?.assertServerResponse(request.method, result);
+      } catch (error) {
+        if (error instanceof AppServerProtocolValidationError) {
+          throw new AppServerServerRequestError(error.message, -32603);
+        }
+        throw error;
+      }
+      return result;
     });
   }
 
@@ -942,6 +999,13 @@ function validateInitializeResponse(value: unknown): InitializeResponse {
 }
 
 function validateClientOptions(options: CodexAppServerClientOptions): void {
+  if (
+    options.protocolValidation !== undefined &&
+    options.protocolValidation !== "strict" &&
+    options.protocolValidation !== "off"
+  ) {
+    throw new TypeError("protocolValidation must be strict or off.");
+  }
   if (
     options.requestTimeoutMs !== undefined &&
     (!Number.isFinite(options.requestTimeoutMs) || options.requestTimeoutMs < 0)

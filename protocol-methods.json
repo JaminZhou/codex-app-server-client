@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "codexCliVersion": "0.144.4",
   "source": {
     "repository": "https://github.com/openai/codex",
@@ -1007,6 +1007,96 @@
         "name": "FuzzyFileSearchSessionStopResponse"
       },
       "variant": "FuzzyFileSearchSessionStop"
+    }
+  ],
+  "serverRequests": [
+    {
+      "method": "item/commandExecution/requestApproval",
+      "response": {
+        "module": "v2/CommandExecutionRequestApprovalResponse",
+        "name": "CommandExecutionRequestApprovalResponse"
+      },
+      "variant": "CommandExecutionRequestApproval"
+    },
+    {
+      "method": "item/fileChange/requestApproval",
+      "response": {
+        "module": "v2/FileChangeRequestApprovalResponse",
+        "name": "FileChangeRequestApprovalResponse"
+      },
+      "variant": "FileChangeRequestApproval"
+    },
+    {
+      "method": "item/tool/requestUserInput",
+      "response": {
+        "module": "v2/ToolRequestUserInputResponse",
+        "name": "ToolRequestUserInputResponse"
+      },
+      "variant": "ToolRequestUserInput"
+    },
+    {
+      "method": "mcpServer/elicitation/request",
+      "response": {
+        "module": "v2/McpServerElicitationRequestResponse",
+        "name": "McpServerElicitationRequestResponse"
+      },
+      "variant": "McpServerElicitationRequest"
+    },
+    {
+      "method": "item/permissions/requestApproval",
+      "response": {
+        "module": "v2/PermissionsRequestApprovalResponse",
+        "name": "PermissionsRequestApprovalResponse"
+      },
+      "variant": "PermissionsRequestApproval"
+    },
+    {
+      "method": "item/tool/call",
+      "response": {
+        "module": "v2/DynamicToolCallResponse",
+        "name": "DynamicToolCallResponse"
+      },
+      "variant": "DynamicToolCall"
+    },
+    {
+      "method": "account/chatgptAuthTokens/refresh",
+      "response": {
+        "module": "v2/ChatgptAuthTokensRefreshResponse",
+        "name": "ChatgptAuthTokensRefreshResponse"
+      },
+      "variant": "ChatgptAuthTokensRefresh"
+    },
+    {
+      "method": "attestation/generate",
+      "response": {
+        "module": "v2/AttestationGenerateResponse",
+        "name": "AttestationGenerateResponse"
+      },
+      "variant": "AttestationGenerate"
+    },
+    {
+      "method": "currentTime/read",
+      "response": {
+        "module": "v2/CurrentTimeReadResponse",
+        "name": "CurrentTimeReadResponse"
+      },
+      "variant": "CurrentTimeRead"
+    },
+    {
+      "method": "applyPatchApproval",
+      "response": {
+        "module": "ApplyPatchApprovalResponse",
+        "name": "ApplyPatchApprovalResponse"
+      },
+      "variant": "ApplyPatchApproval"
+    },
+    {
+      "method": "execCommandApproval",
+      "response": {
+        "module": "ExecCommandApprovalResponse",
+        "name": "ExecCommandApprovalResponse"
+      },
+      "variant": "ExecCommandApproval"
     }
   ]
 }

@@ -8,6 +8,8 @@ export * from "./jsonl-rpc-peer";
 export { ChatGptLoginHandle, DeviceCodeLoginHandle } from "./login";
 export type { ChatGptAuthTokens, ChatGptLoginOptions, LoginWaitOptions } from "./login";
 export { protocolMetadata } from "./protocol-metadata";
+export { protocolValidationMetadata } from "./protocol-validator";
+export type { ProtocolValidationMode } from "./protocol-validator";
 export * from "./retry";
 export * from "./thread";
 export * from "./typed-handlers";

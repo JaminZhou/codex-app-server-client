@@ -43,6 +43,12 @@ transport. For production local rich clients, prefer stdio or the Unix control s
 | Backpressure error classification | Complete for the documented ingress error | `-32001` `Server overloaded; retry later.` maps to `AppServerBusyError` |
 | Overload retry helper | Complete and opt-in | Exponential backoff with jitter; only overload-classified failures retry |
 | Experimental protocol | Generated and available | Enabled by the default initialize capability; it remains version-sensitive |
+| Runtime protocol validation | Complete for every generated request/notification/server-request shape and 122 of 125 client responses | Strict by default; three deprecated response types have no upstream JSON Schema |
+
+Unknown method names bypass known-method Schema validation and remain available through generic
+handlers and raw requests. This is intentional forward compatibility, not a claim that an unknown
+shape has been verified. `protocolValidation: "off"` is available for deliberate version-skew
+experiments.
 
 ## High-level API coverage
 
@@ -65,7 +71,8 @@ normalized single-turn stream.
 
 The following items are deliberately not claimed as complete:
 
-- generated runtime validation for every request, response, notification, and server request;
+- response validation for the three deprecated compatibility methods whose response Schema is not
+  exported upstream (`getAuthStatus`, `getConversationSummary`, and `gitDiffToRemote`);
 - broader high-level operation-scope coordination outside turn and goal starts;
 - automatic reconnect, replay, or idempotency policy for a dropped remote connection;
 - a cross-version compatibility suite spanning multiple Codex CLI releases;

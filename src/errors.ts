@@ -75,6 +75,49 @@ export class AppServerProtocolError extends CodexAppServerError {
   }
 }
 
+export type ProtocolValidationDirection =
+  | "request"
+  | "response"
+  | "notification"
+  | "serverRequest"
+  | "serverResponse";
+
+export interface ProtocolValidationIssue {
+  instancePath: string;
+  keyword: string;
+  message?: string;
+  schemaPath: string;
+}
+
+export class AppServerProtocolValidationError extends AppServerProtocolError {
+  readonly direction: ProtocolValidationDirection;
+  readonly issues: readonly ProtocolValidationIssue[];
+  readonly method: string;
+
+  constructor(
+    direction: ProtocolValidationDirection,
+    method: string,
+    issues: readonly ProtocolValidationIssue[],
+    options?: ErrorOptions,
+  ) {
+    const detail = issues
+      .slice(0, 3)
+      .map(
+        (issue) =>
+          `${issue.instancePath || "/"} ${issue.message ?? `failed ${issue.keyword}`}`,
+      )
+      .join("; ");
+    super(
+      `Public app-server ${direction} validation failed for ${method}${detail ? `: ${detail}` : "."}`,
+      options,
+    );
+    this.name = "AppServerProtocolValidationError";
+    this.direction = direction;
+    this.method = method;
+    this.issues = issues;
+  }
+}
+
 export class AppServerRequestTimeoutError extends CodexAppServerError {
   readonly method: string;
   readonly timeoutMs: number;

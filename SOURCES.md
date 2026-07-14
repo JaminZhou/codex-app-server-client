@@ -18,7 +18,17 @@ This repository is an independently written client for public Codex interfaces.
 - Open-source commit: `8c68d4c87dc54d38861f5114e920c3de2efa5876`
 - Method-map source: `codex-rs/app-server-protocol/src/protocol/common.rs`
 
-The CLI generates `src/generated/protocol/` and `schemas/`. A deterministic post-generation normalization changes Rust 64-bit integer TypeScript fields from `bigint` to `number | bigint`, matching the lossless JSONL runtime representation. The public Rust `client_request_definitions!` table supplies method-to-response associations recorded in `protocol-methods.json`. Generation verifies that this table exactly matches the CLI-generated `ClientRequest` method union and that every response type exists.
+The CLI generates `src/generated/protocol/` and `schemas/`. A deterministic post-generation
+normalization changes Rust 64-bit integer TypeScript fields from `bigint` to `number | bigint`,
+matching the lossless JSONL runtime representation. The public Rust `client_request_definitions!`
+and `server_request_definitions!` tables supply method-to-response associations recorded in
+`protocol-methods.json`. Generation verifies that these tables exactly match the CLI-generated
+request unions and that every response type exists.
+
+Runtime validation compiles the pinned aggregate Schema plus generated standalone server-response
+Schema. Unknown method names remain forward-compatible. The generator records the three deprecated
+client responses for which the upstream CLI exports TypeScript but no JSON Schema, so that boundary
+cannot silently regress into a claim of complete runtime coverage.
 
 The Python SDK is used as a behavioral reference for transport closure, request routing, early
 notification buffering, interactive login handles, initialization, typed error mapping, overload

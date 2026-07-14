@@ -5,6 +5,7 @@ import {
 } from "../src";
 import type { ServerNotification } from "../src/generated/protocol/ServerNotification";
 import type { ThreadGoal } from "../src/generated/protocol/v2/ThreadGoal";
+import type { Thread } from "../src/generated/protocol/v2/Thread";
 import type { Turn } from "../src/generated/protocol/v2/Turn";
 import { FakeAppServer, type FakeRpcMessage } from "./fake-app-server";
 
@@ -17,12 +18,7 @@ describe("thread goal workflows", () => {
       switch (message.method) {
         case "thread/read":
           appServer.reply(message, {
-            thread: {
-              id: THREAD_ID,
-              status: { type: "idle" },
-              ephemeral: false,
-              path: "/tmp/thread-goal.jsonl",
-            },
+            thread: threadSnapshot(),
           });
           break;
         case "thread/goal/clear":
@@ -156,12 +152,7 @@ describe("thread goal workflows", () => {
       switch (message.method) {
         case "thread/read":
           appServer.reply(message, {
-            thread: {
-              id: THREAD_ID,
-              status: { type: "idle" },
-              ephemeral: false,
-              path: "/tmp/thread-goal.jsonl",
-            },
+            thread: threadSnapshot(),
           });
           break;
         case "thread/goal/clear":
@@ -286,6 +277,34 @@ function threadGoal(status: ThreadGoal["status"]): ThreadGoal {
     timeUsedSeconds: 8,
     createdAt: 1,
     updatedAt: 2,
+  };
+}
+
+function threadSnapshot(): Thread {
+  return {
+    id: THREAD_ID,
+    extra: null,
+    sessionId: "session-goal",
+    forkedFromId: null,
+    parentThreadId: null,
+    preview: "",
+    ephemeral: false,
+    historyMode: "legacy",
+    modelProvider: "openai",
+    createdAt: 1,
+    updatedAt: 1,
+    recencyAt: 1,
+    status: { type: "idle" },
+    path: "/tmp/thread-goal.jsonl",
+    cwd: "/tmp",
+    cliVersion: "0.144.4",
+    source: "unknown",
+    threadSource: null,
+    agentNickname: null,
+    agentRole: null,
+    gitInfo: null,
+    name: null,
+    turns: [],
   };
 }
 

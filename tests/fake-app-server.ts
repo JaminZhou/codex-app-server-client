@@ -3,9 +3,11 @@ import type { AddressInfo } from "node:net";
 import WebSocket, { WebSocketServer } from "ws";
 
 export interface FakeRpcMessage {
+  error?: { code: number; data?: unknown; message: string };
   id?: number | string;
-  method: string;
+  method?: string;
   params?: Record<string, unknown>;
+  result?: unknown;
 }
 
 export type FakeRequestHandler = (
@@ -70,6 +72,10 @@ export class FakeAppServer {
 
   notify(method: string, params: Record<string, unknown>): void {
     this.send({ method, params });
+  }
+
+  request(id: number | string, method: string, params: Record<string, unknown>): void {
+    this.send({ id, method, params });
   }
 
   terminateConnection(): void {
