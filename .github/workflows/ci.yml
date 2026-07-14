@@ -10,13 +10,12 @@ jobs:
     # Temporary while the repository is private; switch back to ubuntu-latest before public release.
     runs-on: [self-hosted, macOS, ARM64, codex-app-server-client]
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
         with:
           version: 11.7.0
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
-          cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
