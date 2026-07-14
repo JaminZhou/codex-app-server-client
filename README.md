@@ -32,6 +32,8 @@ Current protocol baseline: `codex-cli 0.144.4`, including its generated experime
 - Routes typed notifications and all generated server-request methods.
 - Buffers turn events that arrive before the `turn/start` response is consumed.
 - Provides high-level `CodexThread` and `CodexTurn` handles with async event streaming.
+- Exercises collected and manually streamed turns through a real app-server against an isolated
+  local Responses provider, so the end-to-end test cannot consume model usage.
 - Provides browser and device-code login handles with race-safe completion routing.
 - Exposes persisted thread-goal CRUD and coalesces automatic goal continuations into one logical
   turn stream.
@@ -79,6 +81,8 @@ try {
 ```
 
 Running a turn can use the authenticated Codex account associated with the selected `CODEX_HOME` and may consume usage.
+The integration suite instead uses a temporary `CODEX_HOME` whose provider points only to a
+loopback mock Responses endpoint.
 
 ## Transports
 

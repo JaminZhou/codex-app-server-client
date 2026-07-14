@@ -55,7 +55,7 @@ experiments.
 | Area | Current high-level coverage | Raw typed fallback |
 | --- | --- | --- |
 | Threads | start, resume, fork, list, read, archive, unarchive, name, compact | Complete `call()` surface |
-| Turns | start, steer, interrupt, event stream, collected result | Complete `call()` surface |
+| Turns | start, steer, interrupt, event stream, collected result | Complete `call()` surface; collected and manually streamed turns are exercised through the real pinned app-server against a local mock Responses provider |
 | Thread goals | get, set, clear, logical continuation stream, collected result, pause | Complete `call()` surface |
 | Approvals and other server requests | Explicit typed handler registration; no implicit approval | Complete handler surface |
 | Models | list | Complete `call()` surface |
@@ -66,6 +66,12 @@ High-level `turn/start` and logical goal starts are serialized per thread, match
 Python SDK's protection against competing starts. Different threads remain concurrent. Goal
 continuations preserve original notifications for generic handlers while the goal handle receives a
 normalized single-turn stream.
+
+The real-turn integration test uses an isolated temporary `CODEX_HOME`, disables managed config,
+sets retries to zero, and routes the model provider exclusively to a loopback HTTP server. It
+asserts the outbound Responses request as well as real `turn/started`, agent-message delta,
+`item/completed`, token-usage, and `turn/completed` notifications without authenticating or
+consuming model usage.
 
 ## Remaining parity work
 

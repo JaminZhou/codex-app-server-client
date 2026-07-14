@@ -1,6 +1,13 @@
 import { execFileSync, spawn, type ChildProcess } from "node:child_process";
 import { once } from "node:events";
-import { existsSync, mkdtempSync, realpathSync, rmSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { createServer, type AddressInfo } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -10,6 +17,7 @@ import {
   protocolMetadata,
   resolveCodexBinary,
 } from "../src";
+import { MockResponsesServer } from "./mock-responses-server";
 
 const temporaryDirectories: string[] = [];
 
@@ -108,6 +116,88 @@ describe("codex app-server integration", () => {
       expect(client.state).toBe("disconnected");
     },
     20_000,
+  );
+
+  it(
+    "runs and streams turns through a real app-server with a local Responses provider",
+    async () => {
+      const root = mkdtempSync(join(tmpdir(), "codex-app-server-client-turn-test-"));
+      temporaryDirectories.push(root);
+      const codexHome = join(root, "codex-home");
+      const workspace = join(root, "workspace");
+      mkdirSync(codexHome);
+      mkdirSync(workspace);
+
+      const responses = new MockResponsesServer();
+      await responses.start();
+      responses.enqueueAssistantMessage("Hello from the local mock.", "run-1");
+      responses.enqueueStreamingAssistantMessage(["Streamed ", "response."], "stream-1");
+      writeFileSync(
+        join(codexHome, "config.toml"),
+        mockProviderConfig(responses.origin),
+      );
+
+      const client = new CodexAppServerClient({
+        cwd: workspace,
+        env: {
+          CODEX_APP_SERVER_DISABLE_MANAGED_CONFIG: "1",
+          CODEX_HOME: codexHome,
+          RUST_LOG: "warn",
+        },
+        requestTimeoutMs: 10_000,
+      });
+
+      try {
+        await client.connect();
+        const thread = await client.createThread({ cwd: workspace });
+        const result = await thread.run("hello real app-server");
+        expect(result.finalResponse).toBe("Hello from the local mock.");
+        expect(result.turn.status).toBe("completed");
+        expect(result.usage).not.toBeNull();
+
+        const streamedTurn = await thread.startTurn("stream real app-server");
+        const events = [];
+        for await (const event of streamedTurn.events()) events.push(event);
+        expect(events.some((event) => event.method === "turn/started")).toBe(true);
+        expect(
+          events.some(
+            (event) =>
+              event.method === "item/agentMessage/delta" &&
+              event.params.delta === "Streamed ",
+          ),
+        ).toBe(true);
+        expect(
+          events.some(
+            (event) =>
+              event.method === "item/completed" &&
+              event.params.item.type === "agentMessage" &&
+              event.params.item.text === "Streamed response.",
+          ),
+        ).toBe(true);
+        expect(
+          events.some(
+            (event) =>
+              event.method === "turn/completed" && event.params.turn.status === "completed",
+          ),
+        ).toBe(true);
+
+        expect(responses.requests).toHaveLength(2);
+        expect(responses.requests.map((request) => request.path)).toEqual([
+          "/v1/responses",
+          "/v1/responses",
+        ]);
+        expect(responses.requests.map((request) => request.body.stream)).toEqual([
+          true,
+          true,
+        ]);
+        expect(lastUserText(responses.requests[0]?.body)).toBe("hello real app-server");
+        expect(lastUserText(responses.requests[1]?.body)).toBe("stream real app-server");
+      } finally {
+        await client.close();
+        await responses.close();
+      }
+    },
+    30_000,
   );
 
   it(
@@ -255,4 +345,38 @@ async function waitForReady(
 
 function delay(milliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
+function mockProviderConfig(origin: string): string {
+  return `model = "mock-model"
+approval_policy = "never"
+sandbox_mode = "read-only"
+model_provider = "mock_provider"
+
+[model_providers.mock_provider]
+name = "Mock provider for TypeScript client tests"
+base_url = "${origin}/v1"
+wire_api = "responses"
+request_max_retries = 0
+stream_max_retries = 0
+`;
+}
+
+function lastUserText(body: Record<string, unknown> | undefined): string | null {
+  if (!body || !Array.isArray(body.input)) return null;
+  const texts: string[] = [];
+  for (const input of body.input) {
+    if (!isRecord(input) || input.type !== "message" || input.role !== "user") continue;
+    if (!Array.isArray(input.content)) continue;
+    for (const content of input.content) {
+      if (isRecord(content) && content.type === "input_text" && typeof content.text === "string") {
+        texts.push(content.text);
+      }
+    }
+  }
+  return texts.at(-1) ?? null;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

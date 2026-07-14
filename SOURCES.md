@@ -33,7 +33,9 @@ cannot silently regress into a claim of complete runtime coverage.
 The Python SDK is used as a behavioral reference for transport closure, request routing, early
 notification buffering, interactive login handles, initialization, typed error mapping, overload
 retry, per-thread start coordination, thread/turn handles, logical thread-goal routing, and result
-collection. The TypeScript implementation is written independently for Node streams and promises.
+collection. Its public local Responses-provider test pattern is also a normative reference for
+no-usage end-to-end testing. The TypeScript implementation and Node test fixture are written
+independently for Node streams, promises, and HTTP.
 
 ## Explicit exclusions
 

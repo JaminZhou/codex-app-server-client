@@ -13,6 +13,9 @@ pnpm check
 CI then imports the built package and constructs the strict validator on the declared minimum Node.js
 18 runtime.
 
+The real-turn integration test never calls an external model service. It starts the pinned
+app-server with a temporary `CODEX_HOME` configured to use a loopback mock Responses provider.
+
 ## Updating the Codex protocol
 
 1. Change `@openai/codex` to an exact version in `package.json`.
