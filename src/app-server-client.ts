@@ -41,7 +41,7 @@ import type { TurnStartParams } from "./generated/protocol/v2/TurnStartParams";
 import type { TurnStartResponse } from "./generated/protocol/v2/TurnStartResponse";
 import type { TurnSteerParams } from "./generated/protocol/v2/TurnSteerParams";
 import type { TurnSteerResponse } from "./generated/protocol/v2/TurnSteerResponse";
-import { JsonlRpcPeer } from "./jsonl-rpc-peer";
+import { JsonlRpcPeer, JsonRpcPeer } from "./jsonl-rpc-peer";
 import {
   CodexThread,
   CodexTurn,
@@ -62,6 +62,10 @@ import type {
   ServerRequestHandler,
 } from "./types";
 import { TurnEventRouter } from "./turn-event-router";
+import {
+  WebSocketMessageTransport,
+  type AppServerRemoteTransportOptions,
+} from "./websocket-transport";
 
 export type AppServerConnectionState = "disconnected" | "connecting" | "connected" | "closing";
 export type AppServerCallArguments<M extends AppServerMethod> = [AppServerParams<M>] extends [undefined]
@@ -83,7 +87,16 @@ export interface CodexAppServerClientOptions {
   onUnhandledError?: (error: Error) => void;
   requestTimeoutMs?: number;
   stderrBufferLines?: number;
+  transport?: AppServerClientTransportOptions;
 }
+
+export interface AppServerStdioTransportOptions {
+  type: "stdio";
+}
+
+export type AppServerClientTransportOptions =
+  | AppServerRemoteTransportOptions
+  | AppServerStdioTransportOptions;
 
 const DEFAULT_CLIENT_INFO: ClientInfo = {
   name: "codex_app_server_client_ts",
@@ -108,7 +121,8 @@ export class CodexAppServerClient {
   private readonly turnEvents = new TurnEventRouter();
   private child: ChildProcessWithoutNullStreams | null = null;
   private closePromise: Promise<void> | null = null;
-  private peer: JsonlRpcPeer | null = null;
+  private connectAbortController: AbortController | null = null;
+  private peer: JsonRpcPeer | null = null;
   private connectPromise: Promise<InitializeResponse> | null = null;
   private initializeResponse: InitializeResponse | null = null;
   private serverRequestHandler: ServerRequestHandler | null = null;
@@ -125,6 +139,7 @@ export class CodexAppServerClient {
       clientInfo: options.clientInfo ? { ...options.clientInfo } : undefined,
       configOverrides: options.configOverrides ? [...options.configOverrides] : undefined,
       env: options.env ? { ...options.env } : undefined,
+      transport: cloneTransportOptions(options.transport),
     };
   }
 
@@ -388,14 +403,18 @@ export class CodexAppServerClient {
 
   private async stop(): Promise<void> {
     const child = this.child;
+    const peer = this.peer;
+    const reason = new AppServerConnectionClosedError(
+      "The client closed the codex app-server connection.",
+    );
+    this.connectAbortController?.abort(reason);
+    this.connectAbortController = null;
     this.currentState = "closing";
     this.initializeResponse = null;
-    this.turnEvents.failAll(
-      new AppServerConnectionClosedError("The client closed the codex app-server connection."),
-    );
-    this.peer?.dispose();
+    this.turnEvents.failAll(reason);
     this.peer = null;
     this.child = null;
+    await peer?.close(reason);
     if (!child) {
       this.currentState = "disconnected";
       return;
@@ -427,62 +446,12 @@ export class CodexAppServerClient {
     this.currentState = "connecting";
     this.stderrLines = [];
     this.stderrRemainder = "";
+    const abortController = new AbortController();
+    this.connectAbortController = abortController;
     try {
-      const resolved = resolveCodexBinary(this.options.codexPath);
-      const args: string[] = [];
-      for (const override of this.options.configOverrides ?? []) {
-        args.push("--config", override);
-      }
-      args.push("app-server", "--listen", "stdio://", ...(this.options.appServerArgs ?? []));
-
-      const child = spawn(resolved.executablePath, args, {
-        cwd: this.options.cwd,
-        env: prependPathDirectories(
-          { ...globalThis.process.env, ...this.options.env },
-          resolved.pathDirectories,
-        ),
-        stdio: ["pipe", "pipe", "pipe"],
-        windowsHide: true,
-      });
-      this.child = child;
-      child.stderr.setEncoding("utf8");
-      child.stderr.on("data", (chunk: string) => this.captureStderr(chunk));
-      child.on("error", (error) => {
-        this.reportUnhandledError(error);
-        if (this.child === child) {
-          this.peer?.dispose(
-            new AppServerConnectionClosedError("codex app-server process failed.", {
-              cause: error,
-            }),
-          );
-        }
-      });
-      child.once("exit", (code, signal) => this.handleExit(child, code, signal));
-
-      await once(child, "spawn");
-      if (this.child !== child) throw new AppServerConnectionClosedError();
-      const peer = new JsonlRpcPeer(child.stdout, child.stdin, {
-        onUnhandledError: (error) => this.reportUnhandledError(error),
-      });
+      const peer = await this.openPeer(abortController.signal);
       this.peer = peer;
-      peer.onNotification(async (notification) => {
-        this.turnEvents.route(notification);
-        for (const handler of [...this.notificationHandlers]) await handler(notification);
-        for (const handler of this.typedNotificationHandlers.get(notification.method) ?? []) {
-          await handler(notification.params, notification as ServerNotification);
-        }
-      });
-      peer.onServerRequest((request) => {
-        const typedHandler = this.typedServerRequestHandlers.get(request.method);
-        if (typedHandler) return typedHandler(request);
-        if (!this.serverRequestHandler) {
-          throw new AppServerServerRequestError(
-            `Unsupported server request: ${request.method}`,
-            -32601,
-          );
-        }
-        return this.serverRequestHandler(request);
-      });
+      this.configurePeer(peer);
 
       const response = validateInitializeResponse(
         await peer.request<unknown>(
@@ -505,6 +474,100 @@ export class CodexAppServerClient {
         throw new AppServerConnectionClosedError(`${error.message}\n${tail}`, { cause: error });
       }
       throw error;
+    } finally {
+      if (this.connectAbortController === abortController) {
+        this.connectAbortController = null;
+      }
+    }
+  }
+
+  private async openPeer(signal: AbortSignal): Promise<JsonRpcPeer> {
+    const transport = this.options.transport ?? { type: "stdio" };
+    if (transport.type !== "stdio") {
+      const messageTransport = await WebSocketMessageTransport.connect(transport, signal);
+      try {
+        return new JsonRpcPeer(messageTransport, {
+          onUnhandledError: (error) => this.reportUnhandledError(error),
+        });
+      } catch (error) {
+        messageTransport.dispose();
+        throw error;
+      }
+    }
+
+    return this.openStdioPeer();
+  }
+
+  private async openStdioPeer(): Promise<JsonRpcPeer> {
+    const resolved = resolveCodexBinary(this.options.codexPath);
+    const args: string[] = [];
+    for (const override of this.options.configOverrides ?? []) {
+      args.push("--config", override);
+    }
+    args.push("app-server", "--listen", "stdio://", ...(this.options.appServerArgs ?? []));
+
+    const child = spawn(resolved.executablePath, args, {
+      cwd: this.options.cwd,
+      env: prependPathDirectories(
+        { ...globalThis.process.env, ...this.options.env },
+        resolved.pathDirectories,
+      ),
+      stdio: ["pipe", "pipe", "pipe"],
+      windowsHide: true,
+    });
+    this.child = child;
+    child.stderr.setEncoding("utf8");
+    child.stderr.on("data", (chunk: string) => this.captureStderr(chunk));
+    child.on("error", (error) => {
+      if (this.child !== child) return;
+      const reason = new AppServerConnectionClosedError("codex app-server process failed.", {
+        cause: error,
+      });
+      if (this.peer) this.peer.dispose(reason);
+      else this.reportUnhandledError(error);
+    });
+    child.once("exit", (code, signal) => this.handleExit(child, code, signal));
+
+    await once(child, "spawn");
+    if (this.child !== child) throw new AppServerConnectionClosedError();
+    return new JsonlRpcPeer(child.stdout, child.stdin, {
+      onUnhandledError: (error) => this.reportUnhandledError(error),
+    });
+  }
+
+  private configurePeer(peer: JsonRpcPeer): void {
+    peer.onClose((reason) => this.handlePeerClose(peer, reason));
+    peer.onNotification(async (notification) => {
+      this.turnEvents.route(notification);
+      for (const handler of [...this.notificationHandlers]) await handler(notification);
+      for (const handler of this.typedNotificationHandlers.get(notification.method) ?? []) {
+        await handler(notification.params, notification as ServerNotification);
+      }
+    });
+    peer.onServerRequest((request) => {
+      const typedHandler = this.typedServerRequestHandlers.get(request.method);
+      if (typedHandler) return typedHandler(request);
+      if (!this.serverRequestHandler) {
+        throw new AppServerServerRequestError(
+          `Unsupported server request: ${request.method}`,
+          -32601,
+        );
+      }
+      return this.serverRequestHandler(request);
+    });
+  }
+
+  private handlePeerClose(peer: JsonRpcPeer, reason: Error): void {
+    if (this.peer !== peer) return;
+    const wasConnected = this.currentState === "connected";
+    this.peer = null;
+    this.initializeResponse = null;
+    this.turnEvents.failAll(reason);
+    if (this.currentState === "closing") return;
+    this.currentState = "disconnected";
+    if (wasConnected) this.reportUnhandledError(reason);
+    if (this.child && isRunning(this.child)) {
+      void this.close().catch((error: unknown) => this.reportUnhandledError(asError(error)));
     }
   }
 
@@ -562,7 +625,7 @@ export class CodexAppServerClient {
     }
   }
 
-  private requirePeer(): JsonlRpcPeer {
+  private requirePeer(): JsonRpcPeer {
     if (!this.peer || !this.initializeResponse) {
       throw new AppServerConnectionClosedError(
         "Call connect() before using the codex app-server client.",
@@ -605,8 +668,46 @@ function validateClientOptions(options: CodexAppServerClientOptions): void {
   ) {
     throw new RangeError("stderrBufferLines must be a non-negative integer.");
   }
+  if (
+    options.transport !== undefined &&
+    options.transport.type !== "stdio" &&
+    options.transport.type !== "unix" &&
+    options.transport.type !== "websocket"
+  ) {
+    throw new TypeError("transport.type must be stdio, unix, or websocket.");
+  }
+  if (options.transport?.type === "unix" || options.transport?.type === "websocket") {
+    const incompatible = [
+      "appServerArgs",
+      "codexPath",
+      "configOverrides",
+      "cwd",
+      "env",
+      "stderrBufferLines",
+    ].filter((key) => options[key as keyof CodexAppServerClientOptions] !== undefined);
+    if (incompatible.length > 0) {
+      throw new TypeError(
+        `Local process options cannot be used with ${options.transport.type} transport: ${incompatible.join(", ")}.`,
+      );
+    }
+  }
+}
+
+function cloneTransportOptions(
+  options: AppServerClientTransportOptions | undefined,
+): AppServerClientTransportOptions | undefined {
+  if (!options) return undefined;
+  if (options.type === "stdio") return { type: "stdio" };
+  return {
+    ...options,
+    headers: options.headers ? { ...options.headers } : undefined,
+  };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function asError(error: unknown): Error {
+  return error instanceof Error ? error : new Error(String(error));
 }

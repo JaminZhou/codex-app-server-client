@@ -8,3 +8,4 @@ export * from "./retry";
 export * from "./thread";
 export * from "./typed-handlers";
 export * from "./types";
+export * from "./websocket-transport";

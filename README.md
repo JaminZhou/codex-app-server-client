@@ -1,6 +1,6 @@
 # Codex App Server Client
 
-An independently implemented TypeScript client for the public `codex app-server` JSONL-RPC protocol.
+An independently implemented TypeScript client for the public `codex app-server` JSON-RPC protocol.
 
 > This is an unofficial open-source project. It is not affiliated with, sponsored by, or endorsed by OpenAI. Codex and OpenAI are trademarks of OpenAI.
 
@@ -25,13 +25,15 @@ Current protocol baseline: `codex-cli 0.144.4`, including its generated experime
 ## Highlights
 
 - Resolves the version-matched CLI installed with this package; no global `codex` installation is required.
-- Starts `codex app-server --listen stdio://` and performs the `initialize` / `initialized` handshake.
+- Starts a version-matched stdio app-server, or attaches through the public Unix socket and
+  experimental TCP WebSocket transports.
 - Provides a fully typed `call()` API for all 125 client methods in the pinned protocol.
 - Exposes generated protocol types through `codex-app-server-client/protocol`.
 - Routes typed notifications and all generated server-request methods.
 - Buffers turn events that arrive before the `turn/start` response is consumed.
 - Provides high-level `CodexThread` and `CodexTurn` handles with async event streaming.
 - Maps JSON-RPC errors into typed errors and includes bounded overload retry support.
+- Preserves the public W3C trace context and classifies documented `-32001` ingress overloads.
 - Preserves 64-bit JSON integer precision, using `number` when safe and `bigint` otherwise.
 - Handles request cancellation, timeouts, ordered writes, bounded stderr capture, and process shutdown.
 - Verifies generated TypeScript, JSON Schema, and request/response maps in CI.
@@ -72,6 +74,45 @@ try {
 ```
 
 Running a turn can use the authenticated Codex account associated with the selected `CODEX_HOME` and may consume usage.
+
+## Transports
+
+The default is a managed local stdio child process:
+
+```ts
+const client = new CodexAppServerClient();
+```
+
+To attach to an app-server already listening on its local control socket:
+
+```ts
+const client = new CodexAppServerClient({
+  transport: { type: "unix" },
+});
+```
+
+The default socket is
+`$CODEX_HOME/app-server-control/app-server-control.sock` (or the equivalent under `~/.codex`).
+Pass an absolute `socketPath` to connect elsewhere. Unix mode performs the standard WebSocket HTTP
+Upgrade over that socket; it does not spawn or own the app-server process.
+
+TCP WebSocket is exposed because it is part of the public CLI, but upstream labels it experimental
+and unsupported. Do not treat it as a production-supported upstream transport:
+
+```ts
+const client = new CodexAppServerClient({
+  transport: {
+    type: "websocket",
+    url: "wss://codex-host.example/ws",
+    bearerTokenEnv: "CODEX_APP_SERVER_TOKEN",
+  },
+});
+```
+
+The transport omits `Origin`, disables redirects and compression, bounds handshake time and inbound
+payload size, and rejects plaintext `ws://` to non-loopback hosts unless
+`allowInsecureRemote: true` is explicitly set. Local-process launch options are rejected when an
+attach transport is selected so they cannot be silently ignored.
 
 ## Complete typed protocol access
 
@@ -149,6 +190,20 @@ const thread = await retryOnAppServerOverload(
 
 Only overload-classified JSON-RPC failures are retried. Invalid requests, invalid params, authentication failures, and application errors are not retried automatically.
 
+W3C trace context can be attached to any request:
+
+```ts
+await client.call(
+  "thread/read",
+  { threadId: savedThreadId },
+  {
+    trace: {
+      traceparent: "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
+    },
+  },
+);
+```
+
 ## Protocol exports
 
 ```ts
@@ -165,6 +220,9 @@ JSON Schema artifacts are included under `schemas/` in the package.
 The generated Rust 64-bit integer fields are normalized to `number | bigint` to match the JSONL transport: safe integer literals remain numbers, while larger integer literals are parsed and serialized losslessly as bigints.
 
 The generated surface includes experimental methods and fields so rich clients can opt in through `InitializeCapabilities.experimentalApi`. Experimental APIs can change between Codex CLI releases; pin the client version and run compatibility tests before upgrading.
+
+See [COMPATIBILITY.md](./COMPATIBILITY.md) for the verified transport and protocol matrix, plus the
+remaining high-level parity work.
 
 ## CLI resolution
 

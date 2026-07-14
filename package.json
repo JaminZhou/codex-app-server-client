@@ -22,6 +22,7 @@
   "type": "module",
   "sideEffects": false,
   "files": [
+    "COMPATIBILITY.md",
     "dist",
     "schemas"
   ],
@@ -52,10 +53,12 @@
   },
   "packageManager": "pnpm@11.7.0",
   "dependencies": {
-    "@openai/codex": "0.144.4"
+    "@openai/codex": "0.144.4",
+    "ws": "8.21.0"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",
+    "@types/ws": "8.18.1",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^4.1.10"

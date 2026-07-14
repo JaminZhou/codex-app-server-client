@@ -138,7 +138,7 @@ export function mapAppServerRpcError(error: JsonRpcErrorData): AppServerRpcError
     if (containsRetryLimitText(error.message)) {
       return new AppServerRetryLimitExceededError(error);
     }
-    if (containsServerOverloaded(error.data)) {
+    if (containsServerOverloaded(error.data) || isIngressOverload(error)) {
       return new AppServerBusyError(error);
     }
     return new AppServerServerError(error);
@@ -157,6 +157,12 @@ export function isRetryableAppServerError(error: unknown): boolean {
 function containsRetryLimitText(message: string): boolean {
   const normalized = message.toLowerCase();
   return normalized.includes("retry limit") || normalized.includes("too many failed attempts");
+}
+
+function isIngressOverload(error: JsonRpcErrorData): boolean {
+  if (error.code !== -32001) return false;
+  const normalized = error.message.toLowerCase();
+  return normalized.includes("server overloaded") || normalized.includes("retry later");
 }
 
 function containsServerOverloaded(value: JsonValue | undefined): boolean {
