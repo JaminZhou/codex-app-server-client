@@ -23,4 +23,5 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 18
-      - run: pnpm package:smoke
+      # pnpm 11 itself requires Node 22; invoke the Node 18 smoke script directly.
+      - run: node scripts/package-smoke.mjs
