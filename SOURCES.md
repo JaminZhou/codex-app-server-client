@@ -30,6 +30,10 @@ Schema. Unknown method names remain forward-compatible. The generator records th
 client responses for which the upstream CLI exports TypeScript but no JSON Schema, so that boundary
 cannot silently regress into a claim of complete runtime coverage.
 
+The generated protocol bindings and Schema retain their OpenAI Codex attribution and Apache-2.0
+licensing through `THIRD_PARTY_NOTICES.md` and the bundled license copy under
+`THIRD_PARTY_LICENSES/`. The independent client implementation remains MIT-licensed.
+
 The Python SDK is used as a behavioral reference for transport closure, request routing, early
 notification buffering, interactive login handles, initialization, typed error mapping, overload
 retry, per-thread start coordination, thread/turn handles, logical thread-goal routing, and result

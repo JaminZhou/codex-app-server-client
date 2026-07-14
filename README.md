@@ -336,4 +336,6 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for the CLI upgrade and public-source e
 
 ## License
 
-MIT
+The independently written client is MIT-licensed. Generated Codex protocol bindings and Schema are
+distributed with their OpenAI attribution under Apache-2.0; see
+[THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md).

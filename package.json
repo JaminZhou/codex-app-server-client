@@ -24,7 +24,10 @@
   "files": [
     "COMPATIBILITY.md",
     "dist",
-    "schemas"
+    "schemas",
+    "SOURCES.md",
+    "THIRD_PARTY_LICENSES",
+    "THIRD_PARTY_NOTICES.md"
   ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
