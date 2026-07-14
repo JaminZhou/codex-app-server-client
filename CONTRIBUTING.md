@@ -10,6 +10,8 @@ pnpm check
 ```
 
 `pnpm check` verifies generated protocol artifacts before running TypeScript checks, unit and real app-server integration tests, and the package build.
+CI then imports the built package and constructs the strict validator on the declared minimum Node.js
+18 runtime.
 
 ## Updating the Codex protocol
 
