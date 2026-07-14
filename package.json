@@ -45,6 +45,7 @@
   },
   "scripts": {
     "build": "tsup",
+    "package:smoke": "node scripts/package-smoke.mjs",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "protocol:generate": "node scripts/generate-protocol.mjs",

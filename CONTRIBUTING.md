@@ -9,9 +9,10 @@ pnpm install --frozen-lockfile
 pnpm check
 ```
 
-`pnpm check` verifies generated protocol artifacts before running TypeScript checks, unit and real app-server integration tests, and the package build.
-CI then imports the built package and constructs the strict validator on the declared minimum Node.js
-18 runtime.
+`pnpm check` verifies generated protocol artifacts before running TypeScript checks, unit and real
+app-server integration tests, and the package build. CI then packs the npm artifact, installs it in
+an empty temporary project, verifies its exported Schema/CLI/provenance files, and initializes a
+strictly validated real app-server on the declared minimum Node.js 18 runtime.
 
 The real-turn integration test never calls an external model service. It starts the pinned
 app-server with a temporary `CODEX_HOME` configured to use a loopback mock Responses provider.
