@@ -1,58 +1,205 @@
 # Codex App Server Client
 
-A TypeScript client for the public `codex app-server` JSON-RPC protocol.
+An independently implemented TypeScript client for the public `codex app-server` JSONL-RPC protocol.
 
-> This is an unofficial, independently developed open-source project for the public Codex ecosystem. It is not affiliated with, sponsored by, or endorsed by OpenAI. Codex and OpenAI are trademarks of OpenAI.
+> This is an unofficial open-source project. It is not affiliated with, sponsored by, or endorsed by OpenAI. Codex and OpenAI are trademarks of OpenAI.
+
+## Why this exists
+
+The official TypeScript Codex SDK runs `codex exec`. This project targets the richer, long-lived `codex app-server` surface used to build interactive clients: concurrent requests, server-initiated approvals, typed notifications, thread lifecycle, turn streaming, and race-safe process management.
+
+The implementation uses only public sources:
+
+- generated TypeScript bindings and JSON Schema from the public Codex CLI;
+- the public app-server protocol and implementation;
+- the official open-source Python SDK as a behavioral reference.
+
+No Codex Desktop private code or extracted `app.asar` code is included or used as implementation source.
 
 ## Status
 
-Early private development. The public API is not stable yet.
+Pre-1.0 private development. The main protocol and client architecture are implemented, but the package API may still change before the first public release.
 
-## Current scope
+Current protocol baseline: `codex-cli 0.144.4`, including its generated experimental surface.
 
-- Start a local `codex app-server` process over stdio.
-- Perform the `initialize` / `initialized` handshake.
-- Send JSON-RPC requests and notifications.
-- Receive notifications and server-initiated requests.
-- Keep the transport independent from generated protocol types.
+## Highlights
 
-## Example
+- Resolves the version-matched CLI installed with this package; no global `codex` installation is required.
+- Starts `codex app-server --listen stdio://` and performs the `initialize` / `initialized` handshake.
+- Provides a fully typed `call()` API for all 125 client methods in the pinned protocol.
+- Exposes generated protocol types through `codex-app-server-client/protocol`.
+- Routes typed notifications and all generated server-request methods.
+- Buffers turn events that arrive before the `turn/start` response is consumed.
+- Provides high-level `CodexThread` and `CodexTurn` handles with async event streaming.
+- Maps JSON-RPC errors into typed errors and includes bounded overload retry support.
+- Preserves 64-bit JSON integer precision, using `number` when safe and `bigint` otherwise.
+- Handles request cancellation, timeouts, ordered writes, bounded stderr capture, and process shutdown.
+- Verifies generated TypeScript, JSON Schema, and request/response maps in CI.
+
+## Installation
+
+The package is not published while the repository remains private. Once published:
+
+```bash
+pnpm add codex-app-server-client
+```
+
+`@openai/codex` is an exact runtime dependency. The client resolves that local package and its platform-specific optional dependency. Pass `codexPath` only when intentionally testing another binary.
+
+## Quick start
 
 ```ts
 import { CodexAppServerClient } from "codex-app-server-client";
 
 const client = new CodexAppServerClient({
-  clientInfo: {
-    name: "my_coding_agent",
-    title: "My Coding Agent",
-    version: "0.1.0",
-  },
+  requestTimeoutMs: 30_000,
 });
+
+// Approval behavior is explicit. This example declines command execution.
+client.onServerRequest("item/commandExecution/requestApproval", () => ({
+  decision: "decline",
+}));
 
 await client.connect();
 
-const thread = await client.request("thread/start", {
-  cwd: process.cwd(),
-});
-
-console.log(thread);
-await client.close();
+try {
+  const thread = await client.createThread({ cwd: process.cwd() });
+  const result = await thread.run("Summarize this repository.");
+  console.log(result.finalResponse);
+} finally {
+  await client.close();
+}
 ```
 
-Generate version-matched TypeScript protocol types with the target Codex binary:
+Running a turn can use the authenticated Codex account associated with the selected `CODEX_HOME` and may consume usage.
 
-```bash
-codex app-server generate-ts --out src/generated/app-server
+## Complete typed protocol access
+
+`call()` derives its parameter type from generated `ClientRequest` bindings and its result type from the matching public Rust protocol response type:
+
+```ts
+const page = await client.call("thread/list", {
+  limit: 20,
+  sortDirection: "desc",
+});
+
+for (const thread of page.data) {
+  console.log(thread.id);
+}
+
+// Methods whose protocol params are undefined require no second argument.
+await client.call("account/logout");
+```
+
+For forward compatibility or deliberately untyped extensions, `request<T>(method, params)` remains available as a raw escape hatch.
+
+## Thread and turn handles
+
+```ts
+const thread = await client.resumeThread(savedThreadId);
+const turn = await thread.startTurn("Continue from the previous result.");
+
+for await (const notification of turn.events()) {
+  if (notification.method === "item/agentMessage/delta") {
+    process.stdout.write(notification.params.delta);
+  }
+}
+```
+
+Each turn event stream has a single consumer. Use either `turn.events()` for manual streaming or `turn.result()` / `thread.run()` to collect the final response, completed items, final turn state, and token usage.
+
+## Typed notifications and server requests
+
+Handlers can be registered before or after `connect()`:
+
+```ts
+client.onNotification("turn/completed", ({ threadId, turn }) => {
+  console.log(threadId, turn.status);
+});
+
+client.onServerRequest("item/fileChange/requestApproval", async (params) => {
+  console.log(params.itemId, params.reason);
+  return { decision: "decline" };
+});
+
+client.onError((error) => {
+  console.error("handler error", error);
+});
+```
+
+Unhandled server requests receive JSON-RPC method-not-found. The client does not auto-approve commands or file changes.
+
+## Cancellation, timeouts, and retry
+
+```ts
+import { retryOnAppServerOverload } from "codex-app-server-client";
+
+const controller = new AbortController();
+
+const thread = await retryOnAppServerOverload(
+  () =>
+    client.call(
+      "thread/read",
+      { threadId: savedThreadId, includeTurns: true },
+      { signal: controller.signal, timeoutMs: 10_000 },
+    ),
+  { maxAttempts: 3 },
+);
+```
+
+Only overload-classified JSON-RPC failures are retried. Invalid requests, invalid params, authentication failures, and application errors are not retried automatically.
+
+## Protocol exports
+
+```ts
+import type {
+  ServerNotification,
+  v2,
+} from "codex-app-server-client/protocol";
+
+import { protocolMetadata } from "codex-app-server-client/protocol";
+```
+
+JSON Schema artifacts are included under `schemas/` in the package.
+
+The generated Rust 64-bit integer fields are normalized to `number | bigint` to match the JSONL transport: safe integer literals remain numbers, while larger integer literals are parsed and serialized losslessly as bigints.
+
+The generated surface includes experimental methods and fields so rich clients can opt in through `InitializeCapabilities.experimentalApi`. Experimental APIs can change between Codex CLI releases; pin the client version and run compatibility tests before upgrading.
+
+## CLI resolution
+
+By default the client resolves this dependency chain:
+
+```text
+codex-app-server-client
+└── @openai/codex (exact version)
+    └── platform-specific Codex binary
+```
+
+It does not search the global `PATH`. To override this intentionally:
+
+```ts
+const client = new CodexAppServerClient({
+  codexPath: "/absolute/path/to/codex",
+});
 ```
 
 ## Development
 
 ```bash
 pnpm install
+pnpm protocol:check
 pnpm check
 ```
+
+Regenerate version-matched protocol artifacts:
+
+```bash
+pnpm protocol:generate
+```
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the CLI upgrade and public-source extraction workflow.
 
 ## License
 
 MIT
-

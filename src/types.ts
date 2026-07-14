@@ -1,7 +1,21 @@
-export type JsonPrimitive = boolean | null | number | string;
-export type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
+export type JsonValue =
+  | bigint
+  | boolean
+  | null
+  | number
+  | string
+  | JsonValue[]
+  | { [key: string]: JsonValue | undefined };
 export type JsonObject = { [key: string]: JsonValue };
-export type RequestId = number | string;
+export type JsonInputValue =
+  | bigint
+  | boolean
+  | null
+  | number
+  | string
+  | readonly JsonInputValue[]
+  | { readonly [key: string]: JsonInputValue | undefined };
+export type RequestId = bigint | number | string;
 
 export interface JsonRpcErrorData {
   code: number;
@@ -12,12 +26,12 @@ export interface JsonRpcErrorData {
 export interface JsonRpcRequest {
   id: RequestId;
   method: string;
-  params?: JsonValue;
+  params?: unknown;
 }
 
 export interface JsonRpcNotification {
   method: string;
-  params?: JsonValue;
+  params?: unknown;
 }
 
 export interface JsonRpcSuccessResponse {
@@ -33,24 +47,9 @@ export interface JsonRpcErrorResponse {
 export type JsonRpcResponse = JsonRpcSuccessResponse | JsonRpcErrorResponse;
 export type JsonRpcMessage = JsonRpcRequest | JsonRpcNotification | JsonRpcResponse;
 
-export interface ClientInfo {
-  name: string;
-  title: string;
-  version: string;
-}
-
-export interface InitializeCapabilities {
-  experimentalApi?: boolean;
-  optOutNotificationMethods?: string[];
-  requestAttestation?: boolean;
-}
-
-export interface InitializeResponse {
-  codexHome?: string;
-  platformFamily?: string;
-  platformOs?: string;
-  userAgent?: string;
-  [key: string]: JsonValue | undefined;
+export interface RequestOptions {
+  signal?: AbortSignal;
+  timeoutMs?: number;
 }
 
 export type NotificationHandler = (
@@ -60,3 +59,8 @@ export type NotificationHandler = (
 export type ServerRequestHandler = (
   request: JsonRpcRequest,
 ) => JsonValue | Promise<JsonValue>;
+
+export interface JsonlRpcPeerOptions {
+  onUnhandledError?: (error: Error) => void;
+  requestIdFactory?: () => RequestId;
+}

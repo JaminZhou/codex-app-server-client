@@ -3,10 +3,27 @@
   "version": "0.0.0",
   "private": true,
   "description": "A TypeScript client for the public codex app-server JSON-RPC protocol.",
+  "keywords": [
+    "codex",
+    "app-server",
+    "json-rpc",
+    "openai",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JaminZhou/codex-app-server-client.git"
+  },
+  "homepage": "https://github.com/JaminZhou/codex-app-server-client#readme",
+  "bugs": {
+    "url": "https://github.com/JaminZhou/codex-app-server-client/issues"
+  },
   "license": "MIT",
   "type": "module",
+  "sideEffects": false,
   "files": [
-    "dist"
+    "dist",
+    "schemas"
   ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -15,18 +32,28 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./protocol": {
+      "types": "./dist/protocol.d.ts",
+      "import": "./dist/protocol.js"
+    },
+    "./schemas/*": "./schemas/*"
   },
   "scripts": {
     "build": "tsup",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "check": "pnpm typecheck && pnpm test && pnpm build"
+    "protocol:generate": "node scripts/generate-protocol.mjs",
+    "protocol:check": "node scripts/generate-protocol.mjs --check",
+    "check": "pnpm protocol:check && pnpm typecheck && pnpm test && pnpm build"
   },
   "engines": {
     "node": ">=18"
   },
   "packageManager": "pnpm@11.7.0",
+  "dependencies": {
+    "@openai/codex": "0.144.4"
+  },
   "devDependencies": {
     "@types/node": "^26.1.1",
     "tsup": "^8.5.1",

@@ -1,5 +1,10 @@
 export * from "./app-server-client";
+export * from "./codex-binary";
 export * from "./errors";
+export * from "./generated/app-server-methods";
 export * from "./jsonl-rpc-peer";
+export { protocolMetadata } from "./protocol-metadata";
+export * from "./retry";
+export * from "./thread";
+export * from "./typed-handlers";
 export * from "./types";
-
