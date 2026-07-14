@@ -90,10 +90,17 @@ describe("codex app-server integration", () => {
         expect(response.data).toEqual([]);
         expect(response.nextCursor).toBeNull();
 
+        await expect(client.account(false)).resolves.toMatchObject({
+          account: null,
+          requiresOpenaiAuth: true,
+        });
+
         const thread = await client.createThread({ cwd: codexHome });
         expect(thread.id).toMatch(/^[0-9a-f-]+$/i);
         const read = await thread.read();
         expect(read.thread.id).toBe(thread.id);
+        await expect(thread.goal()).resolves.toEqual({ goal: null });
+        await expect(thread.clearGoal()).resolves.toEqual({ cleared: false });
         await expect(thread.setName("integration test")).resolves.toEqual({});
       } finally {
         await client.close();

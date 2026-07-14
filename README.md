@@ -32,6 +32,10 @@ Current protocol baseline: `codex-cli 0.144.4`, including its generated experime
 - Routes typed notifications and all generated server-request methods.
 - Buffers turn events that arrive before the `turn/start` response is consumed.
 - Provides high-level `CodexThread` and `CodexTurn` handles with async event streaming.
+- Provides browser and device-code login handles with race-safe completion routing.
+- Exposes persisted thread-goal CRUD and coalesces automatic goal continuations into one logical
+  turn stream.
+- Serializes high-level turn and goal starts per thread while preserving concurrency across threads.
 - Maps JSON-RPC errors into typed errors and includes bounded overload retry support.
 - Preserves the public W3C trace context and classifies documented `-32001` ingress overloads.
 - Preserves 64-bit JSON integer precision, using `number` when safe and `bigint` otherwise.
@@ -134,7 +138,28 @@ await client.call("account/logout");
 
 For forward compatibility or deliberately untyped extensions, `request<T>(method, params)` remains available as a raw escape hatch.
 
-## Thread and turn handles
+## Account and login workflows
+
+Account methods operate on the `CODEX_HOME` used by the connected app-server. API-key login is a
+single request; interactive ChatGPT login returns a live handle whose completion notification is
+buffered even if it arrives before the start response:
+
+```ts
+const login = await client.loginChatGPTDeviceCode();
+console.log(login.verificationUrl, login.userCode);
+
+const completed = await login.wait({ timeoutMs: 5 * 60_000 });
+if (!completed.success) throw new Error(completed.error ?? "Login failed");
+
+const account = await client.account(true);
+console.log(account.account);
+```
+
+Use `login.cancel()` to cancel that specific attempt. `loginChatGPT()` exposes the equivalent
+browser flow through `authUrl`; `loginApiKey()` and `loginChatGPTAuthTokens()` cover the other
+generated public login variants. Do not log API keys, access tokens, or raw auth-token parameters.
+
+## Thread, turn, and goal handles
 
 ```ts
 const thread = await client.resumeThread(savedThreadId);
@@ -148,6 +173,27 @@ for await (const notification of turn.events()) {
 ```
 
 Each turn event stream has a single consumer. Use either `turn.events()` for manual streaming or `turn.result()` / `thread.run()` to collect the final response, completed items, final turn state, and token usage.
+
+Persisted thread goals are also available at both the raw typed layer and through `CodexThread`:
+
+```ts
+const thread = await client.resumeThread(savedThreadId);
+const goal = await thread.startGoal("Keep fixing failures until every quality gate passes", {
+  tokenBudget: 200_000,
+});
+
+const result = await goal.result();
+console.log(result.finalResponse);
+```
+
+`startGoal()` requires an idle, persisted thread. It replaces the stored goal, waits for the
+runtime-generated first turn, and represents later automatic physical turns as a single logical
+turn whose ID is the first physical turn ID. Intermediate `turn/started` and `turn/completed`
+notifications are suppressed from that logical stream, while ordinary notification handlers still
+receive the original physical events. Terminal goal states (`paused`, `blocked`, `usageLimited`,
+`budgetLimited`, and `complete`) end the logical stream after the active physical turn finishes.
+Call `goal.pause()` to update the stored goal and interrupt the current physical turn on a
+best-effort basis.
 
 ## Typed notifications and server requests
 

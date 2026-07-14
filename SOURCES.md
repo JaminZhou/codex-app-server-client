@@ -20,7 +20,10 @@ This repository is an independently written client for public Codex interfaces.
 
 The CLI generates `src/generated/protocol/` and `schemas/`. A deterministic post-generation normalization changes Rust 64-bit integer TypeScript fields from `bigint` to `number | bigint`, matching the lossless JSONL runtime representation. The public Rust `client_request_definitions!` table supplies method-to-response associations recorded in `protocol-methods.json`. Generation verifies that this table exactly matches the CLI-generated `ClientRequest` method union and that every response type exists.
 
-The Python SDK is used as a behavioral reference for transport closure, request routing, early notification buffering, initialization, typed error mapping, overload retry, thread/turn handles, and result collection. The TypeScript implementation is written independently for Node streams and promises.
+The Python SDK is used as a behavioral reference for transport closure, request routing, early
+notification buffering, interactive login handles, initialization, typed error mapping, overload
+retry, per-thread start coordination, thread/turn handles, logical thread-goal routing, and result
+collection. The TypeScript implementation is written independently for Node streams and promises.
 
 ## Explicit exclusions
 

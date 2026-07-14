@@ -3,6 +3,7 @@ import { once } from "node:events";
 import { prependPathDirectories, resolveCodexBinary } from "./codex-binary";
 import {
   AppServerConnectionClosedError,
+  AppServerInvalidRequestError,
   AppServerProtocolError,
   AppServerServerRequestError,
 } from "./errors";
@@ -15,6 +16,14 @@ import type { ClientInfo } from "./generated/protocol/ClientInfo";
 import type { InitializeCapabilities } from "./generated/protocol/InitializeCapabilities";
 import type { InitializeResponse } from "./generated/protocol/InitializeResponse";
 import type { ServerNotification } from "./generated/protocol/ServerNotification";
+import type { AccountLoginCompletedNotification } from "./generated/protocol/v2/AccountLoginCompletedNotification";
+import type { CancelLoginAccountParams } from "./generated/protocol/v2/CancelLoginAccountParams";
+import type { CancelLoginAccountResponse } from "./generated/protocol/v2/CancelLoginAccountResponse";
+import type { GetAccountParams } from "./generated/protocol/v2/GetAccountParams";
+import type { GetAccountResponse } from "./generated/protocol/v2/GetAccountResponse";
+import type { LoginAccountParams } from "./generated/protocol/v2/LoginAccountParams";
+import type { LoginAccountResponse } from "./generated/protocol/v2/LoginAccountResponse";
+import type { LogoutAccountResponse } from "./generated/protocol/v2/LogoutAccountResponse";
 import type { ModelListParams } from "./generated/protocol/v2/ModelListParams";
 import type { ModelListResponse } from "./generated/protocol/v2/ModelListResponse";
 import type { ThreadArchiveParams } from "./generated/protocol/v2/ThreadArchiveParams";
@@ -23,6 +32,12 @@ import type { ThreadCompactStartParams } from "./generated/protocol/v2/ThreadCom
 import type { ThreadCompactStartResponse } from "./generated/protocol/v2/ThreadCompactStartResponse";
 import type { ThreadForkParams } from "./generated/protocol/v2/ThreadForkParams";
 import type { ThreadForkResponse } from "./generated/protocol/v2/ThreadForkResponse";
+import type { ThreadGoalClearParams } from "./generated/protocol/v2/ThreadGoalClearParams";
+import type { ThreadGoalClearResponse } from "./generated/protocol/v2/ThreadGoalClearResponse";
+import type { ThreadGoalGetParams } from "./generated/protocol/v2/ThreadGoalGetParams";
+import type { ThreadGoalGetResponse } from "./generated/protocol/v2/ThreadGoalGetResponse";
+import type { ThreadGoalSetParams } from "./generated/protocol/v2/ThreadGoalSetParams";
+import type { ThreadGoalSetResponse } from "./generated/protocol/v2/ThreadGoalSetResponse";
 import type { ThreadListParams } from "./generated/protocol/v2/ThreadListParams";
 import type { ThreadListResponse } from "./generated/protocol/v2/ThreadListResponse";
 import type { ThreadReadParams } from "./generated/protocol/v2/ThreadReadParams";
@@ -41,7 +56,23 @@ import type { TurnStartParams } from "./generated/protocol/v2/TurnStartParams";
 import type { TurnStartResponse } from "./generated/protocol/v2/TurnStartResponse";
 import type { TurnSteerParams } from "./generated/protocol/v2/TurnSteerParams";
 import type { TurnSteerResponse } from "./generated/protocol/v2/TurnSteerResponse";
+import {
+  CodexGoal,
+  DEFAULT_GOAL_START_TIMEOUT_MS,
+  GoalEventRouter,
+  type GoalOperationState,
+  type GoalStartOptions,
+} from "./goal";
 import { JsonlRpcPeer, JsonRpcPeer } from "./jsonl-rpc-peer";
+import {
+  ChatGptLoginHandle,
+  DeviceCodeLoginHandle,
+  LoginEventRouter,
+  type ChatGptAuthTokens,
+  type ChatGptLoginOptions,
+  type LoginWaitOptions,
+} from "./login";
+import { KeyedOperationCoordinator } from "./operation-coordinator";
 import {
   CodexThread,
   CodexTurn,
@@ -119,6 +150,9 @@ export class CodexAppServerClient {
   >();
   private readonly typedServerRequestHandlers = new Map<string, ServerRequestHandler>();
   private readonly turnEvents = new TurnEventRouter();
+  private readonly goalEvents = new GoalEventRouter();
+  private readonly loginEvents = new LoginEventRouter();
+  private readonly threadOperations = new KeyedOperationCoordinator();
   private child: ChildProcessWithoutNullStreams | null = null;
   private closePromise: Promise<void> | null = null;
   private connectAbortController: AbortController | null = null;
@@ -191,6 +225,97 @@ export class CodexAppServerClient {
     return this.request<AppServerResponseMap[M]>(method, params, options);
   }
 
+  accountLoginStart(
+    params: LoginAccountParams,
+    options: RequestOptions = {},
+  ): Promise<LoginAccountResponse> {
+    return this.request("account/login/start", params, options);
+  }
+
+  accountLoginCancel(
+    params: CancelLoginAccountParams,
+    options: RequestOptions = {},
+  ): Promise<CancelLoginAccountResponse> {
+    return this.request("account/login/cancel", params, options);
+  }
+
+  accountRead(
+    params: GetAccountParams = {},
+    options: RequestOptions = {},
+  ): Promise<GetAccountResponse> {
+    return this.request("account/read", params, options);
+  }
+
+  accountLogout(options: RequestOptions = {}): Promise<LogoutAccountResponse> {
+    return this.request("account/logout", undefined, options);
+  }
+
+  async loginApiKey(apiKey: string, options: RequestOptions = {}): Promise<void> {
+    if (!apiKey) throw new TypeError("apiKey must be a non-empty string.");
+    const response = await this.accountLoginStart({ type: "apiKey", apiKey }, options);
+    if (response.type !== "apiKey") {
+      throw new AppServerProtocolError(`Unexpected API-key login response: ${response.type}.`);
+    }
+  }
+
+  async loginChatGPT(
+    params: ChatGptLoginOptions = {},
+    options: RequestOptions = {},
+  ): Promise<ChatGptLoginHandle> {
+    const response = await this.accountLoginStart({ type: "chatgpt", ...params }, options);
+    if (response.type !== "chatgpt") {
+      throw new AppServerProtocolError(`Unexpected ChatGPT login response: ${response.type}.`);
+    }
+    return new ChatGptLoginHandle(this, response.loginId, response.authUrl);
+  }
+
+  async loginChatGPTDeviceCode(
+    options: RequestOptions = {},
+  ): Promise<DeviceCodeLoginHandle> {
+    const response = await this.accountLoginStart({ type: "chatgptDeviceCode" }, options);
+    if (response.type !== "chatgptDeviceCode") {
+      throw new AppServerProtocolError(
+        `Unexpected device-code login response: ${response.type}.`,
+      );
+    }
+    return new DeviceCodeLoginHandle(
+      this,
+      response.loginId,
+      response.verificationUrl,
+      response.userCode,
+    );
+  }
+
+  async loginChatGPTAuthTokens(
+    params: ChatGptAuthTokens,
+    options: RequestOptions = {},
+  ): Promise<void> {
+    const response = await this.accountLoginStart(
+      { type: "chatgptAuthTokens", ...params },
+      options,
+    );
+    if (response.type !== "chatgptAuthTokens") {
+      throw new AppServerProtocolError(
+        `Unexpected ChatGPT token login response: ${response.type}.`,
+      );
+    }
+  }
+
+  account(refreshToken = false, options: RequestOptions = {}): Promise<GetAccountResponse> {
+    return this.accountRead({ refreshToken }, options);
+  }
+
+  async logout(options: RequestOptions = {}): Promise<void> {
+    await this.accountLogout(options);
+  }
+
+  waitForLoginCompleted(
+    loginId: string,
+    options: LoginWaitOptions = {},
+  ): Promise<AccountLoginCompletedNotification> {
+    return this.loginEvents.wait(loginId, options);
+  }
+
   threadStart(
     params: ThreadStartParams = {},
     options: RequestOptions = {},
@@ -224,6 +349,27 @@ export class CodexAppServerClient {
     options: RequestOptions = {},
   ): Promise<ThreadReadResponse> {
     return this.request("thread/read", params, options);
+  }
+
+  threadGoalGet(
+    params: ThreadGoalGetParams,
+    options: RequestOptions = {},
+  ): Promise<ThreadGoalGetResponse> {
+    return this.request("thread/goal/get", params, options);
+  }
+
+  threadGoalSet(
+    params: ThreadGoalSetParams,
+    options: RequestOptions = {},
+  ): Promise<ThreadGoalSetResponse> {
+    return this.request("thread/goal/set", params, options);
+  }
+
+  threadGoalClear(
+    params: ThreadGoalClearParams,
+    options: RequestOptions = {},
+  ): Promise<ThreadGoalClearResponse> {
+    return this.request("thread/goal/clear", params, options);
   }
 
   threadArchive(
@@ -314,11 +460,107 @@ export class CodexAppServerClient {
     params: CodexTurnStartOptions = {},
     options: RequestOptions = {},
   ): Promise<CodexTurn> {
-    const response = await this.turnStart(
-      { ...params, threadId, input: normalizeTurnInput(input) },
-      options,
-    );
-    return new CodexTurn(this, threadId, response.turn.id, this.turnEvents.open(response.turn.id));
+    return this.threadOperations.run(threadId, async () => {
+      if (this.goalEvents.has(threadId)) {
+        throw new AppServerInvalidRequestError({
+          code: -32600,
+          message: `Thread has an active goal operation: ${threadId}`,
+        });
+      }
+      const response = await this.turnStart(
+        { ...params, threadId, input: normalizeTurnInput(input) },
+        options,
+      );
+      return new CodexTurn(
+        this,
+        threadId,
+        response.turn.id,
+        this.turnEvents.open(response.turn.id),
+      );
+    });
+  }
+
+  async startGoal(
+    threadId: string,
+    objective: string,
+    goalOptions: GoalStartOptions = {},
+    requestOptions: RequestOptions = {},
+  ): Promise<CodexGoal> {
+    validateGoalStartOptions(threadId, objective, goalOptions);
+    return this.threadOperations.run(threadId, async () => {
+      if (this.goalEvents.has(threadId)) {
+        throw new AppServerInvalidRequestError({
+          code: -32600,
+          message: `Thread already has an active goal operation: ${threadId}`,
+        });
+      }
+      const thread = (await this.threadRead({ threadId, includeTurns: false }, requestOptions))
+        .thread;
+      if (thread.status.type !== "idle") {
+        throw new AppServerInvalidRequestError({
+          code: -32600,
+          message: `Thread must be idle before starting a goal: ${threadId}`,
+        });
+      }
+      if (thread.ephemeral || thread.path === null) {
+        throw new AppServerInvalidRequestError({
+          code: -32600,
+          message: `Thread must be persisted before starting a goal: ${threadId}`,
+        });
+      }
+
+      const state = this.goalEvents.reserve(threadId);
+      let goalActivated = false;
+      try {
+        await this.threadGoalClear({ threadId }, requestOptions);
+        state.activateTurnRouting();
+        await this.threadGoalSet(
+          {
+            threadId,
+            objective,
+            status: "active",
+            ...(goalOptions.tokenBudget === undefined
+              ? {}
+              : { tokenBudget: goalOptions.tokenBudget }),
+          },
+          requestOptions,
+        );
+        goalActivated = true;
+        const logicalTurnId = await state.waitForStart({
+          signal: requestOptions.signal,
+          timeoutMs: goalOptions.startTimeoutMs ?? DEFAULT_GOAL_START_TIMEOUT_MS,
+        });
+        return new CodexGoal(
+          logicalTurnId,
+          threadId,
+          objective,
+          state.stream,
+          (options) => this.pauseGoalOperation(state, options),
+        );
+      } catch (error) {
+        if (goalActivated || !(error instanceof AppServerInvalidRequestError)) {
+          await this.pauseGoalOperation(state).catch(() => undefined);
+        }
+        state.fail(asError(error));
+        this.goalEvents.release(state);
+        throw error;
+      }
+    });
+  }
+
+  private async pauseGoalOperation(
+    state: GoalOperationState,
+    options: RequestOptions = {},
+  ): Promise<void> {
+    if (state.finished) return;
+    let pauseError: unknown;
+    try {
+      await this.threadGoalSet({ threadId: state.threadId, status: "paused" }, options);
+    } catch (error) {
+      pauseError = error;
+    }
+    if (await this.interruptGoalTurn(state, options)) state.markInterrupted();
+    if (pauseError !== undefined) throw pauseError;
   }
 
   notify(method: string, params?: unknown): Promise<void> {
@@ -412,6 +654,8 @@ export class CodexAppServerClient {
     this.currentState = "closing";
     this.initializeResponse = null;
     this.turnEvents.failAll(reason);
+    this.loginEvents.failAll(reason);
+    this.goalEvents.failAll(reason);
     this.peer = null;
     this.child = null;
     await peer?.close(reason);
@@ -446,6 +690,7 @@ export class CodexAppServerClient {
     this.currentState = "connecting";
     this.stderrLines = [];
     this.stderrRemainder = "";
+    this.loginEvents.reset();
     const abortController = new AbortController();
     this.connectAbortController = abortController;
     try {
@@ -538,10 +783,12 @@ export class CodexAppServerClient {
   private configurePeer(peer: JsonRpcPeer): void {
     peer.onClose((reason) => this.handlePeerClose(peer, reason));
     peer.onNotification(async (notification) => {
-      this.turnEvents.route(notification);
+      const typed = notification as ServerNotification;
+      this.loginEvents.route(typed);
+      if (!this.goalEvents.route(typed)) this.turnEvents.route(notification);
       for (const handler of [...this.notificationHandlers]) await handler(notification);
       for (const handler of this.typedNotificationHandlers.get(notification.method) ?? []) {
-        await handler(notification.params, notification as ServerNotification);
+        await handler(notification.params, typed);
       }
     });
     peer.onServerRequest((request) => {
@@ -563,11 +810,40 @@ export class CodexAppServerClient {
     this.peer = null;
     this.initializeResponse = null;
     this.turnEvents.failAll(reason);
+    this.loginEvents.failAll(reason);
+    this.goalEvents.failAll(reason);
     if (this.currentState === "closing") return;
     this.currentState = "disconnected";
     if (wasConnected) this.reportUnhandledError(reason);
     if (this.child && isRunning(this.child)) {
       void this.close().catch((error: unknown) => this.reportUnhandledError(asError(error)));
+    }
+  }
+
+  private async interruptGoalTurn(
+    state: GoalOperationState,
+    options: RequestOptions,
+  ): Promise<boolean> {
+    const turnId = state.turnForInterrupt();
+    if (!turnId) return false;
+    try {
+      await this.turnInterrupt({ threadId: state.threadId, turnId }, options);
+      return true;
+    } catch (error) {
+      if (!(error instanceof AppServerInvalidRequestError)) return false;
+      if (!error.rpcMessage.startsWith("expected active turn id")) return false;
+      const activeTurnId = activeTurnIdFromError(error.rpcMessage);
+      if (!activeTurnId || activeTurnId === turnId) return false;
+      try {
+        await this.turnInterrupt(
+          { threadId: state.threadId, turnId: activeTurnId },
+          options,
+        );
+        return true;
+      } catch {
+        // Goal cancellation is best effort across physical-turn rollover races.
+        return false;
+      }
     }
   }
 
@@ -584,6 +860,16 @@ export class CodexAppServerClient {
       ),
     );
     this.turnEvents.failAll(
+      new AppServerConnectionClosedError(
+        `codex app-server exited (${signal ?? code ?? "unknown"}).${suffix}`,
+      ),
+    );
+    this.loginEvents.failAll(
+      new AppServerConnectionClosedError(
+        `codex app-server exited (${signal ?? code ?? "unknown"}).${suffix}`,
+      ),
+    );
+    this.goalEvents.failAll(
       new AppServerConnectionClosedError(
         `codex app-server exited (${signal ?? code ?? "unknown"}).${suffix}`,
       ),
@@ -702,6 +988,32 @@ function cloneTransportOptions(
     ...options,
     headers: options.headers ? { ...options.headers } : undefined,
   };
+}
+
+function validateGoalStartOptions(
+  threadId: string,
+  objective: string,
+  options: GoalStartOptions,
+): void {
+  if (!threadId.trim()) throw new TypeError("threadId must be a non-empty string.");
+  if (!objective.trim()) throw new TypeError("objective must be a non-empty string.");
+  if (
+    options.startTimeoutMs !== undefined &&
+    (!Number.isFinite(options.startTimeoutMs) || options.startTimeoutMs < 0)
+  ) {
+    throw new RangeError("startTimeoutMs must be a finite non-negative number.");
+  }
+  if (
+    options.tokenBudget !== undefined &&
+    options.tokenBudget !== null &&
+    (!Number.isSafeInteger(options.tokenBudget) || options.tokenBudget <= 0)
+  ) {
+    throw new RangeError("tokenBudget must be null or a positive safe integer.");
+  }
+}
+
+function activeTurnIdFromError(message: string): string | null {
+  return message.match(/ but found `?([^`]+)`?$/)?.[1] ?? null;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

@@ -1,8 +1,13 @@
 import type { CodexAppServerClient } from "./app-server-client";
 import { CodexTurnFailedError } from "./errors";
+import type { CodexGoal, GoalStartOptions } from "./goal";
 import type { ServerNotification } from "./generated/protocol/ServerNotification";
 import type { Thread } from "./generated/protocol/v2/Thread";
 import type { ThreadCompactStartResponse } from "./generated/protocol/v2/ThreadCompactStartResponse";
+import type { ThreadGoalClearResponse } from "./generated/protocol/v2/ThreadGoalClearResponse";
+import type { ThreadGoalGetResponse } from "./generated/protocol/v2/ThreadGoalGetResponse";
+import type { ThreadGoalSetParams } from "./generated/protocol/v2/ThreadGoalSetParams";
+import type { ThreadGoalSetResponse } from "./generated/protocol/v2/ThreadGoalSetResponse";
 import type { ThreadItem } from "./generated/protocol/v2/ThreadItem";
 import type { ThreadReadResponse } from "./generated/protocol/v2/ThreadReadResponse";
 import type { ThreadSetNameResponse } from "./generated/protocol/v2/ThreadSetNameResponse";
@@ -68,6 +73,29 @@ export class CodexThread {
   compact(requestOptions: RequestOptions = {}): Promise<ThreadCompactStartResponse> {
     return this.client.threadCompact({ threadId: this.id }, requestOptions);
   }
+
+  goal(requestOptions: RequestOptions = {}): Promise<ThreadGoalGetResponse> {
+    return this.client.threadGoalGet({ threadId: this.id }, requestOptions);
+  }
+
+  setGoal(
+    params: Omit<ThreadGoalSetParams, "threadId">,
+    requestOptions: RequestOptions = {},
+  ): Promise<ThreadGoalSetResponse> {
+    return this.client.threadGoalSet({ ...params, threadId: this.id }, requestOptions);
+  }
+
+  clearGoal(requestOptions: RequestOptions = {}): Promise<ThreadGoalClearResponse> {
+    return this.client.threadGoalClear({ threadId: this.id }, requestOptions);
+  }
+
+  startGoal(
+    objective: string,
+    options: GoalStartOptions = {},
+    requestOptions: RequestOptions = {},
+  ): Promise<CodexGoal> {
+    return this.client.startGoal(this.id, objective, options, requestOptions);
+  }
 }
 
 export class CodexTurn {
@@ -119,24 +147,32 @@ export class CodexTurn {
   }
 
   async result(): Promise<CodexTurnResult> {
+    return collectTurnResult(this.events(), this.id);
+  }
+}
+
+export async function collectTurnResult(
+  events: AsyncIterable<ServerNotification>,
+  turnId: string,
+): Promise<CodexTurnResult> {
     const items: ThreadItem[] = [];
     let usage: ThreadTokenUsage | null = null;
     let completed: Turn | null = null;
 
-    for await (const event of this.events()) {
-      if (event.method === "item/completed" && event.params.turnId === this.id) {
+    for await (const event of events) {
+      if (event.method === "item/completed" && event.params.turnId === turnId) {
         items.push(event.params.item);
       } else if (
         event.method === "thread/tokenUsage/updated" &&
-        event.params.turnId === this.id
+        event.params.turnId === turnId
       ) {
         usage = event.params.tokenUsage;
-      } else if (event.method === "turn/completed" && event.params.turn.id === this.id) {
+      } else if (event.method === "turn/completed" && event.params.turn.id === turnId) {
         completed = event.params.turn;
       }
     }
 
-    if (!completed) throw new Error(`Turn ${this.id} completed without a completion event.`);
+    if (!completed) throw new Error(`Turn ${turnId} completed without a completion event.`);
     if (completed.status === "failed") throw new CodexTurnFailedError(completed);
     return {
       finalResponse: finalAssistantResponse(items),
@@ -144,7 +180,6 @@ export class CodexTurn {
       turn: completed,
       usage,
     };
-  }
 }
 
 export function normalizeTurnInput(input: CodexTurnInput): UserInput[] {

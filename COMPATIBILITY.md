@@ -50,19 +50,23 @@ transport. For production local rich clients, prefer stdio or the Unix control s
 | --- | --- | --- |
 | Threads | start, resume, fork, list, read, archive, unarchive, name, compact | Complete `call()` surface |
 | Turns | start, steer, interrupt, event stream, collected result | Complete `call()` surface |
+| Thread goals | get, set, clear, logical continuation stream, collected result, pause | Complete `call()` surface |
 | Approvals and other server requests | Explicit typed handler registration; no implicit approval | Complete handler surface |
 | Models | list | Complete `call()` surface |
-| Account and login flows | No opinionated workflow wrapper yet | Complete `call()` surface |
-| Thread goals | No high-level goal handle yet | Complete `call()` surface |
+| Account and login flows | API key, browser, device code, auth tokens, completion wait/cancel, account read, logout | Complete `call()` surface |
 | MCP, apps, plugins, skills, config, review, processes, and remote control | No area-specific wrappers yet | Complete `call()` surface |
+
+High-level `turn/start` and logical goal starts are serialized per thread, matching the official
+Python SDK's protection against competing starts. Different threads remain concurrent. Goal
+continuations preserve original notifications for generic handlers while the goal handle receives a
+normalized single-turn stream.
 
 ## Remaining parity work
 
 The following items are deliberately not claimed as complete:
 
 - generated runtime validation for every request, response, notification, and server request;
-- high-level account/login and thread-goal workflows comparable to the official Python SDK;
-- per-thread high-level turn-start serialization and broader operation-scope coordination;
+- broader high-level operation-scope coordination outside turn and goal starts;
 - automatic reconnect, replay, or idempotency policy for a dropped remote connection;
 - a cross-version compatibility suite spanning multiple Codex CLI releases;
 - production support for TCP WebSocket while upstream continues to label it experimental and
