@@ -7,8 +7,8 @@ on:
 
 jobs:
   check:
-    # Temporary while the repository is private; switch back to ubuntu-latest before public release.
-    runs-on: [self-hosted, macOS, ARM64, codex-app-server-client]
+    # Public pull requests must never execute untrusted code on a personal self-hosted runner.
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6

@@ -18,7 +18,8 @@ No Codex Desktop private code or extracted `app.asar` code is included or used a
 
 ## Status
 
-Pre-1.0 private development. The main protocol and client architecture are implemented, but the package API may still change before the first public release.
+Pre-1.0 public development. The main protocol and client architecture are implemented, but the
+package API may still change before the first npm release.
 
 Current protocol baseline: `codex-cli 0.144.4`, including its generated experimental surface.
 
@@ -49,7 +50,7 @@ Current protocol baseline: `codex-cli 0.144.4`, including its generated experime
 
 ## Installation
 
-The package is not published while the repository remains private. Once published:
+The package is not yet published to npm. Once published:
 
 ```bash
 pnpm add codex-app-server-client
