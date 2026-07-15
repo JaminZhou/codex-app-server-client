@@ -17,6 +17,11 @@ export type JsonInputValue =
   | { readonly [key: string]: JsonInputValue | undefined };
 export type RequestId = bigint | number | string;
 
+export interface W3cTraceContext {
+  traceparent?: string | null;
+  tracestate?: string | null;
+}
+
 export interface JsonRpcErrorData {
   code: number;
   message: string;
@@ -27,6 +32,7 @@ export interface JsonRpcRequest {
   id: RequestId;
   method: string;
   params?: unknown;
+  trace?: W3cTraceContext | null;
 }
 
 export interface JsonRpcNotification {
@@ -50,6 +56,7 @@ export type JsonRpcMessage = JsonRpcRequest | JsonRpcNotification | JsonRpcRespo
 export interface RequestOptions {
   signal?: AbortSignal;
   timeoutMs?: number;
+  trace?: W3cTraceContext | null;
 }
 
 export type NotificationHandler = (

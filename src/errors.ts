@@ -75,6 +75,49 @@ export class AppServerProtocolError extends CodexAppServerError {
   }
 }
 
+export type ProtocolValidationDirection =
+  | "request"
+  | "response"
+  | "notification"
+  | "serverRequest"
+  | "serverResponse";
+
+export interface ProtocolValidationIssue {
+  instancePath: string;
+  keyword: string;
+  message?: string;
+  schemaPath: string;
+}
+
+export class AppServerProtocolValidationError extends AppServerProtocolError {
+  readonly direction: ProtocolValidationDirection;
+  readonly issues: readonly ProtocolValidationIssue[];
+  readonly method: string;
+
+  constructor(
+    direction: ProtocolValidationDirection,
+    method: string,
+    issues: readonly ProtocolValidationIssue[],
+    options?: ErrorOptions,
+  ) {
+    const detail = issues
+      .slice(0, 3)
+      .map(
+        (issue) =>
+          `${issue.instancePath || "/"} ${issue.message ?? `failed ${issue.keyword}`}`,
+      )
+      .join("; ");
+    super(
+      `Public app-server ${direction} validation failed for ${method}${detail ? `: ${detail}` : "."}`,
+      options,
+    );
+    this.name = "AppServerProtocolValidationError";
+    this.direction = direction;
+    this.method = method;
+    this.issues = issues;
+  }
+}
+
 export class AppServerRequestTimeoutError extends CodexAppServerError {
   readonly method: string;
   readonly timeoutMs: number;
@@ -138,7 +181,7 @@ export function mapAppServerRpcError(error: JsonRpcErrorData): AppServerRpcError
     if (containsRetryLimitText(error.message)) {
       return new AppServerRetryLimitExceededError(error);
     }
-    if (containsServerOverloaded(error.data)) {
+    if (containsServerOverloaded(error.data) || isIngressOverload(error)) {
       return new AppServerBusyError(error);
     }
     return new AppServerServerError(error);
@@ -157,6 +200,12 @@ export function isRetryableAppServerError(error: unknown): boolean {
 function containsRetryLimitText(message: string): boolean {
   const normalized = message.toLowerCase();
   return normalized.includes("retry limit") || normalized.includes("too many failed attempts");
+}
+
+function isIngressOverload(error: JsonRpcErrorData): boolean {
+  if (error.code !== -32001) return false;
+  const normalized = error.message.toLowerCase();
+  return normalized.includes("server overloaded") || normalized.includes("retry later");
 }
 
 function containsServerOverloaded(value: JsonValue | undefined): boolean {

@@ -9,7 +9,13 @@ pnpm install --frozen-lockfile
 pnpm check
 ```
 
-`pnpm check` verifies generated protocol artifacts before running TypeScript checks, unit and real app-server integration tests, and the package build.
+`pnpm check` verifies generated protocol artifacts before running TypeScript checks, unit and real
+app-server integration tests, and the package build. CI then packs the npm artifact, installs it in
+an empty temporary project, verifies its exported Schema/CLI/provenance files, and initializes a
+strictly validated real app-server on the declared minimum Node.js 18 runtime.
+
+The real-turn integration test never calls an external model service. It starts the pinned
+app-server with a temporary `CODEX_HOME` configured to use a loopback mock Responses provider.
 
 ## Updating the Codex protocol
 
@@ -17,7 +23,7 @@ pnpm check
 2. Install dependencies and update `pnpm-lock.yaml`.
 3. Fetch the matching public `rust-vX.Y.Z` tag from `openai/codex`.
 4. Extract the exact tag's `codex-rs/app-server-protocol/src/protocol/common.rs`.
-5. Refresh the public method map:
+5. Refresh the public client-method and server-request maps:
 
 ```bash
 node scripts/extract-method-map.mjs \
@@ -30,7 +36,9 @@ node scripts/extract-method-map.mjs \
 6. Run `pnpm protocol:generate`.
 7. Review generated protocol and Schema changes, update compatibility notes, then run `pnpm check`.
 
-The generator rejects non-exact CLI versions, mismatched method-map versions, missing methods, extra methods, and missing generated response types.
+The generator rejects non-exact CLI versions, mismatched method-map versions, missing methods,
+extra methods, missing generated response types, and missing server-response Schema. It also records
+client response types for which the upstream generator publishes no JSON Schema.
 
 `@openai/codex` is exempt from the repository's minimum-release-age gate because protocol updates intentionally track current Codex releases. It remains exact-version pinned and must match a public Rust tag, commit, lockfile integrity, and regenerated protocol artifacts.
 

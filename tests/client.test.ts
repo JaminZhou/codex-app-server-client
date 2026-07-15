@@ -13,6 +13,16 @@ describe("CodexAppServerClient configuration", () => {
     );
   });
 
+  it("rejects local launch options for attach transports", () => {
+    expect(
+      () =>
+        new CodexAppServerClient({
+          codexPath: "/tmp/codex",
+          transport: { type: "unix", socketPath: "/tmp/codex.sock" },
+        }),
+    ).toThrow("Local process options cannot be used with unix transport: codexPath.");
+  });
+
   it("rejects method-scoped registrations without a handler at runtime", () => {
     const client = new CodexAppServerClient();
     const registerNotification = client.onNotification.bind(client) as (

@@ -20,3 +20,8 @@ jobs:
           node-version: 22
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 18
+      # pnpm 11 itself requires Node 22; invoke the Node 18 smoke script directly.
+      - run: node scripts/package-smoke.mjs

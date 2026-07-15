@@ -22,8 +22,12 @@
   "type": "module",
   "sideEffects": false,
   "files": [
+    "COMPATIBILITY.md",
     "dist",
-    "schemas"
+    "schemas",
+    "SOURCES.md",
+    "THIRD_PARTY_LICENSES",
+    "THIRD_PARTY_NOTICES.md"
   ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -41,6 +45,7 @@
   },
   "scripts": {
     "build": "tsup",
+    "package:smoke": "node scripts/package-smoke.mjs",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "protocol:generate": "node scripts/generate-protocol.mjs",
@@ -52,10 +57,13 @@
   },
   "packageManager": "pnpm@11.7.0",
   "dependencies": {
-    "@openai/codex": "0.144.4"
+    "@openai/codex": "0.144.4",
+    "ajv": "8.20.0",
+    "ws": "8.21.0"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",
+    "@types/ws": "8.18.1",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^4.1.10"

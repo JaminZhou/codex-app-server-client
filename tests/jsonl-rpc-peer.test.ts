@@ -59,6 +59,46 @@ describe("JsonlRpcPeer", () => {
       `${JSON.stringify({ id: busyRequest.id, error: { code: -32000, message: "busy", data: { codexErrorInfo: "server_overloaded" } } })}\n`,
     );
     await expect(busy).rejects.toBeInstanceOf(AppServerBusyError);
+
+    const ingressBusy = peer.request("thread/list", {});
+    const ingressBusyRequest = await outbound.next();
+    serverToClient.write(
+      `${JSON.stringify({ id: ingressBusyRequest.id, error: { code: -32001, message: "Server overloaded; retry later." } })}\n`,
+    );
+    await expect(ingressBusy).rejects.toBeInstanceOf(AppServerBusyError);
+    peer.dispose();
+  });
+
+  it("sends and preserves W3C trace context on JSON-RPC requests", async () => {
+    const { outbound, peer, serverToClient } = createHarness();
+    const response = peer.request("thread/read", { threadId: "thread-1" }, {
+      trace: {
+        traceparent: "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
+        tracestate: "vendor=value",
+      },
+    });
+    const request = await outbound.next();
+    expect(request.trace).toEqual({
+      traceparent: "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
+      tracestate: "vendor=value",
+    });
+    serverToClient.write(`${JSON.stringify({ id: request.id, result: {} })}\n`);
+    await expect(response).resolves.toEqual({});
+
+    let observedTrace: unknown;
+    peer.onServerRequest((serverRequest) => {
+      observedTrace = serverRequest.trace;
+      return {};
+    });
+    serverToClient.write(
+      `${JSON.stringify({ id: 10, method: "example/request", trace: { traceparent: null } })}\n`,
+    );
+    await outbound.next();
+    expect(observedTrace).toEqual({ traceparent: null });
+
+    expect(() =>
+      peer.request("invalid", {}, { trace: { traceparent: 3 } } as never),
+    ).toThrow(AppServerProtocolError);
     peer.dispose();
   });
 

@@ -24,37 +24,38 @@ import type {
   ServerRequestHandler,
 } from "./types";
 
+export interface JsonRpcMessageTransport {
+  close(): Promise<void>;
+  dispose(): void;
+  onClose(handler: (reason: Error) => void): () => void;
+  onMessage(handler: (message: string) => void): () => void;
+  send(message: string): Promise<void>;
+}
+
 interface PendingRequest {
   cleanup: () => void;
   reject: (error: Error) => void;
   resolve: (value: JsonValue) => void;
 }
 
-export class JsonlRpcPeer {
-  private readonly input: Readable;
-  private readonly output: Writable;
+export class JsonRpcPeer {
+  private readonly transport: JsonRpcMessageTransport;
   private readonly options: JsonlRpcPeerOptions;
   private readonly pending = new Map<RequestId, PendingRequest>();
   private readonly notificationHandlers = new Set<NotificationHandler>();
-  private readonly reader: ReadLineInterface;
+  private readonly closeHandlers = new Set<(reason: Error) => void>();
+  private readonly unsubscribeClose: () => void;
+  private readonly unsubscribeMessage: () => void;
   private writeQueue: Promise<void> = Promise.resolve();
   private notificationQueue: Promise<void> = Promise.resolve();
   private closed = false;
   private serverRequestHandler: ServerRequestHandler | null = null;
 
-  constructor(input: Readable, output: Writable, options: JsonlRpcPeerOptions = {}) {
-    this.input = input;
-    this.output = output;
+  constructor(transport: JsonRpcMessageTransport, options: JsonlRpcPeerOptions = {}) {
+    this.transport = transport;
     this.options = options;
-    this.reader = createInterface({ input, crlfDelay: Infinity });
-    this.reader.on("line", (line) => this.handleLine(line));
-    this.reader.once("close", () => {
-      if (!this.closed) {
-        this.dispose(new AppServerConnectionClosedError("codex app-server closed stdout."));
-      }
-    });
-    this.input.once("error", (error) => this.dispose(asError(error)));
-    this.output.once("error", (error) => this.dispose(asError(error)));
+    this.unsubscribeMessage = transport.onMessage((message) => this.handleMessage(message));
+    this.unsubscribeClose = transport.onClose((reason) => this.dispose(reason));
   }
 
   request<T = JsonValue>(
@@ -103,7 +104,12 @@ export class JsonlRpcPeer {
 
       if (!this.pending.has(id)) return;
       void this.enqueueWrite(
-        { id, method, ...(params === undefined ? {} : { params }) },
+        {
+          id,
+          method,
+          ...(params === undefined ? {} : { params }),
+          ...(options.trace === undefined ? {} : { trace: options.trace }),
+        },
         () => this.pending.has(id),
       ).catch((error) => fail(asError(error)));
     });
@@ -130,10 +136,31 @@ export class JsonlRpcPeer {
     };
   }
 
+  onClose(handler: (reason: Error) => void): () => void {
+    if (this.closed) throw new AppServerConnectionClosedError();
+    this.closeHandlers.add(handler);
+    return () => this.closeHandlers.delete(handler);
+  }
+
+  async close(reason: Error = new AppServerConnectionClosedError()): Promise<void> {
+    if (!this.beginClose(reason)) return;
+    try {
+      await this.transport.close();
+    } finally {
+      this.transport.dispose();
+    }
+  }
+
   dispose(reason: Error = new AppServerConnectionClosedError()): void {
-    if (this.closed) return;
+    if (!this.beginClose(reason)) return;
+    this.transport.dispose();
+  }
+
+  private beginClose(reason: Error): boolean {
+    if (this.closed) return false;
     this.closed = true;
-    this.reader.close();
+    this.unsubscribeMessage();
+    this.unsubscribeClose();
     for (const request of this.pending.values()) {
       request.cleanup();
       request.reject(reason);
@@ -141,6 +168,15 @@ export class JsonlRpcPeer {
     this.pending.clear();
     this.notificationHandlers.clear();
     this.serverRequestHandler = null;
+    for (const handler of [...this.closeHandlers]) {
+      try {
+        handler(reason);
+      } catch (error) {
+        this.reportUnhandledError(asError(error));
+      }
+    }
+    this.closeHandlers.clear();
+    return true;
   }
 
   private nextRequestId(): RequestId {
@@ -160,7 +196,7 @@ export class JsonlRpcPeer {
     this.assertOpen();
     let serialized: string;
     try {
-      serialized = `${stringifyJsonPreservingBigInts(message)}\n`;
+      serialized = stringifyJsonPreservingBigInts(message);
     } catch (error) {
       return Promise.reject(
         new AppServerProtocolError("JSON-RPC message is not safely serializable.", {
@@ -171,27 +207,18 @@ export class JsonlRpcPeer {
     const operation = this.writeQueue.then(() => {
       this.assertOpen();
       if (!shouldWrite()) return;
-      return new Promise<void>((resolve, reject) => {
-        try {
-          this.output.write(serialized, "utf8", (error?: Error | null) => {
-            if (error) reject(error);
-            else resolve();
-          });
-        } catch (error) {
-          reject(asError(error));
-        }
-      });
+      return this.transport.send(serialized);
     });
     this.writeQueue = operation.catch(() => undefined);
     return operation;
   }
 
-  private handleLine(line: string): void {
-    if (!line.trim() || this.closed) return;
+  private handleMessage(messageText: string): void {
+    if (!messageText.trim() || this.closed) return;
 
     let value: unknown;
     try {
-      value = parseJsonPreservingLargeIntegers(line);
+      value = parseJsonPreservingLargeIntegers(messageText);
     } catch (error) {
       this.dispose(new AppServerProtocolError("Received invalid JSONL from codex app-server.", { cause: error }));
       return;
@@ -268,6 +295,91 @@ export class JsonlRpcPeer {
   }
 }
 
+export class JsonlRpcPeer extends JsonRpcPeer {
+  constructor(input: Readable, output: Writable, options: JsonlRpcPeerOptions = {}) {
+    super(new JsonlStreamTransport(input, output), options);
+  }
+}
+
+class JsonlStreamTransport implements JsonRpcMessageTransport {
+  private readonly input: Readable;
+  private readonly output: Writable;
+  private readonly reader: ReadLineInterface;
+  private readonly closeHandlers = new Set<(reason: Error) => void>();
+  private readonly messageHandlers = new Set<(message: string) => void>();
+  private readonly handleInputError = (error: Error) => this.signalClose(asError(error));
+  private readonly handleOutputError = (error: Error) => this.signalClose(asError(error));
+  private readonly handleReaderClose = () =>
+    this.signalClose(
+      new AppServerConnectionClosedError("codex app-server closed the JSONL stream."),
+    );
+  private closed = false;
+  private closeReason: Error | null = null;
+
+  constructor(input: Readable, output: Writable) {
+    this.input = input;
+    this.output = output;
+    this.reader = createInterface({ input, crlfDelay: Infinity });
+    this.reader.on("line", (line) => {
+      for (const handler of [...this.messageHandlers]) handler(line);
+    });
+    this.reader.once("close", this.handleReaderClose);
+    this.input.once("error", this.handleInputError);
+    this.output.once("error", this.handleOutputError);
+  }
+
+  send(message: string): Promise<void> {
+    if (this.closed) return Promise.reject(this.closeReason ?? new AppServerConnectionClosedError());
+    return new Promise<void>((resolve, reject) => {
+      try {
+        this.output.write(`${message}\n`, "utf8", (error?: Error | null) => {
+          if (error) reject(error);
+          else resolve();
+        });
+      } catch (error) {
+        reject(asError(error));
+      }
+    });
+  }
+
+  onMessage(handler: (message: string) => void): () => void {
+    this.messageHandlers.add(handler);
+    return () => this.messageHandlers.delete(handler);
+  }
+
+  onClose(handler: (reason: Error) => void): () => void {
+    if (this.closeReason) {
+      const reason = this.closeReason;
+      queueMicrotask(() => handler(reason));
+      return () => undefined;
+    }
+    this.closeHandlers.add(handler);
+    return () => this.closeHandlers.delete(handler);
+  }
+
+  close(): Promise<void> {
+    this.dispose();
+    return Promise.resolve();
+  }
+
+  dispose(): void {
+    this.closed = true;
+    this.reader.off("close", this.handleReaderClose);
+    this.input.off("error", this.handleInputError);
+    this.output.off("error", this.handleOutputError);
+    this.reader.close();
+    this.closeHandlers.clear();
+    this.messageHandlers.clear();
+  }
+
+  private signalClose(reason: Error): void {
+    if (this.closed) return;
+    this.closed = true;
+    this.closeReason = reason;
+    for (const handler of [...this.closeHandlers]) handler(reason);
+  }
+}
+
 function classifyMessage(value: unknown): JsonRpcMessage {
   if (!isRecord(value)) throw new AppServerProtocolError("JSON-RPC payload must be an object.");
 
@@ -281,6 +393,9 @@ function classifyMessage(value: unknown): JsonRpcMessage {
         id: value.id,
         method: value.method,
         ...(Object.hasOwn(value, "params") ? { params: value.params as JsonValue } : {}),
+        ...(Object.hasOwn(value, "trace")
+          ? { trace: validateTraceContext(value.trace) }
+          : {}),
       };
     }
     return {
@@ -319,6 +434,31 @@ function validateRequestOptions(options: RequestOptions): void {
   ) {
     throw new RangeError("timeoutMs must be a finite non-negative number.");
   }
+  if (options.trace !== undefined) validateTraceContext(options.trace);
+}
+
+function validateTraceContext(value: unknown): JsonRpcRequest["trace"] {
+  if (value === null) return null;
+  if (!isRecord(value)) {
+    throw new AppServerProtocolError("JSON-RPC trace must be an object or null.");
+  }
+  for (const field of ["traceparent", "tracestate"] as const) {
+    if (
+      Object.hasOwn(value, field) &&
+      value[field] !== null &&
+      typeof value[field] !== "string"
+    ) {
+      throw new AppServerProtocolError(`JSON-RPC trace ${field} must be a string or null.`);
+    }
+  }
+  return {
+    ...(Object.hasOwn(value, "traceparent")
+      ? { traceparent: value.traceparent as string | null }
+      : {}),
+    ...(Object.hasOwn(value, "tracestate")
+      ? { tracestate: value.tracestate as string | null }
+      : {}),
+  };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

@@ -14,9 +14,10 @@ if (!sourceArgument || !version || !commit) {
 
 const sourcePath = resolve(sourceArgument);
 const source = readFileSync(sourcePath, "utf8");
-const methods = parseClientRequestDefinitions(source);
+const methods = parseRequestDefinitions(source, "client_request_definitions!");
+const serverRequests = parseRequestDefinitions(source, "server_request_definitions!");
 const output = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   codexCliVersion: version,
   source: {
     repository: "https://github.com/openai/codex",
@@ -25,16 +26,18 @@ const output = {
     path: "codex-rs/app-server-protocol/src/protocol/common.rs",
   },
   methods,
+  serverRequests,
 };
 
 writeFileSync(
   resolve("protocol-methods.json"),
   `${JSON.stringify(output, null, 2)}\n`,
 );
-console.log(`Extracted ${methods.length} client methods from ${tag}.`);
+console.log(
+  `Extracted ${methods.length} client methods and ${serverRequests.length} server requests from ${tag}.`,
+);
 
-function parseClientRequestDefinitions(sourceText) {
-  const marker = "client_request_definitions!";
+function parseRequestDefinitions(sourceText, marker) {
   const markerIndex = sourceText.indexOf(marker);
   if (markerIndex < 0) throw new Error(`${marker} was not found.`);
   const open = sourceText.indexOf("{", markerIndex + marker.length);
