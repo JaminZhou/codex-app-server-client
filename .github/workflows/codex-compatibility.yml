@@ -1,0 +1,31 @@
+name: codex compatibility
+
+on:
+  schedule:
+    - cron: "19 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.7.0
+          dest: ${{ runner.temp }}/setup-pnpm
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm compatibility:check
+      - run: pnpm build
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 18
+      # pnpm 11 itself requires Node 22; invoke the Node 18 smoke script directly.
+      - run: node scripts/compatibility-smoke.mjs

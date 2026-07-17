@@ -50,6 +50,15 @@ handlers and raw requests. This is intentional forward compatibility, not a clai
 shape has been verified. `protocolValidation: "off"` is available for deliberate version-skew
 experiments.
 
+## Cross-version verification
+
+The scheduled compatibility smoke covers every exact stable release in
+`compatibility-matrix.json`, currently `0.144.4` and the pinned `0.144.5`. On the minimum supported
+Node.js 18 runtime it installs each CLI in isolation, starts its real stdio app-server with plugins
+disabled, uses strict current-Schema validation, and exercises initialization, thread listing,
+thread creation/read, and thread-goal access without calling a model service. The matrix is an
+explicit verified window, not a compatibility claim for arbitrary older or preview releases.
+
 ## High-level API coverage
 
 | Area | Current high-level coverage | Raw typed fallback |
@@ -83,7 +92,6 @@ The following items are deliberately not claimed as complete:
   exported upstream (`getAuthStatus`, `getConversationSummary`, and `gitDiffToRemote`);
 - broader high-level operation-scope coordination outside turn and goal starts;
 - automatic reconnect, replay, or idempotency policy for a dropped remote connection;
-- a cross-version compatibility suite spanning multiple Codex CLI releases;
 - production support for TCP WebSocket while upstream continues to label it experimental and
   unsupported.
 
