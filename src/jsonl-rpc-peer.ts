@@ -180,12 +180,7 @@ export class JsonRpcPeer {
   }
 
   private nextRequestId(): RequestId {
-    const id = this.options.requestIdFactory?.() ?? randomUUID();
-    if (!isRequestId(id)) {
-      throw new TypeError(
-        "requestIdFactory must return a string, bigint, or finite number that remains numeric on the wire.",
-      );
-    }
+    const id = normalizeRequestId(this.options.requestIdFactory?.() ?? randomUUID());
     if (this.pending.has(id)) throw new Error(`Duplicate JSON-RPC request id: ${String(id)}`);
     return id;
   }
@@ -467,13 +462,30 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+function normalizeRequestId(value: unknown): RequestId {
+  if (typeof value === "string") return value;
+  if (typeof value === "bigint") {
+    return value >= BigInt(Number.MIN_SAFE_INTEGER) && value <= BigInt(Number.MAX_SAFE_INTEGER)
+      ? Number(value)
+      : value;
+  }
+  if (
+    typeof value === "number" &&
+    Number.isFinite(value) &&
+    (!Number.isInteger(value) || Number.isSafeInteger(value))
+  ) {
+    return value;
+  }
+  throw new TypeError(
+    "requestIdFactory must return a string, bigint, or finite number that remains numeric on the wire.",
+  );
+}
+
 function isRequestId(value: unknown): value is RequestId {
   return (
     typeof value === "string" ||
     typeof value === "bigint" ||
-    (typeof value === "number" &&
-      Number.isFinite(value) &&
-      (!Number.isInteger(value) || Number.isSafeInteger(value)))
+    (typeof value === "number" && Number.isFinite(value))
   );
 }
 

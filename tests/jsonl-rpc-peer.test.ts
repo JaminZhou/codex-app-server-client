@@ -183,6 +183,19 @@ describe("JsonlRpcPeer", () => {
   });
 
   it("rejects lossy numeric request ids and non-finite JSON values", async () => {
+    const safeBigintInput = new PassThrough();
+    const safeBigintOutput = new PassThrough();
+    const safeBigintOutbound = jsonLineReader(safeBigintOutput);
+    const safeBigintPeer = new JsonlRpcPeer(safeBigintInput, safeBigintOutput, {
+      requestIdFactory: () => 1n,
+    });
+    const safeBigintPending = safeBigintPeer.request("thread/read", {});
+    const safeBigintRequest = await safeBigintOutbound.next();
+    expect(safeBigintRequest.id).toBe(1);
+    safeBigintInput.write(`${JSON.stringify({ id: 1, result: true })}\n`);
+    await expect(safeBigintPending).resolves.toBe(true);
+    safeBigintPeer.dispose();
+
     const unsafeIdInput = new PassThrough();
     const unsafeIdOutput = new PassThrough();
     const unsafeIdPeer = new JsonlRpcPeer(
