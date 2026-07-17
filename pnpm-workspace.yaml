@@ -2,3 +2,5 @@ allowBuilds:
   esbuild: true
 minimumReleaseAgeExclude:
   - '@openai/codex'
+overrides:
+  esbuild: 0.28.1

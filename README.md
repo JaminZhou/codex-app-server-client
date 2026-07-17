@@ -21,7 +21,7 @@ No Codex Desktop private code or extracted `app.asar` code is included or used a
 Pre-1.0 public development. The main protocol and client architecture are implemented, but the
 package API may still change before the first npm release.
 
-Current protocol baseline: `codex-cli 0.144.4`, including its generated experimental surface.
+Current protocol baseline: `codex-cli 0.144.5`, including its generated experimental surface.
 
 ## Highlights
 
