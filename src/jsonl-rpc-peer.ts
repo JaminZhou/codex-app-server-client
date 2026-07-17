@@ -24,6 +24,9 @@ import type {
   ServerRequestHandler,
 } from "./types";
 
+const MIN_I64 = -(1n << 63n);
+const MAX_I64 = (1n << 63n) - 1n;
+
 export interface JsonRpcMessageTransport {
   close(): Promise<void>;
   dispose(): void;
@@ -465,19 +468,18 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function normalizeRequestId(value: unknown): RequestId {
   if (typeof value === "string") return value;
   if (typeof value === "bigint") {
+    if (value < MIN_I64 || value > MAX_I64) {
+      throw new TypeError("Numeric request IDs must fit in a signed 64-bit integer.");
+    }
     return value >= BigInt(Number.MIN_SAFE_INTEGER) && value <= BigInt(Number.MAX_SAFE_INTEGER)
       ? Number(value)
       : value;
   }
-  if (
-    typeof value === "number" &&
-    Number.isFinite(value) &&
-    (!Number.isInteger(value) || Number.isSafeInteger(value))
-  ) {
+  if (typeof value === "number" && Number.isSafeInteger(value)) {
     return value;
   }
   throw new TypeError(
-    "requestIdFactory must return a string, bigint, or finite number that remains numeric on the wire.",
+    "requestIdFactory must return a string or signed 64-bit integer without numeric precision loss.",
   );
 }
 
@@ -532,18 +534,11 @@ function stringifyJsonPreservingBigInts(value: unknown): string {
 function parseJsonPreservingLargeIntegers(source: string): unknown {
   let prefix = `__codex_app_server_bigint_${randomUUID()}_`;
   while (source.includes(prefix)) prefix = `__codex_app_server_bigint_${randomUUID()}_`;
-  const transformed = quoteUnsafeIntegerTokens(source, prefix);
-  return JSON.parse(transformed, (_key, value: unknown) => {
-    if (typeof value === "number" && !Number.isFinite(value)) {
-      throw new TypeError("JSON number exceeds the finite range supported by this client.");
-    }
-    if (typeof value !== "string" || !value.startsWith(prefix)) return value;
-    const literal = value.slice(prefix.length);
-    return /^-?\d+$/.test(literal) ? BigInt(literal) : value;
-  });
+  const transformed = quoteNumberTokens(source, prefix);
+  return restoreJsonNumbers(JSON.parse(transformed), prefix, true);
 }
 
-function quoteUnsafeIntegerTokens(source: string, prefix: string): string {
+function quoteNumberTokens(source: string, prefix: string): string {
   let output = "";
   let index = 0;
   while (index < source.length) {
@@ -562,13 +557,61 @@ function quoteUnsafeIntegerTokens(source: string, prefix: string): string {
     }
 
     const token = match[0];
-    output +=
-      !/[.eE]/.test(token) && !isSafeIntegerLiteral(token)
-        ? JSON.stringify(`${prefix}${token}`)
-        : token;
+    output += JSON.stringify(`${prefix}${token}`);
     index += token.length;
   }
   return output;
+}
+
+function restoreJsonNumbers(value: unknown, prefix: string, root: boolean): unknown {
+  if (typeof value === "string" && value.startsWith(prefix)) {
+    return numberFromJsonLiteral(value.slice(prefix.length));
+  }
+  if (Array.isArray(value)) {
+    for (let index = 0; index < value.length; index += 1) {
+      value[index] = restoreJsonNumbers(value[index], prefix, false);
+    }
+    return value;
+  }
+  if (!isRecord(value)) return value;
+
+  for (const [key, item] of Object.entries(value)) {
+    value[key] =
+      root && key === "id" && typeof item === "string" && item.startsWith(prefix)
+        ? requestIdFromJsonLiteral(item.slice(prefix.length))
+        : restoreJsonNumbers(item, prefix, false);
+  }
+  return value;
+}
+
+function numberFromJsonLiteral(literal: string): number | bigint {
+  if (/^-?(?:0|[1-9]\d*)$/.test(literal)) {
+    const integer = BigInt(literal);
+    if (
+      integer < BigInt(Number.MIN_SAFE_INTEGER) ||
+      integer > BigInt(Number.MAX_SAFE_INTEGER)
+    ) {
+      return integer;
+    }
+  }
+  const value = Number(literal);
+  if (!Number.isFinite(value)) {
+    throw new TypeError("JSON number exceeds the finite range supported by this client.");
+  }
+  return value;
+}
+
+function requestIdFromJsonLiteral(literal: string): RequestId {
+  if (!/^-?(?:0|[1-9]\d*)$/.test(literal)) {
+    throw new TypeError("JSON-RPC numeric request IDs must be integers.");
+  }
+  const integer = BigInt(literal);
+  if (integer < MIN_I64 || integer > MAX_I64) {
+    throw new TypeError("JSON-RPC numeric request IDs must fit in a signed 64-bit integer.");
+  }
+  return integer >= BigInt(Number.MIN_SAFE_INTEGER) && integer <= BigInt(Number.MAX_SAFE_INTEGER)
+    ? Number(literal)
+    : integer;
 }
 
 function endOfJsonString(source: string, start: number): number {
@@ -579,13 +622,6 @@ function endOfJsonString(source: string, start: number): number {
     else index += 1;
   }
   return source.length;
-}
-
-function isSafeIntegerLiteral(value: string): boolean {
-  const integer = BigInt(value);
-  return (
-    integer >= BigInt(Number.MIN_SAFE_INTEGER) && integer <= BigInt(Number.MAX_SAFE_INTEGER)
-  );
 }
 
 function countOccurrences(source: string, search: string): number {

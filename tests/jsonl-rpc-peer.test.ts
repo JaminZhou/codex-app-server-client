@@ -196,15 +196,24 @@ describe("JsonlRpcPeer", () => {
     await expect(safeBigintPending).resolves.toBe(true);
     safeBigintPeer.dispose();
 
-    const unsafeIdInput = new PassThrough();
-    const unsafeIdOutput = new PassThrough();
-    const unsafeIdPeer = new JsonlRpcPeer(
-      unsafeIdInput,
-      unsafeIdOutput,
-      { requestIdFactory: () => Number.MAX_SAFE_INTEGER + 1 },
-    );
-    expect(() => unsafeIdPeer.request("thread/read", {})).toThrow(TypeError);
-    unsafeIdPeer.dispose();
+    const fractionalIdInput = new PassThrough();
+    const fractionalIdOutput = new PassThrough();
+    const fractionalIdOutbound = jsonLineReader(fractionalIdOutput);
+    const fractionalIdPeer = new JsonlRpcPeer(fractionalIdInput, fractionalIdOutput, {
+      requestIdFactory: () => 9_007_199_254_740_990,
+    });
+    const fractionalIdPending = fractionalIdPeer.request("thread/read", {});
+    await fractionalIdOutbound.next();
+    fractionalIdInput.write('{"id":9007199254740990.1,"result":true}\n');
+    await expect(fractionalIdPending).rejects.toBeInstanceOf(AppServerProtocolError);
+
+    for (const invalidId of [1.5, Number.MAX_SAFE_INTEGER + 1, 1n << 63n]) {
+      const invalidIdPeer = new JsonlRpcPeer(new PassThrough(), new PassThrough(), {
+        requestIdFactory: () => invalidId,
+      });
+      expect(() => invalidIdPeer.request("thread/read", {})).toThrow(TypeError);
+      invalidIdPeer.dispose();
+    }
 
     const outboundHarness = createHarness();
     await expect(
@@ -219,9 +228,9 @@ describe("JsonlRpcPeer", () => {
     const finite = inboundHarness.peer.request("thread/read", {});
     const finiteRequest = await inboundHarness.outbound.next();
     inboundHarness.serverToClient.write(
-      `${JSON.stringify({ id: finiteRequest.id }).slice(0, -1)},"result":1e100}\n`,
+      `${JSON.stringify({ id: finiteRequest.id }).slice(0, -1)},"result":{"id":1.5,"value":1e100}}\n`,
     );
-    await expect(finite).resolves.toBe(1e100);
+    await expect(finite).resolves.toEqual({ id: 1.5, value: 1e100 });
 
     const pending = inboundHarness.peer.request("thread/read", {});
     const request = await inboundHarness.outbound.next();
