@@ -182,7 +182,9 @@ export class JsonRpcPeer {
   private nextRequestId(): RequestId {
     const id = this.options.requestIdFactory?.() ?? randomUUID();
     if (!isRequestId(id)) {
-      throw new TypeError("requestIdFactory must return a string, number, or bigint.");
+      throw new TypeError(
+        "requestIdFactory must return a string, bigint, or losslessly representable finite number.",
+      );
     }
     if (this.pending.has(id)) throw new Error(`Duplicate JSON-RPC request id: ${String(id)}`);
     return id;
@@ -469,7 +471,7 @@ function isRequestId(value: unknown): value is RequestId {
   return (
     typeof value === "string" ||
     typeof value === "bigint" ||
-    (typeof value === "number" && Number.isFinite(value))
+    (typeof value === "number" && isLosslessJsonNumber(value))
   );
 }
 
@@ -482,6 +484,11 @@ function stringifyJsonPreservingBigInts(value: unknown): string {
     const prefix = `__codex_app_server_bigint_${randomUUID()}_`;
     const markers: Array<{ literal: string; marker: string }> = [];
     const serialized = JSON.stringify(value, (_key, item: unknown) => {
+      if (typeof item === "number" && !isLosslessJsonNumber(item)) {
+        throw new TypeError(
+          "JSON numbers must be finite, and integer values outside the safe range must use bigint.",
+        );
+      }
       if (typeof item !== "bigint") return item;
       const marker = `${prefix}${markers.length}__`;
       markers.push({ literal: item.toString(), marker });
@@ -515,6 +522,9 @@ function parseJsonPreservingLargeIntegers(source: string): unknown {
   while (source.includes(prefix)) prefix = `__codex_app_server_bigint_${randomUUID()}_`;
   const transformed = quoteUnsafeIntegerTokens(source, prefix);
   return JSON.parse(transformed, (_key, value: unknown) => {
+    if (typeof value === "number" && !isLosslessJsonNumber(value)) {
+      throw new TypeError("JSON number cannot be represented losslessly by this client.");
+    }
     if (typeof value !== "string" || !value.startsWith(prefix)) return value;
     const literal = value.slice(prefix.length);
     return /^-?\d+$/.test(literal) ? BigInt(literal) : value;
@@ -564,6 +574,10 @@ function isSafeIntegerLiteral(value: string): boolean {
   return (
     integer >= BigInt(Number.MIN_SAFE_INTEGER) && integer <= BigInt(Number.MAX_SAFE_INTEGER)
   );
+}
+
+function isLosslessJsonNumber(value: number): boolean {
+  return Number.isFinite(value) && (!Number.isInteger(value) || Number.isSafeInteger(value));
 }
 
 function countOccurrences(source: string, search: string): number {

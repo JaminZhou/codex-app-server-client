@@ -182,6 +182,37 @@ describe("JsonlRpcPeer", () => {
     peer.dispose();
   });
 
+  it("rejects numeric values that cannot round-trip losslessly", async () => {
+    const unsafeIdInput = new PassThrough();
+    const unsafeIdOutput = new PassThrough();
+    const unsafeIdPeer = new JsonlRpcPeer(
+      unsafeIdInput,
+      unsafeIdOutput,
+      { requestIdFactory: () => Number.MAX_SAFE_INTEGER + 1 },
+    );
+    expect(() => unsafeIdPeer.request("thread/read", {})).toThrow(TypeError);
+    unsafeIdPeer.dispose();
+
+    const outboundHarness = createHarness();
+    await expect(
+      outboundHarness.peer.notify("future/notification", { value: Number.NaN }),
+    ).rejects.toBeInstanceOf(AppServerProtocolError);
+    await expect(
+      outboundHarness.peer.notify("future/notification", {
+        value: Number.MAX_SAFE_INTEGER + 1,
+      }),
+    ).rejects.toBeInstanceOf(AppServerProtocolError);
+    outboundHarness.peer.dispose();
+
+    const inboundHarness = createHarness();
+    const pending = inboundHarness.peer.request("thread/read", {});
+    const request = await inboundHarness.outbound.next();
+    inboundHarness.serverToClient.write(
+      `${JSON.stringify({ id: request.id }).slice(0, -1)},"result":1e400}\n`,
+    );
+    await expect(pending).rejects.toBeInstanceOf(AppServerProtocolError);
+  });
+
   it("fails all pending requests on invalid JSON or transport closure", async () => {
     const invalidHarness = createHarness();
     const invalid = invalidHarness.peer.request("thread/read", {});
