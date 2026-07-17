@@ -11,6 +11,7 @@ import {
 import { tmpdir } from "node:os";
 import { delimiter, dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { execNpmSync } from "./npm-exec.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const packageJson = readJson(join(root, "package.json"));
@@ -29,7 +30,6 @@ if (!existsSync(builtEntry)) {
 
 const { CodexAppServerClient } = await import(pathToFileURL(builtEntry).href);
 const temporaryRoot = mkdtempSync(join(tmpdir(), "codex-app-server-compatibility-"));
-const npm = process.platform === "win32" ? "npm.cmd" : "npm";
 
 try {
   for (const version of versions) await smokeVersion(version);
@@ -52,8 +52,7 @@ async function smokeVersion(version) {
   mkdirSync(workspace);
   writeFileSync(join(codexHome, "config.toml"), "[features]\nplugins = false\n");
 
-  execFileSync(
-    npm,
+  execNpmSync(
     [
       "install",
       "--ignore-scripts",

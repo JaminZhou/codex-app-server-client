@@ -10,6 +10,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
+import { execNpmSync } from "./npm-exec.mjs";
 import { parseProtocolMethodMap } from "./protocol-method-map.mjs";
 
 const require = createRequire(import.meta.url);
@@ -19,13 +20,15 @@ const pinnedMethodMetadata = JSON.parse(
   readFileSync(join(root, "protocol-methods.json"), "utf8"),
 );
 const pinnedVersion = packageJson.dependencies?.["@openai/codex"];
-const npm = process.platform === "win32" ? "npm.cmd" : "npm";
 
 assertStableVersion("pinned", pinnedVersion);
 const latestVersion = latestStableVersion();
+await verifyPinnedPublicSource();
 
 if (latestVersion === pinnedVersion) {
-  console.log(`Pinned Codex runtime ${pinnedVersion} matches npm's latest stable release.`);
+  console.log(
+    `Pinned Codex runtime ${pinnedVersion} matches npm's latest stable release and its public tag provenance.`,
+  );
   process.exit(0);
 }
 
@@ -79,8 +82,7 @@ function latestStableVersion() {
     assertStableVersion("latest override", override);
     return override;
   }
-  const output = execFileSync(
-    npm,
+  const output = execNpmSync(
     ["view", "@openai/codex", "dist-tags.latest", "--json"],
     { cwd: root, encoding: "utf8" },
   );
@@ -95,9 +97,66 @@ function assertStableVersion(label, version) {
   }
 }
 
+async function verifyPinnedPublicSource() {
+  const expectedTag = `rust-v${pinnedVersion}`;
+  if (pinnedMethodMetadata.codexCliVersion !== pinnedVersion) {
+    throw new Error(
+      `protocol-methods.json targets Codex ${String(pinnedMethodMetadata.codexCliVersion)}, expected ${pinnedVersion}.`,
+    );
+  }
+  if (pinnedMethodMetadata.source?.repository !== "https://github.com/openai/codex") {
+    throw new Error("protocol-methods.json must reference the public openai/codex repository.");
+  }
+  if (pinnedMethodMetadata.source?.tag !== expectedTag) {
+    throw new Error(
+      `protocol-methods.json references ${String(pinnedMethodMetadata.source?.tag)}, expected ${expectedTag}.`,
+    );
+  }
+
+  const publicCommit = resolvePublicTagCommit(expectedTag);
+  if (pinnedMethodMetadata.source?.commit !== publicCommit) {
+    throw new Error(
+      `protocol-methods.json records commit ${String(pinnedMethodMetadata.source?.commit)}, but public ${expectedTag} resolves to ${publicCommit}.`,
+    );
+  }
+
+  const publicMethodMap = await fetchMethodMap(pinnedVersion);
+  const differences = compareMethodMaps(pinnedMethodMetadata, publicMethodMap);
+  if (differences.length > 0) {
+    throw new Error(
+      `Pinned method metadata differs from public ${expectedTag}:\n${differences.map((item) => `- ${item}`).join("\n")}`,
+    );
+  }
+}
+
+function resolvePublicTagCommit(tag) {
+  const output = execFileSync(
+    "git",
+    [
+      "ls-remote",
+      "https://github.com/openai/codex.git",
+      `refs/tags/${tag}`,
+      `refs/tags/${tag}^{}`,
+    ],
+    { cwd: root, encoding: "utf8" },
+  );
+  let directCommit;
+  let peeledCommit;
+  for (const line of output.trim().split("\n")) {
+    if (!line) continue;
+    const [commit, reference] = line.split("\t");
+    if (reference === `refs/tags/${tag}`) directCommit = commit;
+    else if (reference === `refs/tags/${tag}^{}`) peeledCommit = commit;
+  }
+  const commit = peeledCommit ?? directCommit;
+  if (!commit || !/^[0-9a-f]{40}$/.test(commit)) {
+    throw new Error(`Unable to resolve public Codex tag ${tag} to a commit.`);
+  }
+  return commit;
+}
+
 function installCodex(version, prefix) {
-  execFileSync(
-    npm,
+  execNpmSync(
     [
       "install",
       "--ignore-scripts",
