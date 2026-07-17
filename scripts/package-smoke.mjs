@@ -4,16 +4,16 @@ import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { execNpmSync } from "./npm-exec.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(import.meta.url);
 const typescriptCompiler = require.resolve("typescript/bin/tsc");
 const temporaryRoot = mkdtempSync(join(tmpdir(), "codex-app-server-client-package-smoke-"));
-const npm = process.platform === "win32" ? "npm.cmd" : "npm";
 
 try {
   const packed = JSON.parse(
-    execFileSync(npm, ["pack", "--json", "--pack-destination", temporaryRoot], {
+    execNpmSync(["pack", "--json", "--pack-destination", temporaryRoot], {
       cwd: root,
       encoding: "utf8",
     }),
@@ -36,8 +36,7 @@ try {
   }
 
   const artifactPath = join(temporaryRoot, artifact.filename);
-  execFileSync(
-    npm,
+  execNpmSync(
     ["install", "--ignore-scripts", "--no-audit", "--no-fund", artifactPath],
     { cwd: temporaryRoot, stdio: "pipe" },
   );

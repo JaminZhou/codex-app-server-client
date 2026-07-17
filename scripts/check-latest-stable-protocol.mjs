@@ -10,6 +10,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
+import { execNpmSync } from "./npm-exec.mjs";
 import { parseProtocolMethodMap } from "./protocol-method-map.mjs";
 
 const require = createRequire(import.meta.url);
@@ -19,7 +20,6 @@ const pinnedMethodMetadata = JSON.parse(
   readFileSync(join(root, "protocol-methods.json"), "utf8"),
 );
 const pinnedVersion = packageJson.dependencies?.["@openai/codex"];
-const npm = process.platform === "win32" ? "npm.cmd" : "npm";
 
 assertStableVersion("pinned", pinnedVersion);
 const latestVersion = latestStableVersion();
@@ -82,8 +82,7 @@ function latestStableVersion() {
     assertStableVersion("latest override", override);
     return override;
   }
-  const output = execFileSync(
-    npm,
+  const output = execNpmSync(
     ["view", "@openai/codex", "dist-tags.latest", "--json"],
     { cwd: root, encoding: "utf8" },
   );
@@ -157,8 +156,7 @@ function resolvePublicTagCommit(tag) {
 }
 
 function installCodex(version, prefix) {
-  execFileSync(
-    npm,
+  execNpmSync(
     [
       "install",
       "--ignore-scripts",
