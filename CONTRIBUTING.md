@@ -15,10 +15,15 @@ an empty temporary project, type-checks its public protocol declarations with de
 enabled, verifies its exported Schema/CLI/provenance files, and initializes a strictly validated
 real app-server on the declared minimum Node.js 18 runtime.
 
+The installed-package smoke runs on both Linux and Windows, so the public package exports and the
+platform-specific bundled Codex CLI are exercised on each operating system before a pull request is
+merged.
+
 A separate scheduled workflow runs `pnpm protocol:latest-check` against npm's latest stable Codex
-release. It fails when the pinned runtime is behind and reports whether the newer release also
-changes the generated public protocol, without making a time-dependent registry lookup part of the
-required pull-request check.
+release. It always verifies that the pinned public Rust tag still resolves to the recorded commit
+and method map. It also fails when the pinned runtime is behind and reports whether the newer
+release changes the generated public protocol, without making a time-dependent registry lookup part
+of the required pull-request check.
 
 A weekly compatibility workflow reads `compatibility-matrix.json`, installs each exact Codex CLI
 version in isolation, and exercises initialization, strict protocol validation, thread listing,
