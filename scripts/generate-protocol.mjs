@@ -198,21 +198,53 @@ function normalizeJsonTree(directory) {
 }
 
 function normalizeGeneratedTypeTree(directory) {
+  const v2NamespaceExport = 'export * as v2 from "./v2";';
+  if (!readFileSync(join(directory, "index.ts"), "utf8").includes(v2NamespaceExport)) {
+    throw new Error("Generated protocol index does not export the v2 namespace.");
+  }
+  const v2Namespace = generateV2TypeNamespace(directory);
   for (const [path, contents] of listFiles(directory)) {
     if (!path.endsWith(".ts")) continue;
     const source = contents.toString("utf8");
-    if (!/\bbigint\b/.test(source)) continue;
-    const normalized = source
-      .replace(
-        "// GENERATED CODE! DO NOT MODIFY BY HAND!",
-        [
+    let normalized = source.replace(v2NamespaceExport, v2Namespace);
+    if (/\bbigint\b/.test(normalized)) {
+      normalized = normalized
+        .replace(
           "// GENERATED CODE! DO NOT MODIFY BY HAND!",
-          "// JSONL normalization: 64-bit integers are numbers when safe and bigints otherwise.",
-        ].join("\n"),
-      )
-      .replace(/\bbigint\b/g, "number | bigint");
-    writeFileSync(join(directory, path), normalized);
+          [
+            "// GENERATED CODE! DO NOT MODIFY BY HAND!",
+            "// JSONL normalization: 64-bit integers are numbers when safe and bigints otherwise.",
+          ].join("\n"),
+        )
+        .replace(/\bbigint\b/g, "number | bigint");
+    }
+    if (normalized !== source) writeFileSync(join(directory, path), normalized);
   }
+}
+
+function generateV2TypeNamespace(directory) {
+  // Declaration bundlers treat a namespace re-export of type-only modules as runtime values.
+  // Materialize aliases so the packed declaration preserves `v2.Thread` type syntax.
+  const source = readFileSync(join(directory, "v2", "index.ts"), "utf8");
+  const exports = [
+    ...source.matchAll(/^export type \{ ([A-Za-z_$][\w$]*) \} from "\.\/([^"]+)";$/gm),
+  ].map((match) => ({ name: match[1], path: match[2] }));
+  const typeExportCount = source.match(/^export type /gm)?.length ?? 0;
+  if (exports.length === 0 || exports.length !== typeExportCount) {
+    throw new Error("Generated v2 protocol index contains unsupported type exports.");
+  }
+
+  return [
+    ...exports.map(
+      ({ name, path }) => `type CodexV2${name}Type = import("./v2/${path}").${name};`,
+    ),
+    "",
+    "declare namespace v2 {",
+    ...exports.map(({ name }) => `  export type ${name} = CodexV2${name}Type;`),
+    "}",
+    "",
+    "export type { v2 };",
+  ].join("\n");
 }
 
 function sortJson(value) {

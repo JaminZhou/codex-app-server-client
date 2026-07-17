@@ -11,8 +11,9 @@ pnpm check
 
 `pnpm check` verifies generated protocol artifacts before running TypeScript checks, unit and real
 app-server integration tests, and the package build. CI then packs the npm artifact, installs it in
-an empty temporary project, verifies its exported Schema/CLI/provenance files, and initializes a
-strictly validated real app-server on the declared minimum Node.js 18 runtime.
+an empty temporary project, type-checks its public protocol declarations with dependency checks
+enabled, verifies its exported Schema/CLI/provenance files, and initializes a strictly validated
+real app-server on the declared minimum Node.js 18 runtime.
 
 A separate scheduled workflow runs `pnpm protocol:latest-check` against npm's latest stable Codex
 release. It fails when the pinned runtime is behind and reports whether the newer release also

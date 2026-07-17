@@ -1,10 +1,13 @@
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const require = createRequire(import.meta.url);
+const typescriptCompiler = require.resolve("typescript/bin/tsc");
 const temporaryRoot = mkdtempSync(join(tmpdir(), "codex-app-server-client-package-smoke-"));
 const npm = process.platform === "win32" ? "npm.cmd" : "npm";
 
@@ -38,6 +41,38 @@ try {
     ["install", "--ignore-scripts", "--no-audit", "--no-fund", artifactPath],
     { cwd: temporaryRoot, stdio: "pipe" },
   );
+
+  writeFileSync(
+    join(temporaryRoot, "consumer.ts"),
+    [
+      'import type { ServerNotification, v2 } from "codex-app-server-client/protocol";',
+      "",
+      "export type InstalledProtocolTypes = [ServerNotification, v2.Thread];",
+      "",
+    ].join("\n"),
+  );
+  writeFileSync(
+    join(temporaryRoot, "tsconfig.json"),
+    `${JSON.stringify(
+      {
+        compilerOptions: {
+          module: "NodeNext",
+          moduleResolution: "NodeNext",
+          noEmit: true,
+          skipLibCheck: false,
+          strict: true,
+          target: "ES2022",
+        },
+        files: ["consumer.ts"],
+      },
+      null,
+      2,
+    )}\n`,
+  );
+  execFileSync(process.execPath, [typescriptCompiler, "--project", "tsconfig.json"], {
+    cwd: temporaryRoot,
+    stdio: "inherit",
+  });
 
   const smokeProgram = String.raw`
     import { existsSync, mkdirSync, writeFileSync } from "node:fs";
