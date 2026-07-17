@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  check:
+  linux-check:
     # Public pull requests must never execute untrusted code on a personal self-hosted runner.
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -49,3 +49,17 @@ jobs:
           node-version: 18
       # pnpm 11 itself requires Node 22; invoke the Node 18 smoke script directly.
       - run: node scripts/package-smoke.mjs
+
+  check:
+    if: always()
+    needs: [linux-check, windows-package-smoke]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require every platform check
+        env:
+          LINUX_RESULT: ${{ needs.linux-check.result }}
+          WINDOWS_RESULT: ${{ needs.windows-package-smoke.result }}
+        run: |
+          test "$LINUX_RESULT" = "success"
+          test "$WINDOWS_RESULT" = "success"

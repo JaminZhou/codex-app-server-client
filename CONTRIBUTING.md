@@ -17,7 +17,8 @@ real app-server on the declared minimum Node.js 18 runtime.
 
 The installed-package smoke runs on both Linux and Windows, so the public package exports and the
 platform-specific bundled Codex CLI are exercised on each operating system before a pull request is
-merged.
+merged. The protected `check` context aggregates both platform jobs and succeeds only when both
+have passed.
 
 A separate scheduled workflow runs `pnpm protocol:latest-check` against npm's latest stable Codex
 release. It always verifies that the pinned public Rust tag still resolves to the recorded commit
