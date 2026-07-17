@@ -52,8 +52,7 @@ describe("codex app-server integration", () => {
   it(
     "closes safely during startup and serializes a requested reconnect",
     async () => {
-      const codexHome = mkdtempSync(join(tmpdir(), "codex-app-server-client-race-test-"));
-      temporaryDirectories.push(codexHome);
+      const codexHome = createTestCodexHome("codex-app-server-client-race-test-");
       const client = new CodexAppServerClient({
         env: { CODEX_HOME: codexHome },
         requestTimeoutMs: 10_000,
@@ -81,8 +80,7 @@ describe("codex app-server integration", () => {
   it(
     "initializes over stdio and performs a typed-protocol request",
     async () => {
-      const codexHome = mkdtempSync(join(tmpdir(), "codex-app-server-client-test-"));
-      temporaryDirectories.push(codexHome);
+      const codexHome = createTestCodexHome("codex-app-server-client-test-");
       const client = new CodexAppServerClient({
         env: { CODEX_HOME: codexHome },
         requestTimeoutMs: 10_000,
@@ -284,8 +282,7 @@ describe("codex app-server integration", () => {
   it(
     "initializes through the real app-server Unix control socket",
     async () => {
-      const codexHome = mkdtempSync(join(tmpdir(), "codex-app-server-client-unix-test-"));
-      temporaryDirectories.push(codexHome);
+      const codexHome = createTestCodexHome("codex-app-server-client-unix-test-");
       const socketPath = join(codexHome, "control.sock");
       const resolved = resolveCodexBinary();
       const child = spawn(
@@ -328,8 +325,7 @@ describe("codex app-server integration", () => {
   it(
     "initializes through the real experimental TCP WebSocket listener",
     async () => {
-      const codexHome = mkdtempSync(join(tmpdir(), "codex-app-server-client-ws-test-"));
-      temporaryDirectories.push(codexHome);
+      const codexHome = createTestCodexHome("codex-app-server-client-ws-test-");
       const port = await availableTcpPort();
       const listenUrl = `ws://127.0.0.1:${port}`;
       const resolved = resolveCodexBinary();
@@ -428,6 +424,13 @@ function delay(milliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
+function createTestCodexHome(prefix: string): string {
+  const codexHome = mkdtempSync(join(tmpdir(), prefix));
+  temporaryDirectories.push(codexHome);
+  writeFileSync(join(codexHome, "config.toml"), "[features]\nplugins = false\n");
+  return codexHome;
+}
+
 function mockProviderConfig(
   origin: string,
   approvalPolicy = "never",
@@ -447,6 +450,9 @@ base_url = "${origin}/v1"
 wire_api = "responses"
 request_max_retries = 0
 stream_max_retries = 0
+
+[features]
+plugins = false
 `;
 }
 

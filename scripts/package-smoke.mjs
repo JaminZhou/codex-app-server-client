@@ -40,7 +40,7 @@ try {
   );
 
   const smokeProgram = String.raw`
-    import { existsSync, mkdirSync } from "node:fs";
+    import { existsSync, mkdirSync, writeFileSync } from "node:fs";
     import { createRequire } from "node:module";
     import { join } from "node:path";
     import {
@@ -62,6 +62,7 @@ try {
 
     const codexHome = join(process.cwd(), "codex-home");
     mkdirSync(codexHome);
+    writeFileSync(join(codexHome, "config.toml"), "[features]\\nplugins = false\\n");
     const client = new CodexAppServerClient({
       env: {
         CODEX_APP_SERVER_DISABLE_MANAGED_CONFIG: "1",
