@@ -59,10 +59,10 @@ disabled, uses strict current-Schema validation, and exercises initialization, t
 thread creation/read, and thread-goal access without calling a model service. The matrix is an
 explicit verified window, not a compatibility claim for arbitrary older or preview releases.
 
-Regular CI also packs and installs this client on both Linux and Windows, then initializes the
-platform-specific bundled Codex app-server on Node.js 18. This checks the two platform artifact
-paths independently; it does not extend the compatibility window beyond the exact CLI versions
-listed above.
+Regular CI also packs and installs this client on Linux, macOS, and Windows, then initializes the
+platform-specific bundled Codex app-server on Node.js 18. This checks the three operating-system
+artifact paths independently; it does not extend the compatibility window beyond the exact CLI
+versions listed above.
 
 ## High-level API coverage
 

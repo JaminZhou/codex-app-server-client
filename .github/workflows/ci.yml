@@ -30,6 +30,26 @@ jobs:
       # pnpm 11 itself requires Node 22; invoke the Node 18 smoke script directly.
       - run: node scripts/package-smoke.mjs
 
+  macos-package-smoke:
+    runs-on: macos-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.7.0
+          dest: ${{ runner.temp }}/setup-pnpm
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 18
+      # pnpm 11 itself requires Node 22; invoke the Node 18 smoke script directly.
+      - run: node scripts/package-smoke.mjs
+
   windows-package-smoke:
     runs-on: windows-latest
     timeout-minutes: 15
@@ -52,14 +72,16 @@ jobs:
 
   check:
     if: always()
-    needs: [linux-check, windows-package-smoke]
+    needs: [linux-check, macos-package-smoke, windows-package-smoke]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Require every platform check
         env:
           LINUX_RESULT: ${{ needs.linux-check.result }}
+          MACOS_RESULT: ${{ needs.macos-package-smoke.result }}
           WINDOWS_RESULT: ${{ needs.windows-package-smoke.result }}
         run: |
           test "$LINUX_RESULT" = "success"
+          test "$MACOS_RESULT" = "success"
           test "$WINDOWS_RESULT" = "success"

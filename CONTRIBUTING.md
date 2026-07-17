@@ -15,10 +15,10 @@ an empty temporary project, type-checks its public protocol declarations with de
 enabled, verifies its exported Schema/CLI/provenance files, and initializes a strictly validated
 real app-server on the declared minimum Node.js 18 runtime.
 
-The installed-package smoke runs on both Linux and Windows, so the public package exports and the
-platform-specific bundled Codex CLI are exercised on each operating system before a pull request is
-merged. The protected `check` context aggregates both platform jobs and succeeds only when both
-have passed.
+The installed-package smoke runs on Linux, macOS, and Windows, so the public package exports and the
+platform-specific bundled Codex CLI are exercised on each supported operating system before a pull
+request is merged. The protected `check` context aggregates all platform jobs and succeeds only
+when all have passed.
 
 A separate scheduled workflow runs `pnpm protocol:latest-check` against npm's latest stable Codex
 release. It always verifies that the pinned public Rust tag still resolves to the recorded commit
