@@ -8,7 +8,7 @@ Desktop implementation.
 
 | Reference | Pinned baseline | How it is used |
 | --- | --- | --- |
-| Public Codex CLI | `codex-cli 0.144.4` / `rust-v0.144.4` | Runtime binary and public app-server behavior |
+| Public Codex CLI | `codex-cli 0.144.5` / `rust-v0.144.5` | Runtime binary and public app-server behavior |
 | Generated app-server TypeScript | Generated from the pinned CLI | Request, response, notification, and server-request types |
 | Generated JSON Schema | Generated from the pinned CLI | Shipped schema artifacts and drift checks |
 | Official Python SDK | Public source at the same Codex tag | Lifecycle, routing, error, and high-level behavior reference |

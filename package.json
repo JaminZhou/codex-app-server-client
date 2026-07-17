@@ -50,6 +50,7 @@
     "typecheck": "tsc --noEmit",
     "protocol:generate": "node scripts/generate-protocol.mjs",
     "protocol:check": "node scripts/generate-protocol.mjs --check",
+    "protocol:latest-check": "node scripts/check-latest-stable-protocol.mjs",
     "check": "pnpm protocol:check && pnpm typecheck && pnpm test && pnpm build"
   },
   "engines": {
@@ -57,7 +58,7 @@
   },
   "packageManager": "pnpm@11.7.0",
   "dependencies": {
-    "@openai/codex": "0.144.4",
+    "@openai/codex": "0.144.5",
     "ajv": "8.20.0",
     "ws": "8.21.0"
   },

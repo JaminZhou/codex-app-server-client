@@ -14,6 +14,11 @@ app-server integration tests, and the package build. CI then packs the npm artif
 an empty temporary project, verifies its exported Schema/CLI/provenance files, and initializes a
 strictly validated real app-server on the declared minimum Node.js 18 runtime.
 
+A separate scheduled workflow runs `pnpm protocol:latest-check` against npm's latest stable Codex
+release. It fails when the pinned runtime is behind and reports whether the newer release also
+changes the generated public protocol, without making a time-dependent registry lookup part of the
+required pull-request check.
+
 The real-turn integration test never calls an external model service. It starts the pinned
 app-server with a temporary `CODEX_HOME` configured to use a loopback mock Responses provider.
 
