@@ -302,9 +302,11 @@ JSON Schema artifacts are included under `schemas/` in the package.
 
 The generated Rust 64-bit integer fields are normalized to `number | bigint` to match the JSONL
 transport: safe integer literals remain numbers, while larger integer literals are parsed and
-serialized losslessly as bigints. Non-finite numbers and integer-valued `number`s outside the safe
-range are rejected instead of being converted to `null` or losing precision; pass those integers as
-`bigint`.
+serialized losslessly as bigints. Pass integer values outside the safe `number` range as `bigint`.
+Non-finite numbers are rejected instead of being silently converted to `null`, and custom numeric
+request IDs that would be promoted to `bigint` on receipt are rejected before they can break
+response correlation. Finite double-valued protocol fields remain supported across their full
+JavaScript range.
 
 The generated surface includes experimental methods and fields so rich clients can opt in through `InitializeCapabilities.experimentalApi`. Experimental APIs can change between Codex CLI releases; pin the client version and run compatibility tests before upgrading.
 

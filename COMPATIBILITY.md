@@ -38,7 +38,7 @@ transport. For production local rich clients, prefer stdio or the Unix control s
 | Concurrent requests | Complete | UUID request IDs and response correlation independent of arrival order |
 | Ordered writes and notifications | Complete | Serialized outbound writes and transport-order notification dispatch |
 | W3C trace context | Complete at the JSON-RPC envelope | Outbound and inbound `traceparent` / `tracestate` preservation |
-| 64-bit JSON integers | Complete at the wire layer | Safe values use `number`; unsafe integer literals round-trip as `bigint`; lossy numeric inputs are rejected |
+| 64-bit JSON integers | Complete at the wire layer | Safe values use `number`; unsafe integer literals round-trip as `bigint`; lossy numeric request IDs and non-finite inputs are rejected |
 | Cancellation and timeout | Complete at the client request layer | Abort signals and bounded request timeouts |
 | Backpressure error classification | Complete for the documented ingress error | `-32001` `Server overloaded; retry later.` maps to `AppServerBusyError` |
 | Overload retry helper | Complete and opt-in | Exponential backoff with jitter; only overload-classified failures retry |

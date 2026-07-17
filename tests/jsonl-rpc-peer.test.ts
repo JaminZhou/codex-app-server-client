@@ -182,7 +182,7 @@ describe("JsonlRpcPeer", () => {
     peer.dispose();
   });
 
-  it("rejects numeric values that cannot round-trip losslessly", async () => {
+  it("rejects lossy numeric request ids and non-finite JSON values", async () => {
     const unsafeIdInput = new PassThrough();
     const unsafeIdOutput = new PassThrough();
     const unsafeIdPeer = new JsonlRpcPeer(
@@ -198,13 +198,18 @@ describe("JsonlRpcPeer", () => {
       outboundHarness.peer.notify("future/notification", { value: Number.NaN }),
     ).rejects.toBeInstanceOf(AppServerProtocolError);
     await expect(
-      outboundHarness.peer.notify("future/notification", {
-        value: Number.MAX_SAFE_INTEGER + 1,
-      }),
-    ).rejects.toBeInstanceOf(AppServerProtocolError);
+      outboundHarness.peer.notify("future/notification", { value: 1e100 }),
+    ).resolves.toBeUndefined();
     outboundHarness.peer.dispose();
 
     const inboundHarness = createHarness();
+    const finite = inboundHarness.peer.request("thread/read", {});
+    const finiteRequest = await inboundHarness.outbound.next();
+    inboundHarness.serverToClient.write(
+      `${JSON.stringify({ id: finiteRequest.id }).slice(0, -1)},"result":1e100}\n`,
+    );
+    await expect(finite).resolves.toBe(1e100);
+
     const pending = inboundHarness.peer.request("thread/read", {});
     const request = await inboundHarness.outbound.next();
     inboundHarness.serverToClient.write(
