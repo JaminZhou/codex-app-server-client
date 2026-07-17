@@ -19,6 +19,15 @@ release. It fails when the pinned runtime is behind and reports whether the newe
 changes the generated public protocol, without making a time-dependent registry lookup part of the
 required pull-request check.
 
+A weekly compatibility workflow reads `compatibility-matrix.json`, installs each exact Codex CLI
+version in isolation, and exercises initialization, strict protocol validation, thread listing,
+thread creation/read, and thread-goal access against the real app-server on Node.js 18. The regular
+`pnpm check` validates that the ordered matrix contains at least two stable releases and ends at the
+pinned runtime without downloading historical packages.
+
+Run the full matrix locally with `pnpm compatibility:smoke`; it builds the client and downloads the
+exact historical CLI packages declared in the matrix.
+
 The real-turn integration test never calls an external model service. It starts the pinned
 app-server with a temporary `CODEX_HOME` configured to use a loopback mock Responses provider.
 

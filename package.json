@@ -48,10 +48,12 @@
     "package:smoke": "node scripts/package-smoke.mjs",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
+    "compatibility:check": "node scripts/compatibility-smoke.mjs --check",
+    "compatibility:smoke": "pnpm build && node scripts/compatibility-smoke.mjs",
     "protocol:generate": "node scripts/generate-protocol.mjs",
     "protocol:check": "node scripts/generate-protocol.mjs --check",
     "protocol:latest-check": "node scripts/check-latest-stable-protocol.mjs",
-    "check": "pnpm protocol:check && pnpm typecheck && pnpm test && pnpm build"
+    "check": "pnpm protocol:check && pnpm compatibility:check && pnpm typecheck && pnpm test && pnpm build"
   },
   "engines": {
     "node": ">=18"

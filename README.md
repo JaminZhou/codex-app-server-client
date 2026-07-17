@@ -47,6 +47,8 @@ Current protocol baseline: `codex-cli 0.144.5`, including its generated experime
 - Validates known public-protocol traffic at runtime against the pinned generated JSON Schema.
 - Handles request cancellation, timeouts, ordered writes, bounded stderr capture, and process shutdown.
 - Verifies generated TypeScript, JSON Schema, and request/response maps in CI.
+- Runs a real app-server compatibility smoke across the pinned and immediately previous stable
+  Codex releases.
 
 ## Installation
 
