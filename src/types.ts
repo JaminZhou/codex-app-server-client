@@ -23,7 +23,7 @@ export interface W3cTraceContext {
 }
 
 export interface JsonRpcErrorData {
-  code: number;
+  code: bigint | number;
   message: string;
   data?: JsonValue;
 }

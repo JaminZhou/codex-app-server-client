@@ -307,8 +307,9 @@ before JavaScript rounds them; once a value is a `number`, the transport cannot 
 already-rounded integer from a valid integer-valued double such as `1e16`. Non-finite numbers are
 rejected instead of being silently converted to `null`, and custom numeric request IDs follow the
 upstream signed 64-bit integer contract; fractional or out-of-range IDs are rejected before they can
-break response correlation. Finite double-valued protocol fields remain supported across their full
-JavaScript range.
+break response correlation. JSON-RPC error codes follow the same signed 64-bit normalization, so
+large valid codes remain `bigint` instead of being rejected or rounded. Finite double-valued protocol
+fields remain supported across their full JavaScript range.
 
 The generated surface includes experimental methods and fields so rich clients can opt in through `InitializeCapabilities.experimentalApi`. Experimental APIs can change between Codex CLI releases; pin the client version and run compatibility tests before upgrading.
 

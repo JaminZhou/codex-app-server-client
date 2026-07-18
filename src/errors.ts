@@ -9,14 +9,14 @@ export class CodexAppServerError extends Error {
 }
 
 export class AppServerRpcError extends CodexAppServerError {
-  readonly code: number;
+  readonly code: bigint | number;
   readonly data: JsonValue | undefined;
   readonly rpcMessage: string;
 
   constructor(error: JsonRpcErrorData) {
     super(`JSON-RPC error ${error.code}: ${error.message}`);
     this.name = "AppServerRpcError";
-    this.code = error.code;
+    this.code = normalizeRpcErrorCode(error.code);
     this.data = error.data;
     this.rpcMessage = error.message;
   }
@@ -152,42 +152,44 @@ export class CodexTurnFailedError extends CodexAppServerError {
 
 /** Throw from a server-request handler to control the JSON-RPC error response. */
 export class AppServerServerRequestError extends CodexAppServerError {
-  readonly code: number;
+  readonly code: bigint | number;
   readonly data: JsonValue | undefined;
 
-  constructor(message: string, code = -32000, data?: JsonValue) {
+  constructor(message: string, code: bigint | number = -32000, data?: JsonValue) {
     super(message);
     this.name = "AppServerServerRequestError";
-    this.code = code;
+    this.code = normalizeRpcErrorCode(code);
     this.data = data;
   }
 }
 
 export function mapAppServerRpcError(error: JsonRpcErrorData): AppServerRpcError {
-  switch (error.code) {
+  const code = normalizeRpcErrorCode(error.code);
+  const normalized = code === error.code ? error : { ...error, code };
+  switch (code) {
     case -32700:
-      return new AppServerParseError(error);
+      return new AppServerParseError(normalized);
     case -32600:
-      return new AppServerInvalidRequestError(error);
+      return new AppServerInvalidRequestError(normalized);
     case -32601:
-      return new AppServerMethodNotFoundError(error);
+      return new AppServerMethodNotFoundError(normalized);
     case -32602:
-      return new AppServerInvalidParamsError(error);
+      return new AppServerInvalidParamsError(normalized);
     case -32603:
-      return new AppServerInternalRpcError(error);
+      return new AppServerInternalRpcError(normalized);
   }
 
-  if (error.code >= -32099 && error.code <= -32000) {
-    if (containsRetryLimitText(error.message)) {
-      return new AppServerRetryLimitExceededError(error);
+  if (typeof code === "number" && code >= -32099 && code <= -32000) {
+    if (containsRetryLimitText(normalized.message)) {
+      return new AppServerRetryLimitExceededError(normalized);
     }
-    if (containsServerOverloaded(error.data) || isIngressOverload(error)) {
-      return new AppServerBusyError(error);
+    if (containsServerOverloaded(normalized.data) || isIngressOverload(normalized)) {
+      return new AppServerBusyError(normalized);
     }
-    return new AppServerServerError(error);
+    return new AppServerServerError(normalized);
   }
 
-  return new AppServerRpcError(error);
+  return new AppServerRpcError(normalized);
 }
 
 export function isRetryableAppServerError(error: unknown): boolean {
@@ -215,4 +217,19 @@ function containsServerOverloaded(value: JsonValue | undefined): boolean {
     return Object.values(value).some((item) => containsServerOverloaded(item));
   }
   return false;
+}
+
+function normalizeRpcErrorCode(code: bigint | number): bigint | number {
+  if (typeof code === "bigint") {
+    if (code < -(1n << 63n) || code > (1n << 63n) - 1n) {
+      throw new RangeError("JSON-RPC error codes must fit in a signed 64-bit integer.");
+    }
+    return code >= BigInt(Number.MIN_SAFE_INTEGER) && code <= BigInt(Number.MAX_SAFE_INTEGER)
+      ? Number(code)
+      : code;
+  }
+  if (!Number.isSafeInteger(code)) {
+    throw new TypeError("JSON-RPC error codes must be integers without numeric precision loss.");
+  }
+  return code;
 }

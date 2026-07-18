@@ -7,6 +7,7 @@ import {
   AppServerProtocolError,
   AppServerRequestAbortedError,
   AppServerRequestTimeoutError,
+  AppServerRpcError,
   AppServerServerRequestError,
   JsonlRpcPeer,
 } from "../src";
@@ -66,6 +67,17 @@ describe("JsonlRpcPeer", () => {
       `${JSON.stringify({ id: ingressBusyRequest.id, error: { code: -32001, message: "Server overloaded; retry later." } })}\n`,
     );
     await expect(ingressBusy).rejects.toBeInstanceOf(AppServerBusyError);
+
+    const largeCode = peer.request("future/request", {});
+    const largeCodeRequest = await outbound.next();
+    serverToClient.write(
+      `{"id":${JSON.stringify(largeCodeRequest.id)},"error":{"code":9007199254740993,"message":"future error"}}\n`,
+    );
+    await expect(largeCode).rejects.toMatchObject({
+      code: 9_007_199_254_740_993n,
+      rpcMessage: "future error",
+    });
+    await expect(largeCode).rejects.toBeInstanceOf(AppServerRpcError);
     peer.dispose();
   });
 
@@ -118,10 +130,13 @@ describe("JsonlRpcPeer", () => {
   });
 
   it("responds to server requests and preserves explicit handler errors", async () => {
-    const { outbound, peer, serverToClient } = createHarness();
+    const { clientToServer, outbound, peer, serverToClient } = createHarness();
     peer.onServerRequest((request) => {
       if (request.method === "approval") return { decision: "accept" };
       if (request.method === "missing-result") return undefined as never;
+      if (request.method === "large-error") {
+        throw new AppServerServerRequestError("large error", 9_007_199_254_740_993n);
+      }
       throw new AppServerServerRequestError("not allowed", -32602, { field: "method" });
     });
 
@@ -140,6 +155,14 @@ describe("JsonlRpcPeer", () => {
         message: "Server request handler returned undefined instead of a JSON value.",
       },
     });
+    const rawLargeError = new Promise<string>((resolve) => {
+      clientToServer.once("data", (chunk: string | Buffer) => resolve(chunk.toString()));
+    });
+    serverToClient.write(`${JSON.stringify({ id: 10, method: "large-error" })}\n`);
+    expect(await rawLargeError).toContain('"code":9007199254740993');
+    await outbound.next();
+    expect(() => new AppServerServerRequestError("fractional", 1.5)).toThrow(TypeError);
+    expect(() => new AppServerServerRequestError("out of range", 1n << 63n)).toThrow(RangeError);
     peer.dispose();
   });
 
@@ -254,6 +277,16 @@ describe("JsonlRpcPeer", () => {
       `${JSON.stringify({ id: request.id }).slice(0, -1)},"result":1e400}\n`,
     );
     await expect(pending).rejects.toBeInstanceOf(AppServerProtocolError);
+
+    for (const invalidCode of ["-32603.0", "9223372036854775808"]) {
+      const invalidCodeHarness = createHarness();
+      const invalidCodePending = invalidCodeHarness.peer.request("thread/read", {});
+      const invalidCodeRequest = await invalidCodeHarness.outbound.next();
+      invalidCodeHarness.serverToClient.write(
+        `{"id":${JSON.stringify(invalidCodeRequest.id)},"error":{"code":${invalidCode},"message":"invalid"}}\n`,
+      );
+      await expect(invalidCodePending).rejects.toBeInstanceOf(AppServerProtocolError);
+    }
   });
 
   it("fails all pending requests on invalid JSON or transport closure", async () => {
