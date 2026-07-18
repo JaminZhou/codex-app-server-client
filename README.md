@@ -31,7 +31,7 @@ Current pinned runtime and protocol baseline: `@openai/codex@0.144.5`
 - Starts a version-matched stdio app-server, or attaches through the public Unix socket and
   experimental TCP WebSocket transports.
 - Provides a fully typed `call()` API for all 125 client methods in the pinned protocol.
-- Exposes generated protocol types through `codex-app-server-client/protocol`.
+- Exposes generated protocol types through `@jaminzhou/codex-app-server-client/protocol`.
 - Routes typed notifications and all generated server-request methods.
 - Buffers turn events that arrive before the `turn/start` response is consumed.
 - Provides high-level `CodexThread` and `CodexTurn` handles with async event streaming.
