@@ -54,18 +54,37 @@ Current pinned runtime and protocol baseline: `@openai/codex@0.144.5`
 
 ## Installation
 
-The package is not yet published to npm. Once published:
+The package is not yet published to npm. Until the first release, install it from GitHub and pin a
+reviewed full commit SHA so dependency resolution is reproducible:
 
 ```bash
-pnpm add codex-app-server-client
+npm install 'github:JaminZhou/codex-app-server-client#<full-commit-sha>'
 ```
+
+Git installs run the package's `prepare` build because generated `dist/` artifacts are not
+committed. pnpm 11 blocks that build unless the exact Git source is explicitly allowed. For a pnpm
+consumer, add the same pinned SHA to `pnpm-workspace.yaml` before installing:
+
+```yaml
+allowBuilds:
+  '@jaminzhou/codex-app-server-client@https://codeload.github.com/JaminZhou/codex-app-server-client/tar.gz/<full-commit-sha>': true
+```
+
+```bash
+pnpm add 'github:JaminZhou/codex-app-server-client#<full-commit-sha>'
+```
+
+The installed package name is `@jaminzhou/codex-app-server-client`. The unscoped
+`codex-app-server-client` name on npm belongs to an unrelated project and must not be used. Once
+this project is published, the registry install command will be
+`pnpm add @jaminzhou/codex-app-server-client`.
 
 `@openai/codex` is an exact runtime dependency. The client resolves that local package and its platform-specific optional dependency. Pass `codexPath` only when intentionally testing another binary.
 
 ## Quick start
 
 ```ts
-import { CodexAppServerClient } from "codex-app-server-client";
+import { CodexAppServerClient } from "@jaminzhou/codex-app-server-client";
 
 const client = new CodexAppServerClient({
   requestTimeoutMs: 30_000,
@@ -258,7 +277,7 @@ Unhandled server requests receive JSON-RPC method-not-found. The client does not
 ## Cancellation, timeouts, and retry
 
 ```ts
-import { retryOnAppServerOverload } from "codex-app-server-client";
+import { retryOnAppServerOverload } from "@jaminzhou/codex-app-server-client";
 
 const controller = new AbortController();
 
@@ -295,9 +314,9 @@ await client.call(
 import type {
   ServerNotification,
   v2,
-} from "codex-app-server-client/protocol";
+} from "@jaminzhou/codex-app-server-client/protocol";
 
-import { protocolMetadata } from "codex-app-server-client/protocol";
+import { protocolMetadata } from "@jaminzhou/codex-app-server-client/protocol";
 ```
 
 JSON Schema artifacts are included under `schemas/` in the package.
@@ -323,7 +342,7 @@ remaining high-level parity work.
 By default the client resolves this dependency chain:
 
 ```text
-codex-app-server-client
+@jaminzhou/codex-app-server-client
 └── @openai/codex (exact version)
     └── platform-specific Codex binary
 ```

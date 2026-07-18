@@ -12,7 +12,7 @@ const typescriptCompiler = require.resolve("typescript/bin/tsc");
 const temporaryRoot = mkdtempSync(join(tmpdir(), "codex-app-server-client-package-smoke-"));
 
 try {
-  const packed = JSON.parse(
+  const packed = parsePackOutput(
     execNpmSync(["pack", "--json", "--pack-destination", temporaryRoot], {
       cwd: root,
       encoding: "utf8",
@@ -44,7 +44,7 @@ try {
   writeFileSync(
     join(temporaryRoot, "consumer.ts"),
     [
-      'import type { ServerNotification, v2 } from "codex-app-server-client/protocol";',
+      'import type { ServerNotification, v2 } from "@jaminzhou/codex-app-server-client/protocol";',
       "",
       "export type InstalledProtocolTypes = [ServerNotification, v2.Thread];",
       "",
@@ -81,14 +81,14 @@ try {
       CodexAppServerClient,
       protocolValidationMetadata,
       resolveCodexBinary,
-    } from "codex-app-server-client";
+    } from "@jaminzhou/codex-app-server-client";
 
     if (protocolValidationMetadata.validatedClientRequests !== 125) {
       throw new Error("Installed runtime validation metadata is incomplete.");
     }
     const require = createRequire(import.meta.url);
     const runtimeSchema = require.resolve(
-      "codex-app-server-client/schemas/runtime-validation.schemas.json",
+      "@jaminzhou/codex-app-server-client/schemas/runtime-validation.schemas.json",
     );
     if (!existsSync(runtimeSchema)) throw new Error("Installed runtime Schema is missing.");
     const binary = resolveCodexBinary();
@@ -124,4 +124,14 @@ try {
   );
 } finally {
   rmSync(temporaryRoot, { force: true, recursive: true });
+}
+
+function parsePackOutput(output) {
+  const matches = [...output.matchAll(/(?:^|\n)(\[\s*\{\s*"id"\s*:)/g)];
+  const match = matches.at(-1);
+  if (!match || match.index === undefined) {
+    throw new Error("npm pack did not emit its JSON manifest.");
+  }
+  const start = match.index + (output[match.index] === "\n" ? 1 : 0);
+  return JSON.parse(output.slice(start));
 }

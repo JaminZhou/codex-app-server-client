@@ -1,5 +1,5 @@
 {
-  "name": "codex-app-server-client",
+  "name": "@jaminzhou/codex-app-server-client",
   "version": "0.0.0",
   "private": true,
   "description": "A TypeScript client for the public codex app-server JSON-RPC protocol.",
@@ -45,7 +45,9 @@
   },
   "scripts": {
     "build": "tsup",
+    "git:smoke": "node scripts/git-dependency-smoke.mjs",
     "package:smoke": "node scripts/package-smoke.mjs",
+    "prepare": "npm run build",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "compatibility:check": "node scripts/compatibility-smoke.mjs --check",
