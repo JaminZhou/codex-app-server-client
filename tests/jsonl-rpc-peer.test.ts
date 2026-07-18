@@ -220,7 +220,10 @@ describe("JsonlRpcPeer", () => {
       outboundHarness.peer.notify("future/notification", { value: Number.NaN }),
     ).rejects.toBeInstanceOf(AppServerProtocolError);
     await expect(
-      outboundHarness.peer.notify("future/notification", { value: 1e100 }),
+      outboundHarness.peer.notify("future/notification", {
+        integerValuedDouble: 1e16,
+        exponentDouble: 1e100,
+      }),
     ).resolves.toBeUndefined();
     outboundHarness.peer.dispose();
 
@@ -228,9 +231,13 @@ describe("JsonlRpcPeer", () => {
     const finite = inboundHarness.peer.request("thread/read", {});
     const finiteRequest = await inboundHarness.outbound.next();
     inboundHarness.serverToClient.write(
-      `${JSON.stringify({ id: finiteRequest.id }).slice(0, -1)},"result":{"id":1.5,"value":1e100}}\n`,
+      `${JSON.stringify({ id: finiteRequest.id }).slice(0, -1)},"result":{"id":1.5,"integerValuedDouble":1e16,"exponentDouble":1e100}}\n`,
     );
-    await expect(finite).resolves.toEqual({ id: 1.5, value: 1e100 });
+    await expect(finite).resolves.toEqual({
+      id: 1.5,
+      integerValuedDouble: 1e16,
+      exponentDouble: 1e100,
+    });
 
     const pending = inboundHarness.peer.request("thread/read", {});
     const request = await inboundHarness.outbound.next();

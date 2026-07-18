@@ -503,6 +503,11 @@ function stringifyJsonPreservingBigInts(value: unknown): string {
       if (typeof item === "number" && !Number.isFinite(item)) {
         throw new TypeError("JSON numbers must be finite.");
       }
+      // Do not reject every unsafe integer-valued number here. Large finite f64 values such as
+      // 1e16 and 1e100 also satisfy Number.isInteger(), and a schema-less JSON peer cannot recover
+      // whether the caller originally intended integer or double semantics. Integer callers must
+      // supply bigint before JavaScript rounds the value; numeric request IDs are schema-known and
+      // validated separately by normalizeRequestId().
       if (typeof item !== "bigint") return item;
       const marker = `${prefix}${markers.length}__`;
       markers.push({ literal: item.toString(), marker });
@@ -585,6 +590,9 @@ function restoreJsonNumbers(value: unknown, prefix: string, root: boolean): unkn
 }
 
 function numberFromJsonLiteral(literal: string): number | bigint {
+  // Upstream typed integer serializers emit plain integer tokens. Decimal and exponent tokens keep
+  // f64 semantics even when their mathematical value is integral; treating 1e16 or 1e100 as bigint
+  // here would change valid public double fields in this otherwise schema-less layer.
   if (/^-?(?:0|[1-9]\d*)$/.test(literal)) {
     const integer = BigInt(literal);
     if (
