@@ -537,6 +537,10 @@ function stringifyJsonPreservingBigInts(value: unknown): string {
 }
 
 function parseJsonPreservingLargeIntegers(source: string): unknown {
+  // The token-preserving rewrite deliberately quotes numeric literals. Validate the untouched
+  // source first so it cannot accidentally make malformed constructs (for example an unquoted
+  // numeric object key) acceptable. The rounded result of this syntax-only parse is discarded.
+  JSON.parse(source);
   let prefix = `__codex_app_server_bigint_${randomUUID()}_`;
   while (source.includes(prefix)) prefix = `__codex_app_server_bigint_${randomUUID()}_`;
   const transformed = quoteNumberTokens(source, prefix);

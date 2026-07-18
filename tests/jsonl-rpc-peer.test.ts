@@ -254,6 +254,12 @@ describe("JsonlRpcPeer", () => {
     invalidHarness.serverToClient.write("not-json\n");
     await expect(invalid).rejects.toBeInstanceOf(AppServerProtocolError);
 
+    const numericKeyHarness = createHarness();
+    const numericKey = numericKeyHarness.peer.request("thread/read", {});
+    await numericKeyHarness.outbound.next();
+    numericKeyHarness.serverToClient.write('{1:"x","method":"future/notification"}\n');
+    await expect(numericKey).rejects.toBeInstanceOf(AppServerProtocolError);
+
     const closedHarness = createHarness();
     const closed = closedHarness.peer.request("thread/read", {});
     await closedHarness.outbound.next();
