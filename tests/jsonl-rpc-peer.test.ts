@@ -121,6 +121,7 @@ describe("JsonlRpcPeer", () => {
     const { outbound, peer, serverToClient } = createHarness();
     peer.onServerRequest((request) => {
       if (request.method === "approval") return { decision: "accept" };
+      if (request.method === "missing-result") return undefined as never;
       throw new AppServerServerRequestError("not allowed", -32602, { field: "method" });
     });
 
@@ -130,6 +131,14 @@ describe("JsonlRpcPeer", () => {
     await expect(outbound.next()).resolves.toEqual({
       id: 8,
       error: { code: -32602, message: "not allowed", data: { field: "method" } },
+    });
+    serverToClient.write(`${JSON.stringify({ id: 9, method: "missing-result" })}\n`);
+    await expect(outbound.next()).resolves.toEqual({
+      id: 9,
+      error: {
+        code: -32603,
+        message: "Server request handler returned undefined instead of a JSON value.",
+      },
     });
     peer.dispose();
   });

@@ -270,6 +270,12 @@ export class JsonRpcPeer {
 
     try {
       const result = await this.serverRequestHandler(request);
+      if (result === undefined) {
+        throw new AppServerServerRequestError(
+          "Server request handler returned undefined instead of a JSON value.",
+          -32603,
+        );
+      }
       await this.enqueueWrite({ id: request.id, result });
     } catch (error) {
       const requestError =
