@@ -43,7 +43,7 @@ transport. For production local rich clients, prefer stdio or the Unix control s
 | Backpressure error classification | Complete for the documented ingress error | `-32001` `Server overloaded; retry later.` maps to `AppServerBusyError` |
 | Overload retry helper | Complete and opt-in | Exponential backoff with jitter; only overload-classified failures retry |
 | Experimental protocol | Generated and available | Enabled by the default initialize capability; it remains version-sensitive |
-| Runtime protocol validation | Complete for every generated request/notification/server-request shape and 122 of 125 client responses | Strict by default; three deprecated response types have no upstream JSON Schema |
+| Runtime protocol validation | Complete for every generated request/notification/server-request shape and 122 of 125 client responses | Strict by default, including Rust signed/unsigned integer widths; three deprecated response types have no upstream JSON Schema |
 
 Unknown method names bypass known-method Schema validation and remain available through generic
 handlers and raw requests. This is intentional forward compatibility, not a claim that an unknown

@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import Ajv, { type AnySchema, type ErrorObject, type ValidateFunction } from "ajv";
 import baseProtocolSchema from "../schemas/codex_app_server_protocol.schemas.json" with {
   type: "json",
@@ -24,6 +25,30 @@ import type { JsonRpcNotification, JsonRpcRequest } from "./types";
 const BASE_SCHEMA_ID = "codex://app-server/base";
 const V2_SCHEMA_ID = "codex://app-server/v2";
 const VALIDATION_REQUEST_ID = "protocol-validation";
+const BIGINT_VALIDATION_KEYWORD = "codexBigIntFormat";
+
+const INTEGER_FORMAT_RANGES = {
+  int32: [-(1n << 31n), (1n << 31n) - 1n],
+  int64: [-(1n << 63n), (1n << 63n) - 1n],
+  uint: [0n, (1n << 64n) - 1n],
+  uint16: [0n, (1n << 16n) - 1n],
+  uint32: [0n, (1n << 32n) - 1n],
+  uint64: [0n, (1n << 64n) - 1n],
+} as const;
+
+type IntegerFormat = keyof typeof INTEGER_FORMAT_RANGES;
+
+interface BigIntFormatSchema {
+  exclusiveMaximum?: number;
+  exclusiveMinimum?: number;
+  format: IntegerFormat;
+  maximum?: number;
+  minimum?: number;
+}
+
+class ValidationBigInt {
+  constructor(readonly value: bigint) {}
+}
 
 export type ProtocolValidationMode = "strict" | "off";
 
@@ -69,7 +94,25 @@ export class ProtocolValidator {
       allErrors: true,
       allowUnionTypes: true,
       strict: false,
-      validateFormats: false,
+      validateFormats: true,
+    });
+    for (const format of Object.keys(INTEGER_FORMAT_RANGES) as IntegerFormat[]) {
+      this.ajv.addFormat(format, {
+        type: "number",
+        validate: (value: number) =>
+          Number.isSafeInteger(value) && integerMatchesFormat(BigInt(value), format),
+      });
+    }
+    this.ajv.addFormat("double", {
+      type: "number",
+      validate: (value: number) => Number.isFinite(value),
+    });
+    this.ajv.addKeyword({
+      errors: false,
+      keyword: BIGINT_VALIDATION_KEYWORD,
+      schemaType: "object",
+      validate: (schema: BigIntFormatSchema, value: unknown) =>
+        value instanceof ValidationBigInt && bigintMatchesSchema(value.value, schema),
     });
     this.ajv.addSchema(withId(baseProtocolSchema, BASE_SCHEMA_ID), BASE_SCHEMA_ID);
     this.ajv.addSchema(withId(v2ProtocolSchema, V2_SCHEMA_ID), V2_SCHEMA_ID);
@@ -230,15 +273,105 @@ function runtimeSchemaId(definition: string): string {
 }
 
 function withId(schema: unknown, id: string): AnySchema {
-  return { ...(schema as Record<string, unknown>), $id: id } as AnySchema;
+  return {
+    ...(withBigIntIntegerValidation(schema) as Record<string, unknown>),
+    $id: id,
+  } as AnySchema;
 }
 
 function validationWireValue(value: unknown): unknown {
-  const serialized = JSON.stringify(value, (_key, item: unknown) =>
-    typeof item === "bigint" ? Number(item) : item,
+  for (;;) {
+    const prefix = `__codex_protocol_validation_bigint_${randomUUID()}_`;
+    const markers: Array<{ marker: string; value: ValidationBigInt }> = [];
+    const serialized = JSON.stringify(value, (_key, item: unknown) => {
+      if (typeof item === "number" && !Number.isFinite(item)) {
+        throw new TypeError("JSON numbers must be finite.");
+      }
+      if (typeof item !== "bigint") return item;
+      const marker = `${prefix}${markers.length}__`;
+      markers.push({ marker, value: new ValidationBigInt(item) });
+      return marker;
+    });
+    if (serialized === undefined) throw new TypeError("JSON value serialized to undefined.");
+
+    const markerValues = new Map(markers.map(({ marker, value: item }) => [marker, item]));
+    if (
+      markers.some(
+        ({ marker }) => countOccurrences(serialized, JSON.stringify(marker)) !== 1,
+      )
+    ) {
+      continue;
+    }
+    return JSON.parse(serialized, (_key, item: unknown) =>
+      typeof item === "string" && markerValues.has(item) ? markerValues.get(item) : item,
+    ) as unknown;
+  }
+}
+
+function withBigIntIntegerValidation(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(withBigIntIntegerValidation);
+  if (!isRecord(value)) return value;
+
+  const transformed = Object.fromEntries(
+    Object.entries(value).map(([key, item]) => [key, withBigIntIntegerValidation(item)]),
   );
-  if (serialized === undefined) throw new TypeError("JSON value serialized to undefined.");
-  return JSON.parse(serialized) as unknown;
+  const types = Array.isArray(value.type) ? value.type : [value.type];
+  if (!types.includes("integer") || !isIntegerFormat(value.format)) return transformed;
+
+  return {
+    anyOf: [
+      transformed,
+      {
+        [BIGINT_VALIDATION_KEYWORD]: {
+          format: value.format,
+          ...(typeof value.minimum === "number" ? { minimum: value.minimum } : {}),
+          ...(typeof value.maximum === "number" ? { maximum: value.maximum } : {}),
+          ...(typeof value.exclusiveMinimum === "number"
+            ? { exclusiveMinimum: value.exclusiveMinimum }
+            : {}),
+          ...(typeof value.exclusiveMaximum === "number"
+            ? { exclusiveMaximum: value.exclusiveMaximum }
+            : {}),
+        } satisfies BigIntFormatSchema,
+      },
+    ],
+  };
+}
+
+function bigintMatchesSchema(value: bigint, schema: BigIntFormatSchema): boolean {
+  if (!integerMatchesFormat(value, schema.format)) return false;
+  if (schema.minimum !== undefined && value < BigInt(schema.minimum)) return false;
+  if (schema.maximum !== undefined && value > BigInt(schema.maximum)) return false;
+  if (schema.exclusiveMinimum !== undefined && value <= BigInt(schema.exclusiveMinimum)) {
+    return false;
+  }
+  if (schema.exclusiveMaximum !== undefined && value >= BigInt(schema.exclusiveMaximum)) {
+    return false;
+  }
+  return true;
+}
+
+function integerMatchesFormat(value: bigint, format: IntegerFormat): boolean {
+  const [minimum, maximum] = INTEGER_FORMAT_RANGES[format];
+  return value >= minimum && value <= maximum;
+}
+
+function isIntegerFormat(value: unknown): value is IntegerFormat {
+  return typeof value === "string" && Object.hasOwn(INTEGER_FORMAT_RANGES, value);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function countOccurrences(source: string, search: string): number {
+  let count = 0;
+  let index = 0;
+  while ((index = source.indexOf(search, index)) >= 0) {
+    count += 1;
+    index += search.length;
+  }
+  return count;
 }
 
 function validationIssues(

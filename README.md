@@ -168,9 +168,11 @@ const client = new CodexAppServerClient({
 });
 ```
 
-Validation converts `bigint` values only in its private comparison copy; the value sent to or
-received from app-server remains lossless. The upstream generator does not currently export
-response Schema for three deprecated compatibility methods: `getAuthStatus`,
+Validation preserves `bigint` values in its private comparison copy and enforces the public Rust
+integer formats (`int32`, `int64`, `uint`, `uint16`, `uint32`, and `uint64`) without lossy number
+conversion. Integer-valued `double` fields remain doubles across the full finite JavaScript range.
+The value sent to or received from app-server remains lossless. The upstream generator does not
+currently export response Schema for three deprecated compatibility methods: `getAuthStatus`,
 `getConversationSummary`, and `gitDiffToRemote`. Their request parameters remain validated and
 their responses remain statically typed, but their response payloads are the explicit runtime
 validation exceptions reported by `protocolValidationMetadata`.
