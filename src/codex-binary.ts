@@ -57,7 +57,7 @@ export function resolveCodexBinary(override?: string): ResolvedCodexBinary {
   } catch (error) {
     if (error instanceof CodexBinaryResolutionError) throw error;
     throw new CodexBinaryResolutionError(
-      "Unable to resolve the bundled Codex CLI. Reinstall codex-app-server-client with optional dependencies enabled, or provide codexPath.",
+      "Unable to resolve the bundled Codex CLI. Reinstall @jaminzhou/codex-app-server-client with optional dependencies enabled, or provide codexPath.",
       { cause: error },
     );
   }
