@@ -182,12 +182,83 @@ describe("JsonlRpcPeer", () => {
     peer.dispose();
   });
 
+  it("rejects lossy numeric request ids and non-finite JSON values", async () => {
+    const safeBigintInput = new PassThrough();
+    const safeBigintOutput = new PassThrough();
+    const safeBigintOutbound = jsonLineReader(safeBigintOutput);
+    const safeBigintPeer = new JsonlRpcPeer(safeBigintInput, safeBigintOutput, {
+      requestIdFactory: () => 1n,
+    });
+    const safeBigintPending = safeBigintPeer.request("thread/read", {});
+    const safeBigintRequest = await safeBigintOutbound.next();
+    expect(safeBigintRequest.id).toBe(1);
+    safeBigintInput.write(`${JSON.stringify({ id: 1, result: true })}\n`);
+    await expect(safeBigintPending).resolves.toBe(true);
+    safeBigintPeer.dispose();
+
+    const fractionalIdInput = new PassThrough();
+    const fractionalIdOutput = new PassThrough();
+    const fractionalIdOutbound = jsonLineReader(fractionalIdOutput);
+    const fractionalIdPeer = new JsonlRpcPeer(fractionalIdInput, fractionalIdOutput, {
+      requestIdFactory: () => 9_007_199_254_740_990,
+    });
+    const fractionalIdPending = fractionalIdPeer.request("thread/read", {});
+    await fractionalIdOutbound.next();
+    fractionalIdInput.write('{"id":9007199254740990.1,"result":true}\n');
+    await expect(fractionalIdPending).rejects.toBeInstanceOf(AppServerProtocolError);
+
+    for (const invalidId of [1.5, Number.MAX_SAFE_INTEGER + 1, 1n << 63n]) {
+      const invalidIdPeer = new JsonlRpcPeer(new PassThrough(), new PassThrough(), {
+        requestIdFactory: () => invalidId,
+      });
+      expect(() => invalidIdPeer.request("thread/read", {})).toThrow(TypeError);
+      invalidIdPeer.dispose();
+    }
+
+    const outboundHarness = createHarness();
+    await expect(
+      outboundHarness.peer.notify("future/notification", { value: Number.NaN }),
+    ).rejects.toBeInstanceOf(AppServerProtocolError);
+    await expect(
+      outboundHarness.peer.notify("future/notification", {
+        integerValuedDouble: 1e16,
+        exponentDouble: 1e100,
+      }),
+    ).resolves.toBeUndefined();
+    outboundHarness.peer.dispose();
+
+    const inboundHarness = createHarness();
+    const finite = inboundHarness.peer.request("thread/read", {});
+    const finiteRequest = await inboundHarness.outbound.next();
+    inboundHarness.serverToClient.write(
+      `${JSON.stringify({ id: finiteRequest.id }).slice(0, -1)},"result":{"id":1.5,"integerValuedDouble":1e16,"exponentDouble":1e100}}\n`,
+    );
+    await expect(finite).resolves.toEqual({
+      id: 1.5,
+      integerValuedDouble: 1e16,
+      exponentDouble: 1e100,
+    });
+
+    const pending = inboundHarness.peer.request("thread/read", {});
+    const request = await inboundHarness.outbound.next();
+    inboundHarness.serverToClient.write(
+      `${JSON.stringify({ id: request.id }).slice(0, -1)},"result":1e400}\n`,
+    );
+    await expect(pending).rejects.toBeInstanceOf(AppServerProtocolError);
+  });
+
   it("fails all pending requests on invalid JSON or transport closure", async () => {
     const invalidHarness = createHarness();
     const invalid = invalidHarness.peer.request("thread/read", {});
     await invalidHarness.outbound.next();
     invalidHarness.serverToClient.write("not-json\n");
     await expect(invalid).rejects.toBeInstanceOf(AppServerProtocolError);
+
+    const numericKeyHarness = createHarness();
+    const numericKey = numericKeyHarness.peer.request("thread/read", {});
+    await numericKeyHarness.outbound.next();
+    numericKeyHarness.serverToClient.write('{1:"x","method":"future/notification"}\n');
+    await expect(numericKey).rejects.toBeInstanceOf(AppServerProtocolError);
 
     const closedHarness = createHarness();
     const closed = closedHarness.peer.request("thread/read", {});
