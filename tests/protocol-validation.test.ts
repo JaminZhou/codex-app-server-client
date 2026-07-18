@@ -37,6 +37,55 @@ describe("generated protocol runtime validation", () => {
       ).toThrow(AppServerProtocolValidationError);
     }
     expect(() =>
+      validator.assertClientRequest("command/exec/resize", {
+        processId: "process-1",
+        size: { cols: 65_535, rows: 65_535 },
+      }),
+    ).not.toThrow();
+    expect(() =>
+      validator.assertClientRequest("command/exec/resize", {
+        processId: "process-1",
+        size: { cols: 65_536, rows: 1 },
+      }),
+    ).toThrow(AppServerProtocolValidationError);
+    for (const [method, params] of [
+      [
+        "command/exec",
+        { command: ["true"], outputBytesCap: (1n << 64n) - 1n },
+      ],
+      [
+        "environment/add",
+        {
+          connectTimeoutMs: (1n << 64n) - 1n,
+          environmentId: "environment-1",
+          execServerUrl: "wss://example.test",
+        },
+      ],
+    ] as const) {
+      expect(() => validator.assertClientRequest(method, params)).not.toThrow();
+    }
+    expect(() =>
+      validator.assertClientRequest("environment/add", {
+        connectTimeoutMs: 1n << 64n,
+        environmentId: "environment-1",
+        execServerUrl: "wss://example.test",
+      }),
+    ).toThrow(AppServerProtocolValidationError);
+    expect(() =>
+      validator.assertResponse("command/exec", {
+        exitCode: 2_147_483_647,
+        stderr: "",
+        stdout: "",
+      }),
+    ).not.toThrow();
+    expect(() =>
+      validator.assertResponse("command/exec", {
+        exitCode: 2_147_483_648,
+        stderr: "",
+        stdout: "",
+      }),
+    ).toThrow(AppServerProtocolValidationError);
+    expect(() =>
       validator.assertResponse("remoteControl/pairing/start", {
         pairingCode: "PAIR",
         manualPairingCode: null,
