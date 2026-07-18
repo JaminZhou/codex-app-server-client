@@ -418,7 +418,7 @@ function classifyMessage(value: unknown): JsonRpcMessage {
   }
   if (hasError) {
     const error = value.error;
-    if (!isRecord(error) || typeof error.code !== "number" || typeof error.message !== "string") {
+    if (!isRecord(error) || !isRpcErrorCode(error.code) || typeof error.message !== "string") {
       throw new AppServerProtocolError("JSON-RPC error response is malformed.");
     }
     return {
@@ -494,6 +494,13 @@ function isRequestId(value: unknown): value is RequestId {
     typeof value === "string" ||
     typeof value === "bigint" ||
     (typeof value === "number" && Number.isFinite(value))
+  );
+}
+
+function isRpcErrorCode(value: unknown): value is JsonRpcErrorData["code"] {
+  return (
+    (typeof value === "number" && Number.isSafeInteger(value)) ||
+    (typeof value === "bigint" && value >= MIN_I64 && value <= MAX_I64)
   );
 }
 
@@ -591,9 +598,27 @@ function restoreJsonNumbers(value: unknown, prefix: string, root: boolean): unkn
   if (!isRecord(value)) return value;
 
   for (const [key, item] of Object.entries(value)) {
+    if (root && key === "id" && typeof item === "string" && item.startsWith(prefix)) {
+      value[key] = requestIdFromJsonLiteral(item.slice(prefix.length));
+      continue;
+    }
+    if (root && key === "error" && !Object.hasOwn(value, "method") && isRecord(item)) {
+      value[key] = restoreJsonRpcErrorNumbers(item, prefix);
+      continue;
+    }
+    value[key] = restoreJsonNumbers(item, prefix, false);
+  }
+  return value;
+}
+
+function restoreJsonRpcErrorNumbers(
+  value: Record<string, unknown>,
+  prefix: string,
+): Record<string, unknown> {
+  for (const [key, item] of Object.entries(value)) {
     value[key] =
-      root && key === "id" && typeof item === "string" && item.startsWith(prefix)
-        ? requestIdFromJsonLiteral(item.slice(prefix.length))
+      key === "code" && typeof item === "string" && item.startsWith(prefix)
+        ? signedI64FromJsonLiteral(item.slice(prefix.length), "JSON-RPC error codes")
         : restoreJsonNumbers(item, prefix, false);
   }
   return value;
@@ -620,12 +645,16 @@ function numberFromJsonLiteral(literal: string): number | bigint {
 }
 
 function requestIdFromJsonLiteral(literal: string): RequestId {
+  return signedI64FromJsonLiteral(literal, "JSON-RPC numeric request IDs");
+}
+
+function signedI64FromJsonLiteral(literal: string, subject: string): bigint | number {
   if (!/^-?(?:0|[1-9]\d*)$/.test(literal)) {
-    throw new TypeError("JSON-RPC numeric request IDs must be integers.");
+    throw new TypeError(`${subject} must be integers.`);
   }
   const integer = BigInt(literal);
   if (integer < MIN_I64 || integer > MAX_I64) {
-    throw new TypeError("JSON-RPC numeric request IDs must fit in a signed 64-bit integer.");
+    throw new TypeError(`${subject} must fit in a signed 64-bit integer.`);
   }
   return integer >= BigInt(Number.MIN_SAFE_INTEGER) && integer <= BigInt(Number.MAX_SAFE_INTEGER)
     ? Number(literal)
