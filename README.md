@@ -21,6 +21,11 @@ No Codex Desktop private code or extracted `app.asar` code is included or used a
 Pre-1.0 public development. The main protocol and client architecture are implemented, but the
 package API may still change before the first npm release.
 
+Upstream currently classifies [`codex app-server`](https://developers.openai.com/codex/app-server/)
+itself as experimental and primarily intended for development or debugging; it may change without
+notice. This client therefore pins an exact Codex runtime and treats compatibility as
+version-specific rather than as a general stability guarantee.
+
 Current pinned runtime and protocol baseline: `@openai/codex@0.144.6`
 (`codex-cli 0.144.6` / `rust-v0.144.6`), including its generated experimental surface. See
 [SOURCES.md](./SOURCES.md) for exact provenance.

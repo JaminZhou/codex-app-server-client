@@ -4,6 +4,11 @@ This document separates verified public-protocol coverage from higher-level conv
 are still being built. It is intentionally narrower than a claim of parity with any private Codex
 Desktop implementation.
 
+Upstream classifies [`codex app-server`](https://developers.openai.com/codex/app-server/) itself as
+experimental and primarily intended for development or debugging. It may change without notice, so
+every verification claim here is tied to exact versions rather than a general upstream stability
+guarantee.
+
 ## Normative baseline
 
 | Reference | Pinned baseline | How it is used |
