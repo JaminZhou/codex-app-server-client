@@ -21,8 +21,8 @@ No Codex Desktop private code or extracted `app.asar` code is included or used a
 Pre-1.0 public development. The main protocol and client architecture are implemented, but the
 package API may still change before the first npm release.
 
-Current pinned runtime and protocol baseline: `@openai/codex@0.144.5`
-(`codex-cli 0.144.5` / `rust-v0.144.5`), including its generated experimental surface. See
+Current pinned runtime and protocol baseline: `@openai/codex@0.144.6`
+(`codex-cli 0.144.6` / `rust-v0.144.6`), including its generated experimental surface. See
 [SOURCES.md](./SOURCES.md) for exact provenance.
 
 ## Highlights

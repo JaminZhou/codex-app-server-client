@@ -62,7 +62,7 @@
   },
   "packageManager": "pnpm@11.7.0",
   "dependencies": {
-    "@openai/codex": "0.144.5",
+    "@openai/codex": "0.144.6",
     "ajv": "8.20.0",
     "ws": "8.21.1"
   },
