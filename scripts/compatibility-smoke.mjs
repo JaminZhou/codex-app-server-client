@@ -101,6 +101,10 @@ async function smokeVersion(version) {
     if (!Array.isArray(listed.data)) {
       throw new Error(`Codex ${version} returned an invalid thread/list response.`);
     }
+    const models = await client.modelList({ includeHidden: true, limit: 1 });
+    if (!Array.isArray(models.data)) {
+      throw new Error(`Codex ${version} returned an invalid model/list response.`);
+    }
     const thread = await client.createThread({ cwd: workspace });
     const read = await thread.read();
     if (read.thread.id !== thread.id) {
