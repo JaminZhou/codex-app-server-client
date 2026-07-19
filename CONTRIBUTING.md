@@ -27,10 +27,10 @@ release changes the generated public protocol, without making a time-dependent r
 of the required pull-request check.
 
 A weekly compatibility workflow reads `compatibility-matrix.json`, installs each exact Codex CLI
-version in isolation, and exercises initialization, strict protocol validation, thread listing,
-thread creation/read, and thread-goal access against the real app-server on Node.js 18. The regular
-`pnpm check` validates that the ordered matrix contains at least two stable releases and ends at the
-pinned runtime without downloading historical packages.
+version in isolation, and exercises initialization, strict protocol validation, model and thread
+listing, thread creation/read, and thread-goal access against the real app-server on Node.js 18.
+The regular `pnpm check` validates that the ordered matrix contains at least two stable releases and
+ends at the pinned runtime without downloading historical packages.
 
 Run the full matrix locally with `pnpm compatibility:smoke`; it builds the client and downloads the
 exact historical CLI packages declared in the matrix.
