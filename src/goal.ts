@@ -3,7 +3,7 @@ import {
   AppServerRequestAbortedError,
   AppServerRequestTimeoutError,
 } from "./errors";
-import type { ServerNotification } from "./generated/protocol/ServerNotification";
+import type { ServerNotificationEnvelope as ServerNotification } from "./generated/protocol/ServerNotificationEnvelope";
 import type { ThreadGoalStatus } from "./generated/protocol/v2/ThreadGoalStatus";
 import type { Turn } from "./generated/protocol/v2/Turn";
 import type { RequestOptions } from "./types";
@@ -348,7 +348,7 @@ function rewriteNotificationTurnId(
     changed = true;
   }
   return changed
-    ? ({ method: notification.method, params: rewritten } as ServerNotification)
+    ? ({ ...notification, params: rewritten } as ServerNotification)
     : notification;
 }
 
@@ -365,6 +365,7 @@ function logicalCompletion(
       ? Math.max(0, completed.completedAt - startedAt) * 1_000
       : completed.durationMs;
   return {
+    ...notification,
     method: "turn/completed",
     params: {
       ...notification.params,

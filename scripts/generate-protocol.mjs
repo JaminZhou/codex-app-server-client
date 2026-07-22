@@ -207,6 +207,18 @@ function normalizeGeneratedTypeTree(directory) {
     if (!path.endsWith(".ts")) continue;
     const source = contents.toString("utf8");
     let normalized = source.replace(v2NamespaceExport, v2Namespace);
+    if (path === "v2/TokenUsageBreakdown.ts") {
+      const field = "cacheWriteInputTokens: number";
+      if (normalized.split(field).length !== 2) {
+        throw new Error(
+          "Generated TokenUsageBreakdown no longer has the expected cacheWriteInputTokens field.",
+        );
+      }
+      // serde applies the wire default before Rust consumers see this field, but JSON Schema
+      // correctly leaves it out of `required`. Keep the public TypeScript type aligned with the
+      // actual JSONL payload accepted from current and older app-server versions.
+      normalized = normalized.replace(field, "cacheWriteInputTokens?: number");
+    }
     if (/\bbigint\b/.test(normalized)) {
       normalized = normalized
         .replace(

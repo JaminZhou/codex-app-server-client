@@ -36,6 +36,7 @@ export interface JsonRpcRequest {
 }
 
 export interface JsonRpcNotification {
+  emittedAtMs?: bigint | number;
   method: string;
   params?: unknown;
 }

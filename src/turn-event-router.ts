@@ -1,4 +1,4 @@
-import type { ServerNotification } from "./generated/protocol/ServerNotification";
+import type { ServerNotificationEnvelope as ServerNotification } from "./generated/protocol/ServerNotificationEnvelope";
 import type { JsonRpcNotification } from "./types";
 
 const MAX_PENDING_TURNS = 128;

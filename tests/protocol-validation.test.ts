@@ -115,6 +115,7 @@ describe("generated protocol runtime validation", () => {
     expect(() => validator.assertClientRequest("future/request", { arbitrary: true })).not.toThrow();
     expect(() =>
       validator.assertServerNotification({
+        emittedAtMs: 1_753_200_000_000,
         method: "rawResponse/completed",
         params: {
           responseId: "response-1",
@@ -124,6 +125,25 @@ describe("generated protocol runtime validation", () => {
         },
       }),
     ).not.toThrow();
+    expect(() =>
+      validator.assertServerNotification({
+        emittedAtMs: 1n << 63n,
+        method: "rawResponse/completed",
+        params: {
+          responseId: "response-1",
+          threadId: "thread-1",
+          turnId: "turn-1",
+          usage: null,
+        },
+      }),
+    ).toThrow(AppServerProtocolValidationError);
+    expect(() =>
+      validator.assertServerNotification({
+        emittedAtMs: 1n << 63n,
+        method: "thread/archived",
+        params: { threadId: "thread-1" },
+      }),
+    ).toThrow(AppServerProtocolValidationError);
     expect(() =>
       validator.assertServerNotification({
         method: "rawResponseItem/completed",
@@ -207,6 +227,7 @@ describe("generated protocol runtime validation", () => {
     const server = await FakeAppServer.listen(() => undefined);
     const observed: Error[] = [];
     const notifications: JsonRpcNotification[] = [];
+    const typedTimestamps: Array<number | undefined> = [];
     const client = new CodexAppServerClient({
       transport: { type: "websocket", url: server.url },
     });
@@ -214,19 +235,28 @@ describe("generated protocol runtime validation", () => {
     client.onNotification((notification) => {
       notifications.push(notification);
     });
+    client.onNotification("rawResponse/completed", (_params, notification) => {
+      typedTimestamps.push(notification.emittedAtMs);
+    });
 
     await client.connect();
     server.notify("future/notification", { arbitrary: true });
     await vi.waitFor(() => expect(notifications).toHaveLength(1));
     expect(client.state).toBe("connected");
 
-    server.notify("rawResponse/completed", {
-      responseId: "response-1",
-      threadId: "thread-1",
-      turnId: "turn-1",
-      usage: null,
-    });
+    server.notify(
+      "rawResponse/completed",
+      {
+        responseId: "response-1",
+        threadId: "thread-1",
+        turnId: "turn-1",
+        usage: null,
+      },
+      1_753_200_000_000,
+    );
     await vi.waitFor(() => expect(notifications).toHaveLength(2));
+    expect(notifications[1]?.emittedAtMs).toBe(1_753_200_000_000);
+    expect(typedTimestamps).toEqual([1_753_200_000_000]);
     expect(client.state).toBe("connected");
 
     server.notify("turn/started", { threadId: "thread-1" });

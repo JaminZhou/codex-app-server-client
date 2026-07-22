@@ -3,6 +3,7 @@ import type { AddressInfo } from "node:net";
 import WebSocket, { WebSocketServer } from "ws";
 
 export interface FakeRpcMessage {
+  emittedAtMs?: number;
   error?: { code: number; data?: unknown; message: string };
   id?: number | string;
   method?: string;
@@ -70,8 +71,12 @@ export class FakeAppServer {
     });
   }
 
-  notify(method: string, params: Record<string, unknown>): void {
-    this.send({ method, params });
+  notify(method: string, params: Record<string, unknown>, emittedAtMs?: number): void {
+    this.send({
+      ...(emittedAtMs === undefined ? {} : { emittedAtMs }),
+      method,
+      params,
+    });
   }
 
   request(id: number | string, method: string, params: Record<string, unknown>): void {

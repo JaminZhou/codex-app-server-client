@@ -150,7 +150,7 @@ export class ProtocolValidator {
     )) {
       this.standaloneServerNotificationValidators.set(
         method,
-        this.requireDefinitionValidator(reference),
+        this.compileStandaloneServerNotificationValidator(method, reference),
       );
     }
   }
@@ -198,7 +198,7 @@ export class ProtocolValidator {
     if (standalone) {
       this.assertValid(
         standalone,
-        notification.params,
+        notification,
         "notification",
         notification.method,
       );
@@ -271,6 +271,23 @@ export class ProtocolValidator {
       throw new Error(`Generated protocol schema is missing: ${reference.definition}.`);
     }
     return validate;
+  }
+
+  private compileStandaloneServerNotificationValidator(
+    method: string,
+    reference: SchemaReference,
+  ): ValidateFunction {
+    return this.ajv.compile(
+      withBigIntIntegerValidation({
+        properties: {
+          emittedAtMs: { format: "int64", type: "integer" },
+          method: { const: method },
+          params: { $ref: combinedSchemaRef(reference) },
+        },
+        required: ["method", "params"],
+        type: "object",
+      }) as AnySchema,
+    );
   }
 
   private requireValidator(reference: string): ValidateFunction {
