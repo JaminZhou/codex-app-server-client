@@ -114,6 +114,10 @@ async function smokeVersion(version) {
     if (goal.goal !== null) {
       throw new Error(`Codex ${version} returned an unexpected initial thread goal.`);
     }
+    const importHistories = await client.call("externalAgentConfig/import/readHistories");
+    if (!Array.isArray(importHistories.data)) {
+      throw new Error(`Codex ${version} returned invalid external-agent import histories.`);
+    }
   } finally {
     await client.close();
   }

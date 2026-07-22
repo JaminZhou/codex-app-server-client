@@ -1,5 +1,13 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "compatibilityOptionalFields": {
+    "base": {},
+    "v2": {
+      "ExternalAgentConfigImportHistoriesReadResponse": [
+        "connectors"
+      ]
+    }
+  },
   "schemas": {
     "AttestationGenerateResponse": {
       "$schema": "http://json-schema.org/draft-07/schema#",

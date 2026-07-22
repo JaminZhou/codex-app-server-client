@@ -20,7 +20,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const packageJson = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 const methodMetadata = JSON.parse(readFileSync(join(root, "protocol-methods.json"), "utf8"));
 const expectedVersion = packageJson.dependencies?.["@openai/codex"];
-const schemaOptionalGeneratedFields = {
+const wireOptionalGeneratedFields = {
   "v2/AppToolSummary.ts": ["title"],
   "v2/ConnectorMetadata.ts": [
     "description",
@@ -32,6 +32,7 @@ const schemaOptionalGeneratedFields = {
     "toolSummaries",
   ],
   "v2/ExternalAgentConfigImportItemTypeFailure.ts": ["subErrorType"],
+  "v2/ExternalAgentConfigImportHistoriesReadResponse.ts": ["connectors"],
   "v2/HookMetadata.ts": ["additionalContextLimit"],
   "v2/InstalledApp.ts": ["runtimeName"],
   "v2/ManagedHooksRequirements.ts": ["SessionEnd"],
@@ -43,6 +44,12 @@ const schemaOptionalGeneratedFields = {
   "v2/ThreadResumeResponse.ts": ["itemsBackwardsCursor", "turnsBackwardsCursor"],
   "v2/ThreadSearchOccurrencesResponse.ts": ["nextCursor"],
   "v2/TokenUsageBreakdown.ts": ["cacheWriteInputTokens"],
+};
+const compatibilityOptionalSchemaFields = {
+  base: {},
+  v2: {
+    ExternalAgentConfigImportHistoriesReadResponse: ["connectors"],
+  },
 };
 
 if (typeof expectedVersion !== "string" || !/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(expectedVersion)) {
@@ -233,16 +240,15 @@ function normalizeGeneratedTypeTree(directory) {
     if (!path.endsWith(".ts")) continue;
     const source = contents.toString("utf8");
     let normalized = source.replace(v2NamespaceExport, v2Namespace);
-    for (const field of schemaOptionalGeneratedFields[path] ?? []) {
+    for (const field of wireOptionalGeneratedFields[path] ?? []) {
       const requiredField = `${field}:`;
       if (normalized.split(requiredField).length !== 2) {
         throw new Error(
           `Generated ${path} no longer has the expected required ${field} field.`,
         );
       }
-      // The upstream JSON Schema leaves these fields out of `required`, including on payloads
-      // emitted by supported older app-server versions. Keep the public TypeScript type aligned
-      // with the actual JSONL wire contract instead of promising a value that can be absent.
+      // The JSONL wire contract permits these fields to be absent in the current Schema, in a
+      // supported older app-server version, or both. Do not promise a value that can be absent.
       normalized = normalized.replace(requiredField, `${field}?:`);
     }
     if (/\bbigint\b/.test(normalized)) {
@@ -495,8 +501,23 @@ function generateRuntimeValidationSchemas(generatedSchemas, metadata) {
   if (!clientNotification) throw new Error("ClientNotification.json is missing.");
   extras.ClientNotification = clientNotification;
 
+  for (const [bundle, definitions] of Object.entries(compatibilityOptionalSchemaFields)) {
+    for (const [definition, fields] of Object.entries(definitions)) {
+      const required = bundles[bundle].definitions?.[definition]?.required;
+      if (!Array.isArray(required)) {
+        throw new Error(`Compatibility definition has no required fields: ${definition}.`);
+      }
+      for (const field of fields) {
+        if (!required.includes(field)) {
+          throw new Error(`Compatibility field is no longer required: ${definition}.${field}.`);
+        }
+      }
+    }
+  }
+
   const output = sortJson({
     $schema: "http://json-schema.org/draft-07/schema#",
+    compatibilityOptionalFields: compatibilityOptionalSchemaFields,
     schemas: extras,
     unavailableClientResponses: [...new Set(unavailableClientResponses)].sort(),
   });

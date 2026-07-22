@@ -119,8 +119,14 @@ export class ProtocolValidator {
       validate: (schema: BigIntFormatSchema, value: unknown) =>
         value instanceof ValidationBigInt && bigintMatchesSchema(value.value, schema),
     });
-    this.ajv.addSchema(withId(baseProtocolSchema, BASE_SCHEMA_ID), BASE_SCHEMA_ID);
-    this.ajv.addSchema(withId(v2ProtocolSchema, V2_SCHEMA_ID), V2_SCHEMA_ID);
+    this.ajv.addSchema(
+      withId(withCompatibilityOptionalFields(baseProtocolSchema, "base"), BASE_SCHEMA_ID),
+      BASE_SCHEMA_ID,
+    );
+    this.ajv.addSchema(
+      withId(withCompatibilityOptionalFields(v2ProtocolSchema, "v2"), V2_SCHEMA_ID),
+      V2_SCHEMA_ID,
+    );
     for (const [name, schema] of Object.entries(runtimeValidationSchemas.schemas)) {
       const id = runtimeSchemaId(name);
       this.ajv.addSchema(withId(schema, id), id);
@@ -319,6 +325,32 @@ function withId(schema: unknown, id: string): AnySchema {
     ...(withBigIntIntegerValidation(schema) as Record<string, unknown>),
     $id: id,
   } as AnySchema;
+}
+
+function withCompatibilityOptionalFields(
+  schema: unknown,
+  bundle: "base" | "v2",
+): unknown {
+  const compatible = structuredClone(schema) as unknown;
+  if (!isRecord(compatible) || !isRecord(compatible.definitions)) {
+    throw new Error(`Generated ${bundle} protocol schema has no definitions.`);
+  }
+  for (const [definition, fields] of Object.entries(
+    runtimeValidationSchemas.compatibilityOptionalFields[bundle] ?? {},
+  )) {
+    const schemaDefinition = compatible.definitions[definition];
+    if (!isRecord(schemaDefinition) || !Array.isArray(schemaDefinition.required)) {
+      throw new Error(`Generated compatibility definition is invalid: ${definition}.`);
+    }
+    if (!Array.isArray(fields) || !fields.every((field) => typeof field === "string")) {
+      throw new Error(`Generated compatibility fields are invalid: ${definition}.`);
+    }
+    const optional = new Set<string>(fields);
+    schemaDefinition.required = schemaDefinition.required.filter(
+      (field): field is string => typeof field === "string" && !optional.has(field),
+    );
+  }
+  return compatible;
 }
 
 function validationWireValue(value: unknown): unknown {

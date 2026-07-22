@@ -6,6 +6,7 @@ import {
 } from "../src";
 import { loadProtocolValidator } from "../src/protocol-validator";
 import type { JsonRpcNotification } from "../src/types";
+import type { ExternalAgentConfigImportHistoriesReadResponse } from "../src/generated/protocol/v2/ExternalAgentConfigImportHistoriesReadResponse";
 import { FakeAppServer } from "./fake-app-server";
 
 describe("generated protocol runtime validation", () => {
@@ -113,6 +114,22 @@ describe("generated protocol runtime validation", () => {
       }),
     ).not.toThrow();
     expect(() => validator.assertClientRequest("future/request", { arbitrary: true })).not.toThrow();
+    const oldImportHistories: ExternalAgentConfigImportHistoriesReadResponse = { data: [] };
+    expect(() =>
+      validator.assertResponse(
+        "externalAgentConfig/import/readHistories",
+        oldImportHistories,
+      ),
+    ).not.toThrow();
+    expect(() =>
+      validator.assertResponse("externalAgentConfig/import/readHistories", { data: "invalid" }),
+    ).toThrow(AppServerProtocolValidationError);
+    expect(() =>
+      validator.assertResponse("externalAgentConfig/import/readHistories", {
+        connectors: "invalid",
+        data: [],
+      }),
+    ).toThrow(AppServerProtocolValidationError);
     expect(() =>
       validator.assertServerNotification({
         emittedAtMs: 1_753_200_000_000,
