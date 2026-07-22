@@ -18,6 +18,7 @@ import { appServerResponseSchemaRefs } from "./generated/app-server-methods";
 import {
   clientNotificationMethods,
   serverNotificationMethods,
+  standaloneServerNotificationSchemaRefs,
 } from "./generated/protocol-method-sets";
 import { serverRequestResponseSchemaRefs } from "./generated/server-request-methods";
 import type { JsonRpcNotification, JsonRpcRequest } from "./types";
@@ -82,6 +83,10 @@ export class ProtocolValidator {
   private readonly clientNotifications = new Set<string>(clientNotificationMethods);
   private readonly responseValidators = new Map<string, ValidateFunction | null>();
   private readonly serverNotifications = new Set<string>(serverNotificationMethods);
+  private readonly standaloneServerNotificationValidators = new Map<
+    string,
+    ValidateFunction
+  >();
   private readonly serverRequests = new Set(Object.keys(serverRequestResponseSchemaRefs));
   private readonly serverResponseValidators = new Map<string, ValidateFunction>();
   private readonly validateClientNotification: ValidateFunction;
@@ -137,7 +142,15 @@ export class ProtocolValidator {
     for (const [method, reference] of Object.entries(serverRequestResponseSchemaRefs)) {
       this.serverResponseValidators.set(
         method,
-        this.requireResponseValidator(reference),
+        this.requireDefinitionValidator(reference),
+      );
+    }
+    for (const [method, reference] of Object.entries(
+      standaloneServerNotificationSchemaRefs,
+    )) {
+      this.standaloneServerNotificationValidators.set(
+        method,
+        this.requireDefinitionValidator(reference),
       );
     }
   }
@@ -179,6 +192,18 @@ export class ProtocolValidator {
 
   assertServerNotification(notification: JsonRpcNotification): void {
     if (!this.serverNotifications.has(notification.method)) return;
+    const standalone = this.standaloneServerNotificationValidators.get(
+      notification.method,
+    );
+    if (standalone) {
+      this.assertValid(
+        standalone,
+        notification.params,
+        "notification",
+        notification.method,
+      );
+      return;
+    }
     this.assertValid(
       this.validateServerNotification,
       notification,
@@ -240,10 +265,10 @@ export class ProtocolValidator {
     return this.ajv.getSchema(runtimeSchemaId(reference.definition)) ?? null;
   }
 
-  private requireResponseValidator(reference: SchemaReference): ValidateFunction {
+  private requireDefinitionValidator(reference: SchemaReference): ValidateFunction {
     const validate = this.responseValidator(reference);
     if (!validate) {
-      throw new Error(`Generated response schema is missing: ${reference.definition}.`);
+      throw new Error(`Generated protocol schema is missing: ${reference.definition}.`);
     }
     return validate;
   }

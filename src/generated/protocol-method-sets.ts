@@ -78,3 +78,8 @@ export const serverNotificationMethods = [
   "windows/worldWritableWarning",
   "windowsSandbox/setupCompleted",
 ] as const;
+
+export const standaloneServerNotificationSchemaRefs = {
+  "rawResponseItem/completed": { bundle: "v2", definition: "RawResponseItemCompletedNotification" },
+  "rawResponse/completed": { bundle: "v2", definition: "RawResponseCompletedNotification" },
+} as const;

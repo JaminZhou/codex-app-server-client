@@ -113,6 +113,32 @@ describe("generated protocol runtime validation", () => {
       }),
     ).not.toThrow();
     expect(() => validator.assertClientRequest("future/request", { arbitrary: true })).not.toThrow();
+    expect(() =>
+      validator.assertServerNotification({
+        method: "rawResponse/completed",
+        params: {
+          responseId: "response-1",
+          threadId: "thread-1",
+          turnId: "turn-1",
+          usage: null,
+        },
+      }),
+    ).not.toThrow();
+    expect(() =>
+      validator.assertServerNotification({
+        method: "rawResponseItem/completed",
+        params: {
+          item: { type: "other" },
+          threadId: "thread-1",
+          turnId: "turn-1",
+        },
+      }),
+    ).not.toThrow();
+    for (const method of ["rawResponse/completed", "rawResponseItem/completed"]) {
+      expect(() =>
+        validator.assertServerNotification({ method, params: { threadId: "thread-1" } }),
+      ).toThrow(AppServerProtocolValidationError);
+    }
     expect(protocolValidationMetadata).toMatchObject({
       defaultMode: "strict",
       validatedClientNotifications: 1,
@@ -192,6 +218,15 @@ describe("generated protocol runtime validation", () => {
     await client.connect();
     server.notify("future/notification", { arbitrary: true });
     await vi.waitFor(() => expect(notifications).toHaveLength(1));
+    expect(client.state).toBe("connected");
+
+    server.notify("rawResponse/completed", {
+      responseId: "response-1",
+      threadId: "thread-1",
+      turnId: "turn-1",
+      usage: null,
+    });
+    await vi.waitFor(() => expect(notifications).toHaveLength(2));
     expect(client.state).toBe("connected");
 
     server.notify("turn/started", { threadId: "thread-1" });
