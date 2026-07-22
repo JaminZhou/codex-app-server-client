@@ -304,7 +304,6 @@ function threadSnapshot(): Thread {
     cwd: "/tmp",
     cliVersion: "0.145.0",
     source: "unknown",
-    canAcceptDirectInput: true,
     threadSource: null,
     agentNickname: null,
     agentRole: null,

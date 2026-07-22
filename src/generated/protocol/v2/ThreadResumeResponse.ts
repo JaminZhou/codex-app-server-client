@@ -50,11 +50,11 @@ initialTurnsPage: TurnsPage | null,
  * Pass this as `cursor` to `thread/turns/list` with
  * `sortDirection: "desc"`. The first page includes the cursor's head turn.
  */
-turnsBackwardsCursor: string | null,
+turnsBackwardsCursor?: string | null,
 /**
  * Opaque head cursor for hydrating paginated items backwards.
  *
  * Pass this as `cursor` to `thread/items/list` with
  * `sortDirection: "desc"`. The first page includes the cursor's head item.
  */
-itemsBackwardsCursor: string | null, };
+itemsBackwardsCursor?: string | null, };

@@ -10,7 +10,7 @@ export type InstalledApp = { id: string,
  * Best-effort name carried by the runtime tool catalog. Canonical app metadata remains owned
  * by `app/read`.
  */
-runtimeName: string | null,
+runtimeName?: string | null,
 /**
  * Effective enabled state after applying global, workspace, local, and managed configuration
  * at read time.

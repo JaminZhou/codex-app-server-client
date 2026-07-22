@@ -20,6 +20,30 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const packageJson = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 const methodMetadata = JSON.parse(readFileSync(join(root, "protocol-methods.json"), "utf8"));
 const expectedVersion = packageJson.dependencies?.["@openai/codex"];
+const schemaOptionalGeneratedFields = {
+  "v2/AppToolSummary.ts": ["title"],
+  "v2/ConnectorMetadata.ts": [
+    "description",
+    "distributionChannel",
+    "iconUrl",
+    "iconUrlDark",
+    "installUrl",
+    "pluginDisplayNames",
+    "toolSummaries",
+  ],
+  "v2/ExternalAgentConfigImportItemTypeFailure.ts": ["subErrorType"],
+  "v2/HookMetadata.ts": ["additionalContextLimit"],
+  "v2/InstalledApp.ts": ["runtimeName"],
+  "v2/ManagedHooksRequirements.ts": ["SessionEnd"],
+  "v2/PluginDetail.ts": ["scheduledTasks"],
+  "v2/PluginSummary.ts": ["mustShowInstallationInterstitial"],
+  "v2/RateLimitSnapshot.ts": ["spendControlReached"],
+  "v2/RawResponseCompletedNotification.ts": ["usage"],
+  "v2/Thread.ts": ["canAcceptDirectInput"],
+  "v2/ThreadResumeResponse.ts": ["itemsBackwardsCursor", "turnsBackwardsCursor"],
+  "v2/ThreadSearchOccurrencesResponse.ts": ["nextCursor"],
+  "v2/TokenUsageBreakdown.ts": ["cacheWriteInputTokens"],
+};
 
 if (typeof expectedVersion !== "string" || !/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(expectedVersion)) {
   throw new Error("@openai/codex must be an exact dependency version.");
@@ -207,17 +231,17 @@ function normalizeGeneratedTypeTree(directory) {
     if (!path.endsWith(".ts")) continue;
     const source = contents.toString("utf8");
     let normalized = source.replace(v2NamespaceExport, v2Namespace);
-    if (path === "v2/TokenUsageBreakdown.ts") {
-      const field = "cacheWriteInputTokens: number";
-      if (normalized.split(field).length !== 2) {
+    for (const field of schemaOptionalGeneratedFields[path] ?? []) {
+      const requiredField = `${field}:`;
+      if (normalized.split(requiredField).length !== 2) {
         throw new Error(
-          "Generated TokenUsageBreakdown no longer has the expected cacheWriteInputTokens field.",
+          `Generated ${path} no longer has the expected required ${field} field.`,
         );
       }
-      // serde applies the wire default before Rust consumers see this field, but JSON Schema
-      // correctly leaves it out of `required`. Keep the public TypeScript type aligned with the
-      // actual JSONL payload accepted from current and older app-server versions.
-      normalized = normalized.replace(field, "cacheWriteInputTokens?: number");
+      // The upstream JSON Schema leaves these fields out of `required`, including on payloads
+      // emitted by supported older app-server versions. Keep the public TypeScript type aligned
+      // with the actual JSONL wire contract instead of promising a value that can be absent.
+      normalized = normalized.replace(requiredField, `${field}?:`);
     }
     if (/\bbigint\b/.test(normalized)) {
       normalized = normalized

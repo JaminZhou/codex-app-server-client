@@ -11,4 +11,4 @@ export type RateLimitSnapshot = { limitId: string | null, limitName: string | nu
 /**
  * Backend-reported spend-control state. `None` is unavailable, not a sparse-update recovery.
  */
-spendControlReached: boolean | null, planType: PlanType | null, rateLimitReachedType: RateLimitReachedType | null, };
+spendControlReached?: boolean | null, planType: PlanType | null, rateLimitReachedType: RateLimitReachedType | null, };

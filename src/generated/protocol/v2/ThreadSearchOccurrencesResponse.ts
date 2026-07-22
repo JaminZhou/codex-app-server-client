@@ -11,4 +11,4 @@ data: Array<ThreadSearchOccurrence>,
 /**
  * Opaque cursor to continue after the last returned occurrence.
  */
-nextCursor: string | null, };
+nextCursor?: string | null, };
