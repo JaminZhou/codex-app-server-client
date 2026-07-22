@@ -197,7 +197,9 @@ function listFiles(path) {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
       const entryPath = join(directory, entry.name);
       if (entry.isDirectory()) visit(entryPath);
-      else if (entry.isFile()) files.set(relative(path, entryPath), readFileSync(entryPath));
+      else if (entry.isFile()) {
+        files.set(relative(path, entryPath).replaceAll("\\", "/"), readFileSync(entryPath));
+      }
     }
   };
   visit(path);
