@@ -405,6 +405,9 @@ function classifyMessage(value: unknown): JsonRpcMessage {
       };
     }
     return {
+      ...(Object.hasOwn(value, "emittedAtMs")
+        ? { emittedAtMs: validateNotificationTimestamp(value.emittedAtMs) }
+        : {}),
       method: value.method,
       ...(Object.hasOwn(value, "params") ? { params: value.params as JsonValue } : {}),
     };
@@ -441,6 +444,18 @@ function validateRequestOptions(options: RequestOptions): void {
     throw new RangeError("timeoutMs must be a finite non-negative number.");
   }
   if (options.trace !== undefined) validateTraceContext(options.trace);
+}
+
+function validateNotificationTimestamp(value: unknown): bigint | number {
+  if (
+    typeof value === "bigint" ||
+    (typeof value === "number" && Number.isSafeInteger(value))
+  ) {
+    return value;
+  }
+  throw new AppServerProtocolError(
+    "JSON-RPC notification emittedAtMs must be an integer without numeric precision loss.",
+  );
 }
 
 function validateTraceContext(value: unknown): JsonRpcRequest["trace"] {

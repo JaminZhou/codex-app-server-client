@@ -16,7 +16,7 @@ import type {
 import type { ClientInfo } from "./generated/protocol/ClientInfo";
 import type { InitializeCapabilities } from "./generated/protocol/InitializeCapabilities";
 import type { InitializeResponse } from "./generated/protocol/InitializeResponse";
-import type { ServerNotification } from "./generated/protocol/ServerNotification";
+import type { ServerNotificationEnvelope as ServerNotification } from "./generated/protocol/ServerNotificationEnvelope";
 import type { AccountLoginCompletedNotification } from "./generated/protocol/v2/AccountLoginCompletedNotification";
 import type { CancelLoginAccountParams } from "./generated/protocol/v2/CancelLoginAccountParams";
 import type { CancelLoginAccountResponse } from "./generated/protocol/v2/CancelLoginAccountResponse";

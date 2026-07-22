@@ -6,8 +6,9 @@ describe("typed handler registration", () => {
   it("infers generated notification params and server-request responses", () => {
     const client = new CodexAppServerClient();
     const notifications: string[] = [];
-    const removeNotification = client.onNotification("turn/completed", (params) => {
+    const removeNotification = client.onNotification("turn/completed", (params, notification) => {
       notifications.push(params.turn.id);
+      expectTypeOf(notification.emittedAtMs).toEqualTypeOf<number | undefined>();
     });
     const removeApproval = client.onServerRequest(
       "item/commandExecution/requestApproval",

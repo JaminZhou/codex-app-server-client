@@ -7,7 +7,7 @@ import {
 import type { AccountLoginCompletedNotification } from "./generated/protocol/v2/AccountLoginCompletedNotification";
 import type { CancelLoginAccountResponse } from "./generated/protocol/v2/CancelLoginAccountResponse";
 import type { LoginAccountParams } from "./generated/protocol/v2/LoginAccountParams";
-import type { ServerNotification } from "./generated/protocol/ServerNotification";
+import type { ServerNotificationEnvelope as ServerNotification } from "./generated/protocol/ServerNotificationEnvelope";
 import type { RequestOptions } from "./types";
 
 const MAX_COMPLETED_LOGINS = 64;

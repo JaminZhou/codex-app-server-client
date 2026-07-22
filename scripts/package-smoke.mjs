@@ -83,7 +83,7 @@ try {
       resolveCodexBinary,
     } from "@jaminzhou/codex-app-server-client";
 
-    if (protocolValidationMetadata.validatedClientRequests !== 125) {
+    if (protocolValidationMetadata.validatedClientRequests !== 129) {
       throw new Error("Installed runtime validation metadata is incomplete.");
     }
     const require = createRequire(import.meta.url);

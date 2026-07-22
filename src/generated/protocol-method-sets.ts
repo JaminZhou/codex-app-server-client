@@ -42,6 +42,7 @@ export const serverNotificationMethods = [
   "model/verification",
   "process/exited",
   "process/outputDelta",
+  "rawResponse/completed",
   "rawResponseItem/completed",
   "remoteControl/status/changed",
   "serverRequest/resolved",
@@ -50,6 +51,8 @@ export const serverNotificationMethods = [
   "thread/closed",
   "thread/compacted",
   "thread/deleted",
+  "thread/environment/connected",
+  "thread/environment/disconnected",
   "thread/goal/cleared",
   "thread/goal/updated",
   "thread/name/updated",
@@ -75,3 +78,8 @@ export const serverNotificationMethods = [
   "windows/worldWritableWarning",
   "windowsSandbox/setupCompleted",
 ] as const;
+
+export const standaloneServerNotificationSchemaRefs = {
+  "rawResponseItem/completed": { bundle: "v2", definition: "RawResponseItemCompletedNotification" },
+  "rawResponse/completed": { bundle: "v2", definition: "RawResponseCompletedNotification" },
+} as const;

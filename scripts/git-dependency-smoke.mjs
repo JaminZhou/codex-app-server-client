@@ -37,7 +37,7 @@ try {
       "--eval",
       [
         'import { protocolValidationMetadata, resolveCodexBinary } from "@jaminzhou/codex-app-server-client";',
-        "if (protocolValidationMetadata.validatedClientRequests !== 125) throw new Error(\"Git dependency protocol metadata is incomplete.\");",
+        "if (protocolValidationMetadata.validatedClientRequests !== 129) throw new Error(\"Git dependency protocol metadata is incomplete.\");",
         "const binary = resolveCodexBinary();",
         "if (!binary.executablePath) throw new Error(\"Git dependency Codex binary is missing.\");",
       ].join("\n"),

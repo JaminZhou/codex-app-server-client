@@ -1,5 +1,24 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "compatibilityArrayItemDefinitions": {
+    "base": {},
+    "v2": {
+      "ThreadItemsListResponse": {
+        "data": [
+          "ThreadItemEntry",
+          "ThreadItem"
+        ]
+      }
+    }
+  },
+  "compatibilityOptionalFields": {
+    "base": {},
+    "v2": {
+      "ExternalAgentConfigImportHistoriesReadResponse": [
+        "connectors"
+      ]
+    }
+  },
   "schemas": {
     "AttestationGenerateResponse": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -234,6 +253,26 @@
                 "type"
               ],
               "title": "InputImageDynamicToolCallOutputContentItem",
+              "type": "object"
+            },
+            {
+              "properties": {
+                "audioUrl": {
+                  "type": "string"
+                },
+                "type": {
+                  "enum": [
+                    "inputAudio"
+                  ],
+                  "title": "InputAudioDynamicToolCallOutputContentItemType",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "audioUrl",
+                "type"
+              ],
+              "title": "InputAudioDynamicToolCallOutputContentItem",
               "type": "object"
             }
           ]
@@ -517,9 +556,13 @@
                   "type": "string"
                 },
                 "subpath": {
-                  "type": [
-                    "string",
-                    "null"
+                  "anyOf": [
+                    {
+                      "$ref": "#/definitions/LegacyAppPathString"
+                    },
+                    {
+                      "type": "null"
+                    }
                   ]
                 }
               },
@@ -571,9 +614,13 @@
                   "type": "string"
                 },
                 "subpath": {
-                  "type": [
-                    "string",
-                    "null"
+                  "anyOf": [
+                    {
+                      "$ref": "#/definitions/LegacyAppPathString"
+                    },
+                    {
+                      "type": "null"
+                    }
                   ]
                 }
               },

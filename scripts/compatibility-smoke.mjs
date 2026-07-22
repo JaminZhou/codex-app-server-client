@@ -28,7 +28,9 @@ if (!existsSync(builtEntry)) {
   throw new Error("dist/index.js is missing. Run pnpm build before the compatibility smoke.");
 }
 
-const { CodexAppServerClient } = await import(pathToFileURL(builtEntry).href);
+const { AppServerMethodNotFoundError, CodexAppServerClient } = await import(
+  pathToFileURL(builtEntry).href
+);
 const temporaryRoot = mkdtempSync(join(tmpdir(), "codex-app-server-compatibility-"));
 
 try {
@@ -113,6 +115,18 @@ async function smokeVersion(version) {
     const goal = await thread.goal();
     if (goal.goal !== null) {
       throw new Error(`Codex ${version} returned an unexpected initial thread goal.`);
+    }
+    const importHistories = await client.call("externalAgentConfig/import/readHistories");
+    if (!Array.isArray(importHistories.data)) {
+      throw new Error(`Codex ${version} returned invalid external-agent import histories.`);
+    }
+    try {
+      const items = await client.call("thread/items/list", { limit: 1, threadId: thread.id });
+      if (!Array.isArray(items.data)) {
+        throw new Error(`Codex ${version} returned an invalid thread item page.`);
+      }
+    } catch (error) {
+      if (!(error instanceof AppServerMethodNotFoundError)) throw error;
     }
   } finally {
     await client.close();

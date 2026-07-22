@@ -6,6 +6,8 @@ import {
 } from "../src";
 import { loadProtocolValidator } from "../src/protocol-validator";
 import type { JsonRpcNotification } from "../src/types";
+import type { ExternalAgentConfigImportHistoriesReadResponse } from "../src/generated/protocol/v2/ExternalAgentConfigImportHistoriesReadResponse";
+import type { ThreadItemsListResponse } from "../src/generated/protocol/v2/ThreadItemsListResponse";
 import { FakeAppServer } from "./fake-app-server";
 
 describe("generated protocol runtime validation", () => {
@@ -113,12 +115,98 @@ describe("generated protocol runtime validation", () => {
       }),
     ).not.toThrow();
     expect(() => validator.assertClientRequest("future/request", { arbitrary: true })).not.toThrow();
+    const oldImportHistories: ExternalAgentConfigImportHistoriesReadResponse = { data: [] };
+    expect(() =>
+      validator.assertResponse(
+        "externalAgentConfig/import/readHistories",
+        oldImportHistories,
+      ),
+    ).not.toThrow();
+    expect(() =>
+      validator.assertResponse("externalAgentConfig/import/readHistories", { data: "invalid" }),
+    ).toThrow(AppServerProtocolValidationError);
+    expect(() =>
+      validator.assertResponse("externalAgentConfig/import/readHistories", {
+        connectors: "invalid",
+        data: [],
+      }),
+    ).toThrow(AppServerProtocolValidationError);
+    const legacyItems: ThreadItemsListResponse = {
+      backwardsCursor: null,
+      data: [{ id: "item-1", type: "contextCompaction" }],
+      nextCursor: null,
+    };
+    expect(() => validator.assertResponse("thread/items/list", legacyItems)).not.toThrow();
+    const currentItems: ThreadItemsListResponse = {
+      backwardsCursor: null,
+      data: [
+        { item: { id: "item-2", type: "contextCompaction" }, turnId: "turn-1" },
+      ],
+      nextCursor: null,
+    };
+    expect(() => validator.assertResponse("thread/items/list", currentItems)).not.toThrow();
+    expect(() =>
+      validator.assertResponse("thread/items/list", {
+        backwardsCursor: null,
+        data: [
+          { id: "item-1", type: "contextCompaction" },
+          { item: { id: "item-2", type: "contextCompaction" }, turnId: "turn-1" },
+        ],
+        nextCursor: null,
+      }),
+    ).toThrow(AppServerProtocolValidationError);
+    expect(() =>
+      validator.assertServerNotification({
+        emittedAtMs: 1_753_200_000_000,
+        method: "rawResponse/completed",
+        params: {
+          responseId: "response-1",
+          threadId: "thread-1",
+          turnId: "turn-1",
+          usage: null,
+        },
+      }),
+    ).not.toThrow();
+    expect(() =>
+      validator.assertServerNotification({
+        emittedAtMs: 1n << 63n,
+        method: "rawResponse/completed",
+        params: {
+          responseId: "response-1",
+          threadId: "thread-1",
+          turnId: "turn-1",
+          usage: null,
+        },
+      }),
+    ).toThrow(AppServerProtocolValidationError);
+    expect(() =>
+      validator.assertServerNotification({
+        emittedAtMs: 1n << 63n,
+        method: "thread/archived",
+        params: { threadId: "thread-1" },
+      }),
+    ).toThrow(AppServerProtocolValidationError);
+    expect(() =>
+      validator.assertServerNotification({
+        method: "rawResponseItem/completed",
+        params: {
+          item: { type: "other" },
+          threadId: "thread-1",
+          turnId: "turn-1",
+        },
+      }),
+    ).not.toThrow();
+    for (const method of ["rawResponse/completed", "rawResponseItem/completed"]) {
+      expect(() =>
+        validator.assertServerNotification({ method, params: { threadId: "thread-1" } }),
+      ).toThrow(AppServerProtocolValidationError);
+    }
     expect(protocolValidationMetadata).toMatchObject({
       defaultMode: "strict",
       validatedClientNotifications: 1,
-      validatedClientRequests: 125,
-      validatedClientResponses: 122,
-      validatedServerNotifications: 69,
+      validatedClientRequests: 129,
+      validatedClientResponses: 126,
+      validatedServerNotifications: 72,
       validatedServerRequests: 11,
       unavailableResponseSchemas: [
         "getAuthStatus",
@@ -181,6 +269,7 @@ describe("generated protocol runtime validation", () => {
     const server = await FakeAppServer.listen(() => undefined);
     const observed: Error[] = [];
     const notifications: JsonRpcNotification[] = [];
+    const typedTimestamps: Array<number | undefined> = [];
     const client = new CodexAppServerClient({
       transport: { type: "websocket", url: server.url },
     });
@@ -188,10 +277,28 @@ describe("generated protocol runtime validation", () => {
     client.onNotification((notification) => {
       notifications.push(notification);
     });
+    client.onNotification("rawResponse/completed", (_params, notification) => {
+      typedTimestamps.push(notification.emittedAtMs);
+    });
 
     await client.connect();
     server.notify("future/notification", { arbitrary: true });
     await vi.waitFor(() => expect(notifications).toHaveLength(1));
+    expect(client.state).toBe("connected");
+
+    server.notify(
+      "rawResponse/completed",
+      {
+        responseId: "response-1",
+        threadId: "thread-1",
+        turnId: "turn-1",
+        usage: null,
+      },
+      1_753_200_000_000,
+    );
+    await vi.waitFor(() => expect(notifications).toHaveLength(2));
+    expect(notifications[1]?.emittedAtMs).toBe(1_753_200_000_000);
+    expect(typedTimestamps).toEqual([1_753_200_000_000]);
     expect(client.state).toBe("connected");
 
     server.notify("turn/started", { threadId: "thread-1" });

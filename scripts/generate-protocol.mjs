@@ -20,6 +20,60 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const packageJson = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 const methodMetadata = JSON.parse(readFileSync(join(root, "protocol-methods.json"), "utf8"));
 const expectedVersion = packageJson.dependencies?.["@openai/codex"];
+const wireOptionalGeneratedFields = {
+  "v2/AppToolSummary.ts": ["title"],
+  "v2/ConnectorMetadata.ts": [
+    "description",
+    "distributionChannel",
+    "iconUrl",
+    "iconUrlDark",
+    "installUrl",
+    "pluginDisplayNames",
+    "toolSummaries",
+  ],
+  "v2/ExternalAgentConfigImportItemTypeFailure.ts": ["subErrorType"],
+  "v2/ExternalAgentConfigImportHistoriesReadResponse.ts": ["connectors"],
+  "v2/HookMetadata.ts": ["additionalContextLimit"],
+  "v2/InstalledApp.ts": ["runtimeName"],
+  "v2/ManagedHooksRequirements.ts": ["SessionEnd"],
+  "v2/PluginDetail.ts": ["scheduledTasks"],
+  "v2/PluginSummary.ts": ["mustShowInstallationInterstitial"],
+  "v2/RateLimitSnapshot.ts": ["spendControlReached"],
+  "v2/RawResponseCompletedNotification.ts": ["usage"],
+  "v2/Thread.ts": ["canAcceptDirectInput"],
+  "v2/ThreadResumeResponse.ts": ["itemsBackwardsCursor", "turnsBackwardsCursor"],
+  "v2/ThreadSearchOccurrencesResponse.ts": ["nextCursor"],
+  "v2/TokenUsageBreakdown.ts": ["cacheWriteInputTokens"],
+};
+const compatibilityOptionalSchemaFields = {
+  base: {},
+  v2: {
+    ExternalAgentConfigImportHistoriesReadResponse: ["connectors"],
+  },
+};
+const compatibilityArrayItemDefinitions = {
+  base: {},
+  v2: {
+    ThreadItemsListResponse: {
+      data: ["ThreadItemEntry", "ThreadItem"],
+    },
+  },
+};
+const compatibilityGeneratedTypeReplacements = {
+  "v2/ThreadItemsListResponse.ts": [
+    [
+      'import type { ThreadItemEntry } from "./ThreadItemEntry";',
+      [
+        'import type { ThreadItem } from "./ThreadItem";',
+        'import type { ThreadItemEntry } from "./ThreadItemEntry";',
+      ].join("\n"),
+    ],
+    [
+      "data: Array<ThreadItemEntry>",
+      "data: Array<ThreadItemEntry> | Array<ThreadItem>",
+    ],
+  ],
+};
 
 if (typeof expectedVersion !== "string" || !/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(expectedVersion)) {
   throw new Error("@openai/codex must be an exact dependency version.");
@@ -72,7 +126,7 @@ try {
   generateRuntimeValidationSchemas(generatedSchemas, methodMetadata);
   generateMethodMap(generatedTypes, generatedMethodMap, methodMetadata);
   generateServerRequestMap(generatedTypes, generatedServerRequestMap, methodMetadata);
-  generateProtocolMethodSets(generatedTypes, generatedProtocolMethodSets);
+  generateProtocolMethodSets(generatedTypes, generatedSchemas, generatedProtocolMethodSets);
   writeFileSync(
     generatedMetadata,
     [
@@ -173,7 +227,9 @@ function listFiles(path) {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
       const entryPath = join(directory, entry.name);
       if (entry.isDirectory()) visit(entryPath);
-      else if (entry.isFile()) files.set(relative(path, entryPath), readFileSync(entryPath));
+      else if (entry.isFile()) {
+        files.set(relative(path, entryPath).replaceAll("\\", "/"), readFileSync(entryPath));
+      }
     }
   };
   visit(path);
@@ -207,6 +263,23 @@ function normalizeGeneratedTypeTree(directory) {
     if (!path.endsWith(".ts")) continue;
     const source = contents.toString("utf8");
     let normalized = source.replace(v2NamespaceExport, v2Namespace);
+    for (const field of wireOptionalGeneratedFields[path] ?? []) {
+      const requiredField = `${field}:`;
+      if (normalized.split(requiredField).length !== 2) {
+        throw new Error(
+          `Generated ${path} no longer has the expected required ${field} field.`,
+        );
+      }
+      // The JSONL wire contract permits these fields to be absent in the current Schema, in a
+      // supported older app-server version, or both. Do not promise a value that can be absent.
+      normalized = normalized.replace(requiredField, `${field}?:`);
+    }
+    for (const [current, compatible] of compatibilityGeneratedTypeReplacements[path] ?? []) {
+      if (normalized.split(current).length !== 2) {
+        throw new Error(`Generated ${path} no longer has the expected compatibility shape.`);
+      }
+      normalized = normalized.replace(current, compatible);
+    }
     if (/\bbigint\b/.test(normalized)) {
       normalized = normalized
         .replace(
@@ -370,13 +443,39 @@ function generateServerRequestMap(generatedTypes, outputPath, metadata) {
   writeFileSync(outputPath, lines.join("\n"));
 }
 
-function generateProtocolMethodSets(generatedTypes, outputPath) {
-  const clientNotifications = methodsFromGeneratedUnion(
-    readFileSync(join(generatedTypes, "ClientNotification.ts"), "utf8"),
+function generateProtocolMethodSets(generatedTypes, generatedSchemas, outputPath) {
+  const clientNotificationSource = readFileSync(
+    join(generatedTypes, "ClientNotification.ts"),
+    "utf8",
   );
-  const serverNotifications = methodsFromGeneratedUnion(
-    readFileSync(join(generatedTypes, "ServerNotification.ts"), "utf8"),
+  const serverNotificationSource = readFileSync(
+    join(generatedTypes, "ServerNotification.ts"),
+    "utf8",
   );
+  const clientNotifications = methodsFromGeneratedUnion(clientNotificationSource);
+  const serverNotifications = methodsFromGeneratedUnion(serverNotificationSource);
+  const serverNotificationParams = methodParamsFromGeneratedUnion(serverNotificationSource);
+  const schemaBundles = {
+    base: JSON.parse(
+      readFileSync(join(generatedSchemas, "codex_app_server_protocol.schemas.json"), "utf8"),
+    ),
+    v2: JSON.parse(
+      readFileSync(
+        join(generatedSchemas, "codex_app_server_protocol.v2.schemas.json"),
+        "utf8",
+      ),
+    ),
+  };
+  const aggregateServerNotifications = notificationMethodsFromSchema(
+    schemaBundles.v2.definitions?.ServerNotification,
+  );
+  const standaloneServerNotifications = [...serverNotificationParams]
+    .filter(([method]) => !aggregateServerNotifications.has(method))
+    .map(([method, definition]) => ({
+      bundle: definitionSchemaBundle(schemaBundles, definition),
+      definition,
+      method,
+    }));
   const lines = [
     "// Generated by scripts/generate-protocol.mjs. Do not edit by hand.",
     "",
@@ -387,6 +486,13 @@ function generateProtocolMethodSets(generatedTypes, outputPath) {
     "export const serverNotificationMethods = [",
     ...[...serverNotifications].sort().map((method) => `  ${JSON.stringify(method)},`),
     "] as const;",
+    "",
+    "export const standaloneServerNotificationSchemaRefs = {",
+    ...standaloneServerNotifications.map(
+      ({ bundle, definition, method }) =>
+        `  ${JSON.stringify(method)}: { bundle: ${JSON.stringify(bundle)}, definition: ${JSON.stringify(definition)} },`,
+    ),
+    "} as const;",
     "",
   ];
   writeFileSync(outputPath, lines.join("\n"));
@@ -424,8 +530,41 @@ function generateRuntimeValidationSchemas(generatedSchemas, metadata) {
   if (!clientNotification) throw new Error("ClientNotification.json is missing.");
   extras.ClientNotification = clientNotification;
 
+  for (const [bundle, definitions] of Object.entries(compatibilityOptionalSchemaFields)) {
+    for (const [definition, fields] of Object.entries(definitions)) {
+      const required = bundles[bundle].definitions?.[definition]?.required;
+      if (!Array.isArray(required)) {
+        throw new Error(`Compatibility definition has no required fields: ${definition}.`);
+      }
+      for (const field of fields) {
+        if (!required.includes(field)) {
+          throw new Error(`Compatibility field is no longer required: ${definition}.${field}.`);
+        }
+      }
+    }
+  }
+  for (const [bundle, definitions] of Object.entries(compatibilityArrayItemDefinitions)) {
+    for (const [definition, properties] of Object.entries(definitions)) {
+      for (const [property, itemDefinitions] of Object.entries(properties)) {
+        const items = bundles[bundle].definitions?.[definition]?.properties?.[property]?.items;
+        if (items?.$ref !== `#/definitions/${itemDefinitions[0]}`) {
+          throw new Error(
+            `Compatibility array no longer references ${itemDefinitions[0]}: ${definition}.${property}.`,
+          );
+        }
+        for (const itemDefinition of itemDefinitions) {
+          if (!Object.hasOwn(bundles[bundle].definitions ?? {}, itemDefinition)) {
+            throw new Error(`Compatibility item definition is missing: ${itemDefinition}.`);
+          }
+        }
+      }
+    }
+  }
+
   const output = sortJson({
     $schema: "http://json-schema.org/draft-07/schema#",
+    compatibilityArrayItemDefinitions,
+    compatibilityOptionalFields: compatibilityOptionalSchemaFields,
     schemas: extras,
     unavailableClientResponses: [...new Set(unavailableClientResponses)].sort(),
   });
@@ -444,6 +583,46 @@ function readStandaloneSchema(generatedSchemas, name) {
 
 function methodsFromGeneratedUnion(source) {
   return new Set([...source.matchAll(/\{ "method": "([^"]+)"/g)].map((match) => match[1]));
+}
+
+function methodParamsFromGeneratedUnion(source) {
+  const methods = new Map(
+    [...source.matchAll(/\{ "method": "([^"]+)", "params": ([A-Za-z_$][\w$]*) \}/g)].map(
+      (match) => [match[1], match[2]],
+    ),
+  );
+  const methodNames = methodsFromGeneratedUnion(source);
+  if (methods.size !== methodNames.size) {
+    throw new Error("Generated notification union contains an unsupported method shape.");
+  }
+  return methods;
+}
+
+function notificationMethodsFromSchema(schema) {
+  const methods = new Set();
+  const visit = (value, key = "") => {
+    if (!value || typeof value !== "object") return;
+    if (key === "method" && Array.isArray(value.enum)) {
+      for (const method of value.enum) {
+        if (typeof method === "string") methods.add(method);
+      }
+    }
+    for (const [childKey, child] of Object.entries(value)) visit(child, childKey);
+  };
+  visit(schema);
+  return methods;
+}
+
+function definitionSchemaBundle(bundles, definition) {
+  const matches = Object.entries(bundles)
+    .filter(([, bundle]) => Object.hasOwn(bundle.definitions ?? {}, definition))
+    .map(([name]) => name);
+  if (matches.length !== 1) {
+    throw new Error(
+      `Expected exactly one aggregate schema definition for ${definition}; found ${matches.join(", ") || "none"}.`,
+    );
+  }
+  return matches[0];
 }
 
 function assertMethodSetsMatch(label, generatedMethods, metadataMethods) {

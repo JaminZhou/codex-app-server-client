@@ -1,4 +1,4 @@
-import type { ServerNotification } from "./generated/protocol/ServerNotification";
+import type { ServerNotificationEnvelope as ServerNotification } from "./generated/protocol/ServerNotificationEnvelope";
 export type {
   ServerRequestFor,
   ServerRequestMethod,

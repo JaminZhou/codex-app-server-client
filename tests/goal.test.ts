@@ -89,10 +89,14 @@ describe("thread goal workflows", () => {
         turnId: "physical-2",
         goal: threadGoal("complete"),
       });
-      server.notify("turn/completed", {
-        threadId: THREAD_ID,
-        turn: turn("physical-2", "completed", 12, 14),
-      });
+      server.notify(
+        "turn/completed",
+        {
+          threadId: THREAD_ID,
+          turn: turn("physical-2", "completed", 12, 14),
+        },
+        7_000,
+      );
 
       const events = await logicalEvents;
       expect(events.map((event) => event.method)).toEqual([
@@ -108,6 +112,7 @@ describe("thread goal workflows", () => {
         "physical-1",
       ]);
       expect(events.at(-1)).toMatchObject({
+        emittedAtMs: 7_000,
         method: "turn/completed",
         params: {
           turn: {
@@ -297,7 +302,7 @@ function threadSnapshot(): Thread {
     status: { type: "idle" },
     path: "/tmp/thread-goal.jsonl",
     cwd: "/tmp",
-    cliVersion: "0.144.6",
+    cliVersion: "0.145.0",
     source: "unknown",
     threadSource: null,
     agentNickname: null,

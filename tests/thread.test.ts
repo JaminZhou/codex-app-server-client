@@ -27,17 +27,24 @@ describe("turn event routing and handles", () => {
   it("buffers events that arrive before a turn handle is opened", async () => {
     const router = new TurnEventRouter();
     router.route({
+      emittedAtMs: 100,
       method: "turn/started",
       params: { threadId: "thread-1", turn: turn("turn-1", "inProgress") },
     });
     router.route({
+      emittedAtMs: 200,
       method: "turn/completed",
       params: { threadId: "thread-1", turn: turn("turn-1", "completed") },
     });
 
     const methods: string[] = [];
-    for await (const event of router.open("turn-1")) methods.push(event.method);
+    const timestamps: Array<number | undefined> = [];
+    for await (const event of router.open("turn-1")) {
+      methods.push(event.method);
+      timestamps.push(event.emittedAtMs);
+    }
     expect(methods).toEqual(["turn/started", "turn/completed"]);
+    expect(timestamps).toEqual([100, 200]);
   });
 
   it("collects completed items, usage, and the final answer", async () => {

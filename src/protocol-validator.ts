@@ -18,6 +18,7 @@ import { appServerResponseSchemaRefs } from "./generated/app-server-methods";
 import {
   clientNotificationMethods,
   serverNotificationMethods,
+  standaloneServerNotificationSchemaRefs,
 } from "./generated/protocol-method-sets";
 import { serverRequestResponseSchemaRefs } from "./generated/server-request-methods";
 import type { JsonRpcNotification, JsonRpcRequest } from "./types";
@@ -82,6 +83,10 @@ export class ProtocolValidator {
   private readonly clientNotifications = new Set<string>(clientNotificationMethods);
   private readonly responseValidators = new Map<string, ValidateFunction | null>();
   private readonly serverNotifications = new Set<string>(serverNotificationMethods);
+  private readonly standaloneServerNotificationValidators = new Map<
+    string,
+    ValidateFunction
+  >();
   private readonly serverRequests = new Set(Object.keys(serverRequestResponseSchemaRefs));
   private readonly serverResponseValidators = new Map<string, ValidateFunction>();
   private readonly validateClientNotification: ValidateFunction;
@@ -114,8 +119,14 @@ export class ProtocolValidator {
       validate: (schema: BigIntFormatSchema, value: unknown) =>
         value instanceof ValidationBigInt && bigintMatchesSchema(value.value, schema),
     });
-    this.ajv.addSchema(withId(baseProtocolSchema, BASE_SCHEMA_ID), BASE_SCHEMA_ID);
-    this.ajv.addSchema(withId(v2ProtocolSchema, V2_SCHEMA_ID), V2_SCHEMA_ID);
+    this.ajv.addSchema(
+      withId(withCompatibilityOverrides(baseProtocolSchema, "base"), BASE_SCHEMA_ID),
+      BASE_SCHEMA_ID,
+    );
+    this.ajv.addSchema(
+      withId(withCompatibilityOverrides(v2ProtocolSchema, "v2"), V2_SCHEMA_ID),
+      V2_SCHEMA_ID,
+    );
     for (const [name, schema] of Object.entries(runtimeValidationSchemas.schemas)) {
       const id = runtimeSchemaId(name);
       this.ajv.addSchema(withId(schema, id), id);
@@ -137,7 +148,15 @@ export class ProtocolValidator {
     for (const [method, reference] of Object.entries(serverRequestResponseSchemaRefs)) {
       this.serverResponseValidators.set(
         method,
-        this.requireResponseValidator(reference),
+        this.requireDefinitionValidator(reference),
+      );
+    }
+    for (const [method, reference] of Object.entries(
+      standaloneServerNotificationSchemaRefs,
+    )) {
+      this.standaloneServerNotificationValidators.set(
+        method,
+        this.compileStandaloneServerNotificationValidator(method, reference),
       );
     }
   }
@@ -179,6 +198,18 @@ export class ProtocolValidator {
 
   assertServerNotification(notification: JsonRpcNotification): void {
     if (!this.serverNotifications.has(notification.method)) return;
+    const standalone = this.standaloneServerNotificationValidators.get(
+      notification.method,
+    );
+    if (standalone) {
+      this.assertValid(
+        standalone,
+        notification,
+        "notification",
+        notification.method,
+      );
+      return;
+    }
     this.assertValid(
       this.validateServerNotification,
       notification,
@@ -240,12 +271,29 @@ export class ProtocolValidator {
     return this.ajv.getSchema(runtimeSchemaId(reference.definition)) ?? null;
   }
 
-  private requireResponseValidator(reference: SchemaReference): ValidateFunction {
+  private requireDefinitionValidator(reference: SchemaReference): ValidateFunction {
     const validate = this.responseValidator(reference);
     if (!validate) {
-      throw new Error(`Generated response schema is missing: ${reference.definition}.`);
+      throw new Error(`Generated protocol schema is missing: ${reference.definition}.`);
     }
     return validate;
+  }
+
+  private compileStandaloneServerNotificationValidator(
+    method: string,
+    reference: SchemaReference,
+  ): ValidateFunction {
+    return this.ajv.compile(
+      withBigIntIntegerValidation({
+        properties: {
+          emittedAtMs: { format: "int64", type: "integer" },
+          method: { const: method },
+          params: { $ref: combinedSchemaRef(reference) },
+        },
+        required: ["method", "params"],
+        type: "object",
+      }) as AnySchema,
+    );
   }
 
   private requireValidator(reference: string): ValidateFunction {
@@ -277,6 +325,56 @@ function withId(schema: unknown, id: string): AnySchema {
     ...(withBigIntIntegerValidation(schema) as Record<string, unknown>),
     $id: id,
   } as AnySchema;
+}
+
+function withCompatibilityOverrides(
+  schema: unknown,
+  bundle: "base" | "v2",
+): unknown {
+  const compatible = structuredClone(schema) as unknown;
+  if (!isRecord(compatible) || !isRecord(compatible.definitions)) {
+    throw new Error(`Generated ${bundle} protocol schema has no definitions.`);
+  }
+  for (const [definition, fields] of Object.entries(
+    runtimeValidationSchemas.compatibilityOptionalFields[bundle] ?? {},
+  )) {
+    const schemaDefinition = compatible.definitions[definition];
+    if (!isRecord(schemaDefinition) || !Array.isArray(schemaDefinition.required)) {
+      throw new Error(`Generated compatibility definition is invalid: ${definition}.`);
+    }
+    if (!Array.isArray(fields) || !fields.every((field) => typeof field === "string")) {
+      throw new Error(`Generated compatibility fields are invalid: ${definition}.`);
+    }
+    const optional = new Set<string>(fields);
+    schemaDefinition.required = schemaDefinition.required.filter(
+      (field): field is string => typeof field === "string" && !optional.has(field),
+    );
+  }
+  for (const [definition, properties] of Object.entries(
+    runtimeValidationSchemas.compatibilityArrayItemDefinitions[bundle] ?? {},
+  )) {
+    const schemaDefinition = compatible.definitions[definition];
+    if (!isRecord(schemaDefinition) || !isRecord(schemaDefinition.properties)) {
+      throw new Error(`Generated compatibility definition is invalid: ${definition}.`);
+    }
+    for (const [property, itemDefinitions] of Object.entries(properties)) {
+      const propertySchema = schemaDefinition.properties[property];
+      if (
+        !isRecord(propertySchema) ||
+        !Array.isArray(itemDefinitions) ||
+        !itemDefinitions.every((item) => typeof item === "string")
+      ) {
+        throw new Error(`Generated compatibility array is invalid: ${definition}.${property}.`);
+      }
+      schemaDefinition.properties[property] = {
+        anyOf: itemDefinitions.map((itemDefinition) => ({
+          ...structuredClone(propertySchema),
+          items: { $ref: `#/definitions/${itemDefinition}` },
+        })),
+      };
+    }
+  }
+  return compatible;
 }
 
 function validationWireValue(value: unknown): unknown {

@@ -1,7 +1,7 @@
 import type { CodexAppServerClient } from "./app-server-client";
 import { CodexTurnFailedError } from "./errors";
 import type { CodexGoal, GoalStartOptions } from "./goal";
-import type { ServerNotification } from "./generated/protocol/ServerNotification";
+import type { ServerNotificationEnvelope as ServerNotification } from "./generated/protocol/ServerNotificationEnvelope";
 import type { Thread } from "./generated/protocol/v2/Thread";
 import type { ThreadCompactStartResponse } from "./generated/protocol/v2/ThreadCompactStartResponse";
 import type { ThreadGoalClearResponse } from "./generated/protocol/v2/ThreadGoalClearResponse";

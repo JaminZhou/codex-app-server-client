@@ -117,14 +117,19 @@ describe("JsonlRpcPeer", () => {
   it("delivers notifications in transport order", async () => {
     const { peer, serverToClient, unhandledErrors } = createHarness();
     const events: string[] = [];
+    const timestamps: Array<bigint | number | undefined> = [];
     peer.onNotification(async (notification) => {
       if (notification.method === "first") await new Promise((resolve) => setTimeout(resolve, 10));
       events.push(notification.method);
+      timestamps.push(notification.emittedAtMs);
     });
 
-    serverToClient.write(`${JSON.stringify({ method: "first", params: {} })}\n`);
+    serverToClient.write(
+      `${JSON.stringify({ emittedAtMs: 1_753_200_000_000, method: "first", params: {} })}\n`,
+    );
     serverToClient.write(`${JSON.stringify({ method: "second", params: {} })}\n`);
     await vi.waitFor(() => expect(events).toEqual(["first", "second"]));
+    expect(timestamps).toEqual([1_753_200_000_000, undefined]);
     expect(unhandledErrors).toEqual([]);
     peer.dispose();
   });
