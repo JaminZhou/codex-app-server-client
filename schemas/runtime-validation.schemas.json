@@ -1,5 +1,16 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "compatibilityArrayItemDefinitions": {
+    "base": {},
+    "v2": {
+      "ThreadItemsListResponse": {
+        "data": [
+          "ThreadItemEntry",
+          "ThreadItem"
+        ]
+      }
+    }
+  },
   "compatibilityOptionalFields": {
     "base": {},
     "v2": {

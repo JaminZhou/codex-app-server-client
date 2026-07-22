@@ -51,6 +51,29 @@ const compatibilityOptionalSchemaFields = {
     ExternalAgentConfigImportHistoriesReadResponse: ["connectors"],
   },
 };
+const compatibilityArrayItemDefinitions = {
+  base: {},
+  v2: {
+    ThreadItemsListResponse: {
+      data: ["ThreadItemEntry", "ThreadItem"],
+    },
+  },
+};
+const compatibilityGeneratedTypeReplacements = {
+  "v2/ThreadItemsListResponse.ts": [
+    [
+      'import type { ThreadItemEntry } from "./ThreadItemEntry";',
+      [
+        'import type { ThreadItem } from "./ThreadItem";',
+        'import type { ThreadItemEntry } from "./ThreadItemEntry";',
+      ].join("\n"),
+    ],
+    [
+      "data: Array<ThreadItemEntry>",
+      "data: Array<ThreadItemEntry> | Array<ThreadItem>",
+    ],
+  ],
+};
 
 if (typeof expectedVersion !== "string" || !/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(expectedVersion)) {
   throw new Error("@openai/codex must be an exact dependency version.");
@@ -250,6 +273,12 @@ function normalizeGeneratedTypeTree(directory) {
       // The JSONL wire contract permits these fields to be absent in the current Schema, in a
       // supported older app-server version, or both. Do not promise a value that can be absent.
       normalized = normalized.replace(requiredField, `${field}?:`);
+    }
+    for (const [current, compatible] of compatibilityGeneratedTypeReplacements[path] ?? []) {
+      if (normalized.split(current).length !== 2) {
+        throw new Error(`Generated ${path} no longer has the expected compatibility shape.`);
+      }
+      normalized = normalized.replace(current, compatible);
     }
     if (/\bbigint\b/.test(normalized)) {
       normalized = normalized
@@ -514,9 +543,27 @@ function generateRuntimeValidationSchemas(generatedSchemas, metadata) {
       }
     }
   }
+  for (const [bundle, definitions] of Object.entries(compatibilityArrayItemDefinitions)) {
+    for (const [definition, properties] of Object.entries(definitions)) {
+      for (const [property, itemDefinitions] of Object.entries(properties)) {
+        const items = bundles[bundle].definitions?.[definition]?.properties?.[property]?.items;
+        if (items?.$ref !== `#/definitions/${itemDefinitions[0]}`) {
+          throw new Error(
+            `Compatibility array no longer references ${itemDefinitions[0]}: ${definition}.${property}.`,
+          );
+        }
+        for (const itemDefinition of itemDefinitions) {
+          if (!Object.hasOwn(bundles[bundle].definitions ?? {}, itemDefinition)) {
+            throw new Error(`Compatibility item definition is missing: ${itemDefinition}.`);
+          }
+        }
+      }
+    }
+  }
 
   const output = sortJson({
     $schema: "http://json-schema.org/draft-07/schema#",
+    compatibilityArrayItemDefinitions,
     compatibilityOptionalFields: compatibilityOptionalSchemaFields,
     schemas: extras,
     unavailableClientResponses: [...new Set(unavailableClientResponses)].sort(),

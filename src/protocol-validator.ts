@@ -120,11 +120,11 @@ export class ProtocolValidator {
         value instanceof ValidationBigInt && bigintMatchesSchema(value.value, schema),
     });
     this.ajv.addSchema(
-      withId(withCompatibilityOptionalFields(baseProtocolSchema, "base"), BASE_SCHEMA_ID),
+      withId(withCompatibilityOverrides(baseProtocolSchema, "base"), BASE_SCHEMA_ID),
       BASE_SCHEMA_ID,
     );
     this.ajv.addSchema(
-      withId(withCompatibilityOptionalFields(v2ProtocolSchema, "v2"), V2_SCHEMA_ID),
+      withId(withCompatibilityOverrides(v2ProtocolSchema, "v2"), V2_SCHEMA_ID),
       V2_SCHEMA_ID,
     );
     for (const [name, schema] of Object.entries(runtimeValidationSchemas.schemas)) {
@@ -327,7 +327,7 @@ function withId(schema: unknown, id: string): AnySchema {
   } as AnySchema;
 }
 
-function withCompatibilityOptionalFields(
+function withCompatibilityOverrides(
   schema: unknown,
   bundle: "base" | "v2",
 ): unknown {
@@ -349,6 +349,30 @@ function withCompatibilityOptionalFields(
     schemaDefinition.required = schemaDefinition.required.filter(
       (field): field is string => typeof field === "string" && !optional.has(field),
     );
+  }
+  for (const [definition, properties] of Object.entries(
+    runtimeValidationSchemas.compatibilityArrayItemDefinitions[bundle] ?? {},
+  )) {
+    const schemaDefinition = compatible.definitions[definition];
+    if (!isRecord(schemaDefinition) || !isRecord(schemaDefinition.properties)) {
+      throw new Error(`Generated compatibility definition is invalid: ${definition}.`);
+    }
+    for (const [property, itemDefinitions] of Object.entries(properties)) {
+      const propertySchema = schemaDefinition.properties[property];
+      if (
+        !isRecord(propertySchema) ||
+        !Array.isArray(itemDefinitions) ||
+        !itemDefinitions.every((item) => typeof item === "string")
+      ) {
+        throw new Error(`Generated compatibility array is invalid: ${definition}.${property}.`);
+      }
+      schemaDefinition.properties[property] = {
+        anyOf: itemDefinitions.map((itemDefinition) => ({
+          ...structuredClone(propertySchema),
+          items: { $ref: `#/definitions/${itemDefinition}` },
+        })),
+      };
+    }
   }
   return compatible;
 }

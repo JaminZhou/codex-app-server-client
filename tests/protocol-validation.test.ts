@@ -7,6 +7,7 @@ import {
 import { loadProtocolValidator } from "../src/protocol-validator";
 import type { JsonRpcNotification } from "../src/types";
 import type { ExternalAgentConfigImportHistoriesReadResponse } from "../src/generated/protocol/v2/ExternalAgentConfigImportHistoriesReadResponse";
+import type { ThreadItemsListResponse } from "../src/generated/protocol/v2/ThreadItemsListResponse";
 import { FakeAppServer } from "./fake-app-server";
 
 describe("generated protocol runtime validation", () => {
@@ -128,6 +129,30 @@ describe("generated protocol runtime validation", () => {
       validator.assertResponse("externalAgentConfig/import/readHistories", {
         connectors: "invalid",
         data: [],
+      }),
+    ).toThrow(AppServerProtocolValidationError);
+    const legacyItems: ThreadItemsListResponse = {
+      backwardsCursor: null,
+      data: [{ id: "item-1", type: "contextCompaction" }],
+      nextCursor: null,
+    };
+    expect(() => validator.assertResponse("thread/items/list", legacyItems)).not.toThrow();
+    const currentItems: ThreadItemsListResponse = {
+      backwardsCursor: null,
+      data: [
+        { item: { id: "item-2", type: "contextCompaction" }, turnId: "turn-1" },
+      ],
+      nextCursor: null,
+    };
+    expect(() => validator.assertResponse("thread/items/list", currentItems)).not.toThrow();
+    expect(() =>
+      validator.assertResponse("thread/items/list", {
+        backwardsCursor: null,
+        data: [
+          { id: "item-1", type: "contextCompaction" },
+          { item: { id: "item-2", type: "contextCompaction" }, turnId: "turn-1" },
+        ],
+        nextCursor: null,
       }),
     ).toThrow(AppServerProtocolValidationError);
     expect(() =>
