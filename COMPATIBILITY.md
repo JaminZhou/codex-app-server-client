@@ -13,7 +13,7 @@ guarantee.
 
 | Reference | Pinned baseline | How it is used |
 | --- | --- | --- |
-| Public Codex CLI | `codex-cli 0.144.6` / `rust-v0.144.6` | Runtime binary and public app-server behavior |
+| Public Codex CLI | `codex-cli 0.145.0` / `rust-v0.145.0` | Runtime binary and public app-server behavior |
 | Generated app-server TypeScript | Generated from the pinned CLI | Request, response, notification, and server-request types |
 | Generated JSON Schema | Generated from the pinned CLI | Shipped schema artifacts and drift checks |
 | Official Python SDK | Public source at the same Codex tag | Lifecycle, routing, error, and high-level behavior reference |
@@ -36,7 +36,7 @@ transport. For production local rich clients, prefer stdio or the Unix control s
 
 | Capability | Status | Evidence or boundary |
 | --- | --- | --- |
-| Typed client requests | Complete at the raw `call()` layer | All 125 generated client methods are mapped to generated parameter and response types |
+| Typed client requests | Complete at the raw `call()` layer | All 129 generated client methods are mapped to generated parameter and response types |
 | Notifications | Complete routing surface | Generic and generated method-scoped handlers |
 | Server requests | Complete routing surface | Generic and generated method-scoped handlers with typed responses |
 | Initialization lifecycle | Complete | Exactly one `initialize`, followed by `initialized`, per connection |
@@ -48,7 +48,7 @@ transport. For production local rich clients, prefer stdio or the Unix control s
 | Backpressure error classification | Complete for the documented ingress error | `-32001` `Server overloaded; retry later.` maps to `AppServerBusyError` |
 | Overload retry helper | Complete and opt-in | Exponential backoff with jitter; only overload-classified failures retry |
 | Experimental protocol | Generated and available | Enabled by the default initialize capability; it remains version-sensitive |
-| Runtime protocol validation | Complete for every generated request/notification/server-request shape and 122 of 125 client responses | Strict by default, including Rust signed/unsigned integer widths; three deprecated response types have no upstream JSON Schema |
+| Runtime protocol validation | Complete for every generated request/notification/server-request shape and 126 of 129 client responses | Strict by default, including Rust signed/unsigned integer widths; three deprecated response types have no upstream JSON Schema |
 
 Unknown method names bypass known-method Schema validation and remain available through generic
 handlers and raw requests. This is intentional forward compatibility, not a claim that an unknown
@@ -58,7 +58,7 @@ experiments.
 ## Cross-version verification
 
 The scheduled compatibility smoke covers every exact stable release in
-`compatibility-matrix.json`, currently `0.144.5` and the pinned `0.144.6`. On the minimum supported
+`compatibility-matrix.json`, currently `0.144.6` and the pinned `0.145.0`. On the minimum supported
 Node.js 18 runtime it installs each CLI in isolation, starts its real stdio app-server with plugins
 disabled, uses strict current-Schema validation, and exercises initialization, model and thread
 listing, thread creation/read, and thread-goal access without calling a model service. The matrix is an

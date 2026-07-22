@@ -26,8 +26,8 @@ itself as experimental and primarily intended for development or debugging; it m
 notice. This client therefore pins an exact Codex runtime and treats compatibility as
 version-specific rather than as a general stability guarantee.
 
-Current pinned runtime and protocol baseline: `@openai/codex@0.144.6`
-(`codex-cli 0.144.6` / `rust-v0.144.6`), including its generated experimental surface. See
+Current pinned runtime and protocol baseline: `@openai/codex@0.145.0`
+(`codex-cli 0.145.0` / `rust-v0.145.0`), including its generated experimental surface. See
 [SOURCES.md](./SOURCES.md) for exact provenance.
 
 ## Highlights
@@ -35,7 +35,7 @@ Current pinned runtime and protocol baseline: `@openai/codex@0.144.6`
 - Resolves the version-matched CLI installed with this package; no global `codex` installation is required.
 - Starts a version-matched stdio app-server, or attaches through the public Unix socket and
   experimental TCP WebSocket transports.
-- Provides a fully typed `call()` API for all 125 client methods in the pinned protocol.
+- Provides a fully typed `call()` API for all 129 client methods in the pinned protocol.
 - Exposes generated protocol types through `@jaminzhou/codex-app-server-client/protocol`.
 - Routes typed notifications and all generated server-request methods.
 - Buffers turn events that arrive before the `turn/start` response is consumed.

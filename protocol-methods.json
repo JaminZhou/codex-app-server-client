@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
-  "codexCliVersion": "0.144.6",
+  "codexCliVersion": "0.145.0",
   "source": {
     "repository": "https://github.com/openai/codex",
-    "tag": "rust-v0.144.6",
-    "commit": "5d1fbf26c43abc65a203928b2e31561cb039e06d",
+    "tag": "rust-v0.145.0",
+    "commit": "25af12f7e61572b0bc18ddb1008be543b91519b0",
     "path": "codex-rs/app-server-protocol/src/protocol/common.rs"
   },
   "methods": [
@@ -225,6 +225,14 @@
       "variant": "ThreadSearch"
     },
     {
+      "method": "thread/searchOccurrences",
+      "response": {
+        "module": "v2/ThreadSearchOccurrencesResponse",
+        "name": "ThreadSearchOccurrencesResponse"
+      },
+      "variant": "ThreadSearchOccurrences"
+    },
+    {
       "method": "thread/loaded/list",
       "response": {
         "module": "v2/ThreadLoadedListResponse",
@@ -385,12 +393,28 @@
       "variant": "PluginShareDelete"
     },
     {
+      "method": "app/read",
+      "response": {
+        "module": "v2/AppsReadResponse",
+        "name": "AppsReadResponse"
+      },
+      "variant": "AppsRead"
+    },
+    {
       "method": "app/list",
       "response": {
         "module": "v2/AppsListResponse",
         "name": "AppsListResponse"
       },
       "variant": "AppsList"
+    },
+    {
+      "method": "app/installed",
+      "response": {
+        "module": "v2/AppsInstalledResponse",
+        "name": "AppsInstalledResponse"
+      },
+      "variant": "AppsInstalled"
     },
     {
       "method": "fs/readFile",
@@ -695,6 +719,14 @@
         "name": "EnvironmentInfoResponse"
       },
       "variant": "EnvironmentInfo"
+    },
+    {
+      "method": "environment/status",
+      "response": {
+        "module": "v2/EnvironmentStatusResponse",
+        "name": "EnvironmentStatusResponse"
+      },
+      "variant": "EnvironmentStatus"
     },
     {
       "method": "mcpServer/oauth/login",
