@@ -2,9 +2,10 @@ import { defineConfig } from "tsup";
 
 export default defineConfig({
   clean: true,
-  dts: true,
   entry: ["src/index.ts", "src/protocol.ts"],
+  experimentalDts: true,
   format: ["esm"],
   sourcemap: true,
   target: "node18",
+  tsconfig: "tsconfig.build.json",
 });
