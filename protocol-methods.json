@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
-  "codexCliVersion": "0.145.0",
+  "codexCliVersion": "0.146.0",
   "source": {
     "repository": "https://github.com/openai/codex",
-    "tag": "rust-v0.145.0",
-    "commit": "25af12f7e61572b0bc18ddb1008be543b91519b0",
+    "tag": "rust-v0.146.0",
+    "commit": "e363b08c9175ac1cbe5893615dd2cb9ddf95043b",
     "path": "codex-rs/app-server-protocol/src/protocol/common.rs"
   },
   "methods": [
@@ -943,6 +943,14 @@
         "name": "ExternalAgentConfigImportResponse"
       },
       "variant": "ExternalAgentConfigImport"
+    },
+    {
+      "method": "externalAgentConfig/import/recordHistory",
+      "response": {
+        "module": "v2/ExternalAgentConfigImportHistoryRecordResponse",
+        "name": "ExternalAgentConfigImportHistoryRecordResponse"
+      },
+      "variant": "ExternalAgentConfigImportHistoryRecord"
     },
     {
       "method": "externalAgentConfig/import/readHistories",
