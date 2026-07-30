@@ -42,7 +42,7 @@ ephemeral: boolean,
 /**
  * Whether the thread has been pinned by the user.
  */
-isPinned: boolean,
+isPinned?: boolean,
 /**
  * Persisted thread history contract selected when this thread was created.
  */

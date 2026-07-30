@@ -40,7 +40,7 @@ const wireOptionalGeneratedFields = {
   "v2/PluginSummary.ts": ["mustShowInstallationInterstitial"],
   "v2/RateLimitSnapshot.ts": ["spendControlReached"],
   "v2/RawResponseCompletedNotification.ts": ["usage"],
-  "v2/Thread.ts": ["canAcceptDirectInput"],
+  "v2/Thread.ts": ["canAcceptDirectInput", "isPinned"],
   "v2/ThreadResumeResponse.ts": ["itemsBackwardsCursor", "turnsBackwardsCursor"],
   "v2/ThreadSearchOccurrencesResponse.ts": ["nextCursor"],
   "v2/TokenUsageBreakdown.ts": ["cacheWriteInputTokens"],

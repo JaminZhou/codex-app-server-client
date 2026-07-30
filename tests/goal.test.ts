@@ -294,7 +294,6 @@ function threadSnapshot(): Thread {
     parentThreadId: null,
     preview: "",
     ephemeral: false,
-    isPinned: false,
     historyMode: "legacy",
     modelProvider: "openai",
     createdAt: 1,
