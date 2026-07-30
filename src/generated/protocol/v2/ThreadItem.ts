@@ -31,11 +31,11 @@ export type ThreadItem = { "type": "userMessage", id: string, clientId: string |
 /**
  * Trusted first-party plugin id when this command resolves to one plugin script.
  */
-pluginId: string | null,
+pluginId?: string | null,
 /**
  * Safe plugin-relative path when this command resolves to one plugin script.
  */
-scriptPath: string | null,
+scriptPath?: string | null,
 /**
  * The command to be executed.
  */

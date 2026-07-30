@@ -4,13 +4,67 @@ import {
   CodexAppServerClient,
   protocolValidationMetadata,
 } from "../src";
+import type { v2 } from "../src/generated/protocol";
 import { loadProtocolValidator } from "../src/protocol-validator";
 import type { JsonRpcNotification } from "../src/types";
 import type { ExternalAgentConfigImportHistoriesReadResponse } from "../src/generated/protocol/v2/ExternalAgentConfigImportHistoriesReadResponse";
 import type { ThreadItemsListResponse } from "../src/generated/protocol/v2/ThreadItemsListResponse";
 import { FakeAppServer } from "./fake-app-server";
 
+type IsOptional<T, Key extends keyof T> = {} extends Pick<T, Key> ? true : false;
+type CommandExecutionItem = Extract<v2.ThreadItem, { type: "commandExecution" }>;
+
 describe("generated protocol runtime validation", () => {
+  it("keeps newly introduced response fields optional for older wire shapes", () => {
+    const optionalFields: [
+      IsOptional<v2.AppToolSummary, "isEnabled">,
+      IsOptional<v2.AppToolSummary, "disabledReason">,
+      IsOptional<v2.AppToolSummary, "isReadOnly">,
+      IsOptional<v2.BrowserUseRequirements, "disableAutoReview">,
+      IsOptional<v2.ConfigRequirements, "browserUse">,
+      IsOptional<v2.ConfigRequirements, "sqliteHome">,
+      IsOptional<v2.ConfigRequirements, "logDir">,
+      IsOptional<v2.ConfigRequirements, "modelCatalogJson">,
+      IsOptional<v2.ConfigRequirements, "checkForUpdateOnStartup">,
+      IsOptional<v2.ConfigRequirements, "allowLoginShell">,
+      IsOptional<v2.ConfigRequirements, "feedback">,
+      IsOptional<v2.ConfigRequirements, "windowsSandboxPrivateDesktop">,
+      IsOptional<v2.ExternalAgentConfigImportHistory, "providerId">,
+      IsOptional<v2.FeedbackRequirements, "enabled">,
+      IsOptional<v2.PluginShareContext, "canPublishToWorkspace">,
+      IsOptional<v2.PluginShareSaveResponse, "canPublishToWorkspace">,
+      IsOptional<v2.SkillInterface, "iconSmallUrl">,
+      IsOptional<v2.SkillInterface, "iconLargeUrl">,
+      IsOptional<v2.Thread, "isPinned">,
+      IsOptional<CommandExecutionItem, "pluginId">,
+      IsOptional<CommandExecutionItem, "scriptPath">,
+    ] = [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+    ];
+
+    expect(optionalFields).toHaveLength(21);
+  });
+
   it("validates generated request and response schemas without losing bigint values", async () => {
     const validator = await loadProtocolValidator();
     expect(() =>

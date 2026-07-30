@@ -7,8 +7,8 @@ export type SkillInterface = { displayName?: string, shortDescription?: string, 
 /**
  * Remote small icon URL from the plugin catalog.
  */
-iconSmallUrl: string | null,
+iconSmallUrl?: string | null,
 /**
  * Remote large icon URL from the plugin catalog.
  */
-iconLargeUrl: string | null, brandColor?: string, defaultPrompt?: string, };
+iconLargeUrl?: string | null, brandColor?: string, defaultPrompt?: string, };
