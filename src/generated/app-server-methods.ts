@@ -118,17 +118,18 @@ import type { ProcessResizePtyResponse as Response113 } from "./protocol/v2/Proc
 import type { ConfigReadResponse as Response114 } from "./protocol/v2/ConfigReadResponse";
 import type { ExternalAgentConfigDetectResponse as Response115 } from "./protocol/v2/ExternalAgentConfigDetectResponse";
 import type { ExternalAgentConfigImportResponse as Response116 } from "./protocol/v2/ExternalAgentConfigImportResponse";
-import type { ExternalAgentConfigImportHistoriesReadResponse as Response117 } from "./protocol/v2/ExternalAgentConfigImportHistoriesReadResponse";
-import type { ConfigWriteResponse as Response118 } from "./protocol/v2/ConfigWriteResponse";
-import type { ConfigRequirementsReadResponse as Response119 } from "./protocol/v2/ConfigRequirementsReadResponse";
-import type { GetAccountResponse as Response120 } from "./protocol/v2/GetAccountResponse";
-import type { GetConversationSummaryResponse as Response121 } from "./protocol/GetConversationSummaryResponse";
-import type { GitDiffToRemoteResponse as Response122 } from "./protocol/GitDiffToRemoteResponse";
-import type { GetAuthStatusResponse as Response123 } from "./protocol/GetAuthStatusResponse";
-import type { FuzzyFileSearchResponse as Response124 } from "./protocol/FuzzyFileSearchResponse";
-import type { FuzzyFileSearchSessionStartResponse as Response125 } from "./protocol/FuzzyFileSearchSessionStartResponse";
-import type { FuzzyFileSearchSessionUpdateResponse as Response126 } from "./protocol/FuzzyFileSearchSessionUpdateResponse";
-import type { FuzzyFileSearchSessionStopResponse as Response127 } from "./protocol/FuzzyFileSearchSessionStopResponse";
+import type { ExternalAgentConfigImportHistoryRecordResponse as Response117 } from "./protocol/v2/ExternalAgentConfigImportHistoryRecordResponse";
+import type { ExternalAgentConfigImportHistoriesReadResponse as Response118 } from "./protocol/v2/ExternalAgentConfigImportHistoriesReadResponse";
+import type { ConfigWriteResponse as Response119 } from "./protocol/v2/ConfigWriteResponse";
+import type { ConfigRequirementsReadResponse as Response120 } from "./protocol/v2/ConfigRequirementsReadResponse";
+import type { GetAccountResponse as Response121 } from "./protocol/v2/GetAccountResponse";
+import type { GetConversationSummaryResponse as Response122 } from "./protocol/GetConversationSummaryResponse";
+import type { GitDiffToRemoteResponse as Response123 } from "./protocol/GitDiffToRemoteResponse";
+import type { GetAuthStatusResponse as Response124 } from "./protocol/GetAuthStatusResponse";
+import type { FuzzyFileSearchResponse as Response125 } from "./protocol/FuzzyFileSearchResponse";
+import type { FuzzyFileSearchSessionStartResponse as Response126 } from "./protocol/FuzzyFileSearchSessionStartResponse";
+import type { FuzzyFileSearchSessionUpdateResponse as Response127 } from "./protocol/FuzzyFileSearchSessionUpdateResponse";
+import type { FuzzyFileSearchSessionStopResponse as Response128 } from "./protocol/FuzzyFileSearchSessionStopResponse";
 
 export interface AppServerResponseMap {
   "initialize": Response0;
@@ -248,18 +249,19 @@ export interface AppServerResponseMap {
   "config/read": Response114;
   "externalAgentConfig/detect": Response115;
   "externalAgentConfig/import": Response116;
-  "externalAgentConfig/import/readHistories": Response117;
-  "config/value/write": Response118;
-  "config/batchWrite": Response118;
-  "configRequirements/read": Response119;
-  "account/read": Response120;
-  "getConversationSummary": Response121;
-  "gitDiffToRemote": Response122;
-  "getAuthStatus": Response123;
-  "fuzzyFileSearch": Response124;
-  "fuzzyFileSearch/sessionStart": Response125;
-  "fuzzyFileSearch/sessionUpdate": Response126;
-  "fuzzyFileSearch/sessionStop": Response127;
+  "externalAgentConfig/import/recordHistory": Response117;
+  "externalAgentConfig/import/readHistories": Response118;
+  "config/value/write": Response119;
+  "config/batchWrite": Response119;
+  "configRequirements/read": Response120;
+  "account/read": Response121;
+  "getConversationSummary": Response122;
+  "gitDiffToRemote": Response123;
+  "getAuthStatus": Response124;
+  "fuzzyFileSearch": Response125;
+  "fuzzyFileSearch/sessionStart": Response126;
+  "fuzzyFileSearch/sessionUpdate": Response127;
+  "fuzzyFileSearch/sessionStop": Response128;
 }
 
 export type AppServerMethod = keyof AppServerResponseMap;
@@ -384,6 +386,7 @@ export const appServerResponseSchemaRefs = {
   "config/read": { bundle: "v2", definition: "ConfigReadResponse" },
   "externalAgentConfig/detect": { bundle: "v2", definition: "ExternalAgentConfigDetectResponse" },
   "externalAgentConfig/import": { bundle: "v2", definition: "ExternalAgentConfigImportResponse" },
+  "externalAgentConfig/import/recordHistory": { bundle: "v2", definition: "ExternalAgentConfigImportHistoryRecordResponse" },
   "externalAgentConfig/import/readHistories": { bundle: "v2", definition: "ExternalAgentConfigImportHistoriesReadResponse" },
   "config/value/write": { bundle: "v2", definition: "ConfigWriteResponse" },
   "config/batchWrite": { bundle: "v2", definition: "ConfigWriteResponse" },

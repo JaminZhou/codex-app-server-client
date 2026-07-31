@@ -21,7 +21,23 @@ const packageJson = JSON.parse(readFileSync(join(root, "package.json"), "utf8"))
 const methodMetadata = JSON.parse(readFileSync(join(root, "protocol-methods.json"), "utf8"));
 const expectedVersion = packageJson.dependencies?.["@openai/codex"];
 const wireOptionalGeneratedFields = {
-  "v2/AppToolSummary.ts": ["title"],
+  "v2/AppToolSummary.ts": [
+    "title",
+    "isEnabled",
+    "disabledReason",
+    "isReadOnly",
+  ],
+  "v2/BrowserUseRequirements.ts": ["disableAutoReview"],
+  "v2/ConfigRequirements.ts": [
+    "browserUse",
+    "sqliteHome",
+    "logDir",
+    "modelCatalogJson",
+    "checkForUpdateOnStartup",
+    "allowLoginShell",
+    "feedback",
+    "windowsSandboxPrivateDesktop",
+  ],
   "v2/ConnectorMetadata.ts": [
     "description",
     "distributionChannel",
@@ -32,15 +48,20 @@ const wireOptionalGeneratedFields = {
     "toolSummaries",
   ],
   "v2/ExternalAgentConfigImportItemTypeFailure.ts": ["subErrorType"],
+  "v2/ExternalAgentConfigImportHistory.ts": ["providerId"],
   "v2/ExternalAgentConfigImportHistoriesReadResponse.ts": ["connectors"],
+  "v2/FeedbackRequirements.ts": ["enabled"],
   "v2/HookMetadata.ts": ["additionalContextLimit"],
   "v2/InstalledApp.ts": ["runtimeName"],
   "v2/ManagedHooksRequirements.ts": ["SessionEnd"],
   "v2/PluginDetail.ts": ["scheduledTasks"],
+  "v2/PluginShareContext.ts": ["canPublishToWorkspace"],
+  "v2/PluginShareSaveResponse.ts": ["canPublishToWorkspace"],
   "v2/PluginSummary.ts": ["mustShowInstallationInterstitial"],
   "v2/RateLimitSnapshot.ts": ["spendControlReached"],
   "v2/RawResponseCompletedNotification.ts": ["usage"],
-  "v2/Thread.ts": ["canAcceptDirectInput"],
+  "v2/SkillInterface.ts": ["iconSmallUrl", "iconLargeUrl"],
+  "v2/Thread.ts": ["canAcceptDirectInput", "isPinned"],
   "v2/ThreadResumeResponse.ts": ["itemsBackwardsCursor", "turnsBackwardsCursor"],
   "v2/ThreadSearchOccurrencesResponse.ts": ["nextCursor"],
   "v2/TokenUsageBreakdown.ts": ["cacheWriteInputTokens"],
@@ -60,6 +81,16 @@ const compatibilityArrayItemDefinitions = {
   },
 };
 const compatibilityGeneratedTypeReplacements = {
+  "v2/ThreadItem.ts": [
+    [
+      "pluginId: string | null,\n/**\n * Safe plugin-relative path",
+      "pluginId?: string | null,\n/**\n * Safe plugin-relative path",
+    ],
+    [
+      "scriptPath: string | null,\n/**\n * The command to be executed.",
+      "scriptPath?: string | null,\n/**\n * The command to be executed.",
+    ],
+  ],
   "v2/ThreadItemsListResponse.ts": [
     [
       'import type { ThreadItemEntry } from "./ThreadItemEntry";',
