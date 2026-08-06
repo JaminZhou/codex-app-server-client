@@ -26,8 +26,8 @@ itself as experimental and primarily intended for development or debugging; it m
 notice. This client therefore pins an exact Codex runtime and treats compatibility as
 version-specific rather than as a general stability guarantee.
 
-Current pinned runtime and protocol baseline: `@openai/codex@0.146.0`
-(`codex-cli 0.146.0` / `rust-v0.146.0`), including its generated experimental surface. See
+Current pinned runtime and protocol baseline: `@openai/codex@0.146.1`
+(`codex-cli 0.146.1` / `rust-v0.146.1`), including its generated experimental surface. See
 [SOURCES.md](./SOURCES.md) for exact provenance.
 
 ## Highlights

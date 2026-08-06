@@ -302,7 +302,7 @@ function threadSnapshot(): Thread {
     status: { type: "idle" },
     path: "/tmp/thread-goal.jsonl",
     cwd: "/tmp",
-    cliVersion: "0.146.0",
+    cliVersion: "0.146.1",
     source: "unknown",
     threadSource: null,
     agentNickname: null,

@@ -54,6 +54,7 @@ const wireOptionalGeneratedFields = {
   "v2/HookMetadata.ts": ["additionalContextLimit"],
   "v2/InstalledApp.ts": ["runtimeName"],
   "v2/ManagedHooksRequirements.ts": ["SessionEnd"],
+  "v2/Model.ts": ["modelSpecialty"],
   "v2/PluginDetail.ts": ["scheduledTasks"],
   "v2/PluginShareContext.ts": ["canPublishToWorkspace"],
   "v2/PluginShareSaveResponse.ts": ["canPublishToWorkspace"],

@@ -31,6 +31,7 @@ describe("generated protocol runtime validation", () => {
       IsOptional<v2.ConfigRequirements, "windowsSandboxPrivateDesktop">,
       IsOptional<v2.ExternalAgentConfigImportHistory, "providerId">,
       IsOptional<v2.FeedbackRequirements, "enabled">,
+      IsOptional<v2.Model, "modelSpecialty">,
       IsOptional<v2.PluginShareContext, "canPublishToWorkspace">,
       IsOptional<v2.PluginShareSaveResponse, "canPublishToWorkspace">,
       IsOptional<v2.SkillInterface, "iconSmallUrl">,
@@ -60,9 +61,10 @@ describe("generated protocol runtime validation", () => {
       true,
       true,
       true,
+      true,
     ];
 
-    expect(optionalFields).toHaveLength(21);
+    expect(optionalFields).toHaveLength(22);
   });
 
   it("validates generated request and response schemas without losing bigint values", async () => {
