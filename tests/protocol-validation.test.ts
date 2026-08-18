@@ -15,8 +15,9 @@ type IsOptional<T, Key extends keyof T> = {} extends Pick<T, Key> ? true : false
 type CommandExecutionItem = Extract<v2.ThreadItem, { type: "commandExecution" }>;
 
 describe("generated protocol runtime validation", () => {
-  it("keeps newly introduced response fields optional for older wire shapes", () => {
+  it("keeps version-skew fields optional for older wire shapes", () => {
     const optionalFields: [
+      IsOptional<v2.AccountLoginCompletedNotification, "onboardingEntrypoint">,
       IsOptional<v2.AppToolSummary, "isEnabled">,
       IsOptional<v2.AppToolSummary, "disabledReason">,
       IsOptional<v2.AppToolSummary, "isReadOnly">,
@@ -30,13 +31,21 @@ describe("generated protocol runtime validation", () => {
       IsOptional<v2.ConfigRequirements, "feedback">,
       IsOptional<v2.ConfigRequirements, "windowsSandboxPrivateDesktop">,
       IsOptional<v2.ExternalAgentConfigImportHistory, "providerId">,
+      IsOptional<v2.ExternalAgentConfigDetectResponse, "connectors">,
+      IsOptional<v2.ExternalAgentConfigImportItemTypeSuccess, "title">,
       IsOptional<v2.FeedbackRequirements, "enabled">,
       IsOptional<v2.Model, "modelSpecialty">,
       IsOptional<v2.PluginShareContext, "canPublishToWorkspace">,
       IsOptional<v2.PluginShareSaveResponse, "canPublishToWorkspace">,
+      IsOptional<v2.PluginSummary, "installedAt">,
+      IsOptional<v2.PluginSummary, "disabledReason">,
+      IsOptional<v2.PluginSummary, "eligiblePlanTypes">,
       IsOptional<v2.SkillInterface, "iconSmallUrl">,
       IsOptional<v2.SkillInterface, "iconLargeUrl">,
       IsOptional<v2.Thread, "isPinned">,
+      IsOptional<v2.Thread, "section">,
+      IsOptional<v2.Thread, "sectionEnteredAt">,
+      IsOptional<v2.ToolRequestUserInputParams, "isBlocking">,
       IsOptional<CommandExecutionItem, "pluginId">,
       IsOptional<CommandExecutionItem, "scriptPath">,
     ] = [
@@ -62,9 +71,18 @@ describe("generated protocol runtime validation", () => {
       true,
       true,
       true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
     ];
 
-    expect(optionalFields).toHaveLength(22);
+    expect(optionalFields).toHaveLength(31);
   });
 
   it("validates generated request and response schemas without losing bigint values", async () => {
@@ -170,6 +188,19 @@ describe("generated protocol runtime validation", () => {
         },
       }),
     ).not.toThrow();
+    expect(() =>
+      validator.assertServerRequest({
+        id: "request-user-input",
+        method: "item/tool/requestUserInput",
+        params: {
+          autoResolutionMs: null,
+          itemId: "item-1",
+          questions: [],
+          threadId: "thread-1",
+          turnId: "turn-1",
+        },
+      }),
+    ).not.toThrow();
     expect(() => validator.assertClientRequest("future/request", { arbitrary: true })).not.toThrow();
     const oldImportHistories: ExternalAgentConfigImportHistoriesReadResponse = { data: [] };
     expect(() =>
@@ -260,8 +291,8 @@ describe("generated protocol runtime validation", () => {
     expect(protocolValidationMetadata).toMatchObject({
       defaultMode: "strict",
       validatedClientNotifications: 1,
-      validatedClientRequests: 130,
-      validatedClientResponses: 127,
+      validatedClientRequests: 136,
+      validatedClientResponses: 133,
       validatedServerNotifications: 72,
       validatedServerRequests: 11,
       unavailableResponseSchemas: [
