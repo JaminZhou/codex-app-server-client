@@ -21,6 +21,7 @@ const packageJson = JSON.parse(readFileSync(join(root, "package.json"), "utf8"))
 const methodMetadata = JSON.parse(readFileSync(join(root, "protocol-methods.json"), "utf8"));
 const expectedVersion = packageJson.dependencies?.["@openai/codex"];
 const wireOptionalGeneratedFields = {
+  "v2/AccountLoginCompletedNotification.ts": ["onboardingEntrypoint"],
   "v2/AppToolSummary.ts": [
     "title",
     "isEnabled",
@@ -48,8 +49,10 @@ const wireOptionalGeneratedFields = {
     "toolSummaries",
   ],
   "v2/ExternalAgentConfigImportItemTypeFailure.ts": ["subErrorType"],
+  "v2/ExternalAgentConfigDetectResponse.ts": ["connectors"],
   "v2/ExternalAgentConfigImportHistory.ts": ["providerId"],
   "v2/ExternalAgentConfigImportHistoriesReadResponse.ts": ["connectors"],
+  "v2/ExternalAgentConfigImportItemTypeSuccess.ts": ["title"],
   "v2/FeedbackRequirements.ts": ["enabled"],
   "v2/HookMetadata.ts": ["additionalContextLimit"],
   "v2/InstalledApp.ts": ["runtimeName"],
@@ -58,17 +61,25 @@ const wireOptionalGeneratedFields = {
   "v2/PluginDetail.ts": ["scheduledTasks"],
   "v2/PluginShareContext.ts": ["canPublishToWorkspace"],
   "v2/PluginShareSaveResponse.ts": ["canPublishToWorkspace"],
-  "v2/PluginSummary.ts": ["mustShowInstallationInterstitial"],
+  "v2/PluginSummary.ts": [
+    "mustShowInstallationInterstitial",
+    "installedAt",
+    "disabledReason",
+    "eligiblePlanTypes",
+  ],
   "v2/RateLimitSnapshot.ts": ["spendControlReached"],
   "v2/RawResponseCompletedNotification.ts": ["usage"],
   "v2/SkillInterface.ts": ["iconSmallUrl", "iconLargeUrl"],
-  "v2/Thread.ts": ["canAcceptDirectInput", "isPinned"],
+  "v2/Thread.ts": ["canAcceptDirectInput", "section", "sectionEnteredAt"],
   "v2/ThreadResumeResponse.ts": ["itemsBackwardsCursor", "turnsBackwardsCursor"],
   "v2/ThreadSearchOccurrencesResponse.ts": ["nextCursor"],
   "v2/TokenUsageBreakdown.ts": ["cacheWriteInputTokens"],
+  "v2/ToolRequestUserInputParams.ts": ["isBlocking"],
 };
 const compatibilityOptionalSchemaFields = {
-  base: {},
+  base: {
+    ToolRequestUserInputParams: ["isBlocking"],
+  },
   v2: {
     ExternalAgentConfigImportHistoriesReadResponse: ["connectors"],
   },
@@ -82,6 +93,22 @@ const compatibilityArrayItemDefinitions = {
   },
 };
 const compatibilityGeneratedTypeReplacements = {
+  "v2/Thread.ts": [
+    [
+      "ephemeral: boolean,\n/**\n * The independently persisted section selected for this thread, if any.",
+      [
+        "ephemeral: boolean,",
+        "/**",
+        " * Whether the thread was pinned by the user in Codex 0.146.x.",
+        " *",
+        " * @deprecated Codex 0.147.0 replaced pinning with thread sections.",
+        " */",
+        "isPinned?: boolean,",
+        "/**",
+        " * The independently persisted section selected for this thread, if any.",
+      ].join("\n"),
+    ],
+  ],
   "v2/ThreadItem.ts": [
     [
       "pluginId: string | null,\n/**\n * Safe plugin-relative path",

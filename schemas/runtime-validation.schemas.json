@@ -12,7 +12,11 @@
     }
   },
   "compatibilityOptionalFields": {
-    "base": {},
+    "base": {
+      "ToolRequestUserInputParams": [
+        "isBlocking"
+      ]
+    },
     "v2": {
       "ExternalAgentConfigImportHistoriesReadResponse": [
         "connectors"

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
-  "codexCliVersion": "0.146.1",
+  "codexCliVersion": "0.147.0",
   "source": {
     "repository": "https://github.com/openai/codex",
-    "tag": "rust-v0.146.1",
-    "commit": "79b4f03d35962b005b007a015113b38930711665",
+    "tag": "rust-v0.147.0",
+    "commit": "be6e8eac029b183056b7e4402879f15d2c85f61b",
     "path": "codex-rs/app-server-protocol/src/protocol/common.rs"
   },
   "methods": [
@@ -121,6 +121,14 @@
       "variant": "ThreadMetadataUpdate"
     },
     {
+      "method": "thread/section/move",
+      "response": {
+        "module": "v2/ThreadSectionMoveResponse",
+        "name": "ThreadSectionMoveResponse"
+      },
+      "variant": "ThreadSectionMove"
+    },
+    {
       "method": "thread/settings/update",
       "response": {
         "module": "v2/ThreadSettingsUpdateResponse",
@@ -215,6 +223,38 @@
         "name": "ThreadListResponse"
       },
       "variant": "ThreadList"
+    },
+    {
+      "method": "threadSection/list",
+      "response": {
+        "module": "v2/ThreadSectionListResponse",
+        "name": "ThreadSectionListResponse"
+      },
+      "variant": "ThreadSectionList"
+    },
+    {
+      "method": "threadSection/create",
+      "response": {
+        "module": "v2/ThreadSectionCreateResponse",
+        "name": "ThreadSectionCreateResponse"
+      },
+      "variant": "ThreadSectionCreate"
+    },
+    {
+      "method": "threadSection/update",
+      "response": {
+        "module": "v2/ThreadSectionUpdateResponse",
+        "name": "ThreadSectionUpdateResponse"
+      },
+      "variant": "ThreadSectionUpdate"
+    },
+    {
+      "method": "threadSection/delete",
+      "response": {
+        "module": "v2/ThreadSectionDeleteResponse",
+        "name": "ThreadSectionDeleteResponse"
+      },
+      "variant": "ThreadSectionDelete"
     },
     {
       "method": "thread/search",
@@ -327,6 +367,14 @@
         "name": "PluginListResponse"
       },
       "variant": "PluginList"
+    },
+    {
+      "method": "plugin/search",
+      "response": {
+        "module": "v2/PluginSearchResponse",
+        "name": "PluginSearchResponse"
+      },
+      "variant": "PluginSearch"
     },
     {
       "method": "plugin/installed",
