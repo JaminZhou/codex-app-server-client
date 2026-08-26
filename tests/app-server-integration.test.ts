@@ -227,7 +227,7 @@ describe("codex app-server integration", () => {
       responses.enqueueAssistantMessage("The command was declined safely.", "approval-2");
       writeFileSync(
         join(codexHome, "config.toml"),
-        mockProviderConfig(responses.origin, "untrusted", "user"),
+        mockProviderConfig(responses.origin, "on-request", "user"),
       );
 
       const client = new CodexAppServerClient({
@@ -248,7 +248,15 @@ describe("codex app-server integration", () => {
       try {
         await client.connect();
         const thread = await client.createThread({
-          approvalPolicy: "untrusted",
+          approvalPolicy: {
+            granular: {
+              sandbox_approval: true,
+              rules: false,
+              skill_approval: false,
+              request_permissions: false,
+              mcp_elicitations: false,
+            },
+          },
           approvalsReviewer: "user",
           cwd: workspace,
         });
