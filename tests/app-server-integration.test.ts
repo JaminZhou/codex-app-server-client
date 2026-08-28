@@ -215,10 +215,9 @@ describe("codex app-server integration", () => {
       const responses = new MockResponsesServer();
       await responses.start();
       responses.enqueueFunctionCall(
-        "shell_command",
+        "exec_command",
         {
-          command: `touch ${JSON.stringify(marker)}`,
-          timeout_ms: 5_000,
+          cmd: `touch ${JSON.stringify(marker)}`,
           workdir: workspace,
         },
         "call-decline",

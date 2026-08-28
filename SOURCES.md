@@ -13,9 +13,9 @@ This repository is an independently written client for public Codex interfaces.
 
 ## Pinned protocol provenance
 
-- CLI package: `@openai/codex@0.149.1`
-- Open-source tag: `rust-v0.149.1`
-- Open-source commit: `ff29a44391deccde0aba0f8390337d7f3c319ea4`
+- CLI package: `@openai/codex@0.150.1`
+- Open-source tag: `rust-v0.150.1`
+- Open-source commit: `90854393966b21e9ebfd21b122334eb09a20c93d`
 - Method-map source: `codex-rs/app-server-protocol/src/protocol/common.rs`
 
 The CLI generates `src/generated/protocol/` and `schemas/`. A deterministic post-generation

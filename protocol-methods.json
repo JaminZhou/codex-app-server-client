@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
-  "codexCliVersion": "0.149.1",
+  "codexCliVersion": "0.150.1",
   "source": {
     "repository": "https://github.com/openai/codex",
-    "tag": "rust-v0.149.1",
-    "commit": "ff29a44391deccde0aba0f8390337d7f3c319ea4",
+    "tag": "rust-v0.150.1",
+    "commit": "90854393966b21e9ebfd21b122334eb09a20c93d",
     "path": "codex-rs/app-server-protocol/src/protocol/common.rs"
   },
   "methods": [
@@ -745,6 +745,14 @@
       "variant": "ThreadRealtimeStop"
     },
     {
+      "method": "thread/timeline/list",
+      "response": {
+        "module": "v2/ThreadTimelineListResponse",
+        "name": "ThreadTimelineListResponse"
+      },
+      "variant": "ThreadTimelineList"
+    },
+    {
       "method": "thread/realtime/listVoices",
       "response": {
         "module": "v2/ThreadRealtimeListVoicesResponse",
@@ -927,6 +935,22 @@
         "name": "McpResourceReadResponse"
       },
       "variant": "McpResourceRead"
+    },
+    {
+      "method": "mcpServer/event/stream/start",
+      "response": {
+        "module": "v2/McpServerEventStreamStartResponse",
+        "name": "McpServerEventStreamStartResponse"
+      },
+      "variant": "McpServerEventStreamStart"
+    },
+    {
+      "method": "mcpServer/event/stream/stop",
+      "response": {
+        "module": "v2/McpServerEventStreamStopResponse",
+        "name": "McpServerEventStreamStopResponse"
+      },
+      "variant": "McpServerEventStreamStop"
     },
     {
       "method": "mcpServer/tool/call",

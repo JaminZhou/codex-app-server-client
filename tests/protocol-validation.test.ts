@@ -291,9 +291,9 @@ describe("generated protocol runtime validation", () => {
     expect(protocolValidationMetadata).toMatchObject({
       defaultMode: "strict",
       validatedClientNotifications: 1,
-      validatedClientRequests: 153,
-      validatedClientResponses: 150,
-      validatedServerNotifications: 77,
+      validatedClientRequests: 156,
+      validatedClientResponses: 153,
+      validatedServerNotifications: 81,
       validatedServerRequests: 11,
       unavailableResponseSchemas: [
         "getAuthStatus",
