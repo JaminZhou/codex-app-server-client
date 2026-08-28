@@ -105,8 +105,10 @@ import {
 } from "./websocket-transport";
 
 export type AppServerConnectionState = "disconnected" | "connecting" | "connected" | "closing";
-export type AppServerCallArguments<M extends AppServerMethod> = [AppServerParams<M>] extends [undefined]
-  ? [params?: undefined, options?: RequestOptions]
+export type AppServerCallArguments<M extends AppServerMethod> = [undefined] extends [
+  AppServerParams<M>,
+]
+  ? [params?: AppServerParams<M>, options?: RequestOptions]
   : [params: AppServerParams<M>, options?: RequestOptions];
 type StoredTypedNotificationHandler = (
   params: unknown,

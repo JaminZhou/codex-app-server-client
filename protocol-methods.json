@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
-  "codexCliVersion": "0.147.0",
+  "codexCliVersion": "0.150.1",
   "source": {
     "repository": "https://github.com/openai/codex",
-    "tag": "rust-v0.147.0",
-    "commit": "be6e8eac029b183056b7e4402879f15d2c85f61b",
+    "tag": "rust-v0.150.1",
+    "commit": "90854393966b21e9ebfd21b122334eb09a20c93d",
     "path": "codex-rs/app-server-protocol/src/protocol/common.rs"
   },
   "methods": [
@@ -15,6 +15,14 @@
         "name": "InitializeResponse"
       },
       "variant": "Initialize"
+    },
+    {
+      "method": "server/diagnostics",
+      "response": {
+        "module": "v2/ServerDiagnosticsResponse",
+        "name": "ServerDiagnosticsResponse"
+      },
+      "variant": "ServerDiagnostics"
     },
     {
       "method": "thread/start",
@@ -111,6 +119,54 @@
         "name": "ThreadGoalClearResponse"
       },
       "variant": "ThreadGoalClear"
+    },
+    {
+      "method": "thread/queue/add",
+      "response": {
+        "module": "v2/ThreadQueueAddResponse",
+        "name": "ThreadQueueAddResponse"
+      },
+      "variant": "ThreadQueueAdd"
+    },
+    {
+      "method": "thread/queue/list",
+      "response": {
+        "module": "v2/ThreadQueueListResponse",
+        "name": "ThreadQueueListResponse"
+      },
+      "variant": "ThreadQueueList"
+    },
+    {
+      "method": "thread/queue/update",
+      "response": {
+        "module": "v2/ThreadQueueUpdateResponse",
+        "name": "ThreadQueueUpdateResponse"
+      },
+      "variant": "ThreadQueueUpdate"
+    },
+    {
+      "method": "thread/queue/delete",
+      "response": {
+        "module": "v2/ThreadQueueDeleteResponse",
+        "name": "ThreadQueueDeleteResponse"
+      },
+      "variant": "ThreadQueueDelete"
+    },
+    {
+      "method": "thread/queue/reorder",
+      "response": {
+        "module": "v2/ThreadQueueReorderResponse",
+        "name": "ThreadQueueReorderResponse"
+      },
+      "variant": "ThreadQueueReorder"
+    },
+    {
+      "method": "thread/queue/start",
+      "response": {
+        "module": "v2/ThreadQueueStartResponse",
+        "name": "ThreadQueueStartResponse"
+      },
+      "variant": "ThreadQueueStart"
     },
     {
       "method": "thread/metadata/update",
@@ -217,12 +273,76 @@
       "variant": "ThreadRollback"
     },
     {
+      "method": "thread/revert",
+      "response": {
+        "module": "v2/ThreadRevertResponse",
+        "name": "ThreadRevertResponse"
+      },
+      "variant": "ThreadRevert"
+    },
+    {
       "method": "thread/list",
       "response": {
         "module": "v2/ThreadListResponse",
         "name": "ThreadListResponse"
       },
       "variant": "ThreadList"
+    },
+    {
+      "method": "project/list",
+      "response": {
+        "module": "v2/ProjectListResponse",
+        "name": "ProjectListResponse"
+      },
+      "variant": "ProjectList"
+    },
+    {
+      "method": "project/read",
+      "response": {
+        "module": "v2/ProjectReadResponse",
+        "name": "ProjectReadResponse"
+      },
+      "variant": "ProjectRead"
+    },
+    {
+      "method": "project/create",
+      "response": {
+        "module": "v2/ProjectCreateResponse",
+        "name": "ProjectCreateResponse"
+      },
+      "variant": "ProjectCreate"
+    },
+    {
+      "method": "project/import",
+      "response": {
+        "module": "v2/ProjectImportResponse",
+        "name": "ProjectImportResponse"
+      },
+      "variant": "ProjectImport"
+    },
+    {
+      "method": "project/update",
+      "response": {
+        "module": "v2/ProjectUpdateResponse",
+        "name": "ProjectUpdateResponse"
+      },
+      "variant": "ProjectUpdate"
+    },
+    {
+      "method": "project/move",
+      "response": {
+        "module": "v2/ProjectMoveResponse",
+        "name": "ProjectMoveResponse"
+      },
+      "variant": "ProjectMove"
+    },
+    {
+      "method": "project/delete",
+      "response": {
+        "module": "v2/ProjectDeleteResponse",
+        "name": "ProjectDeleteResponse"
+      },
+      "variant": "ProjectDelete"
     },
     {
       "method": "threadSection/list",
@@ -625,6 +745,14 @@
       "variant": "ThreadRealtimeStop"
     },
     {
+      "method": "thread/timeline/list",
+      "response": {
+        "module": "v2/ThreadTimelineListResponse",
+        "name": "ThreadTimelineListResponse"
+      },
+      "variant": "ThreadTimelineList"
+    },
+    {
       "method": "thread/realtime/listVoices",
       "response": {
         "module": "v2/ThreadRealtimeListVoicesResponse",
@@ -809,6 +937,22 @@
       "variant": "McpResourceRead"
     },
     {
+      "method": "mcpServer/event/stream/start",
+      "response": {
+        "module": "v2/McpServerEventStreamStartResponse",
+        "name": "McpServerEventStreamStartResponse"
+      },
+      "variant": "McpServerEventStreamStart"
+    },
+    {
+      "method": "mcpServer/event/stream/stop",
+      "response": {
+        "module": "v2/McpServerEventStreamStopResponse",
+        "name": "McpServerEventStreamStopResponse"
+      },
+      "variant": "McpServerEventStreamStop"
+    },
+    {
       "method": "mcpServer/tool/call",
       "response": {
         "module": "v2/McpServerToolCallResponse",
@@ -839,6 +983,22 @@
         "name": "LoginAccountResponse"
       },
       "variant": "LoginAccount"
+    },
+    {
+      "method": "account/bedrock/discover",
+      "response": {
+        "module": "v2/BedrockDiscoverResponse",
+        "name": "BedrockDiscoverResponse"
+      },
+      "variant": "BedrockDiscover"
+    },
+    {
+      "method": "account/bedrock/setup",
+      "response": {
+        "module": "v2/BedrockSetupResponse",
+        "name": "BedrockSetupResponse"
+      },
+      "variant": "BedrockSetup"
     },
     {
       "method": "account/login/cancel",

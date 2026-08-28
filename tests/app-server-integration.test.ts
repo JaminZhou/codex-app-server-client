@@ -215,10 +215,9 @@ describe("codex app-server integration", () => {
       const responses = new MockResponsesServer();
       await responses.start();
       responses.enqueueFunctionCall(
-        "shell_command",
+        "exec_command",
         {
-          command: `touch ${JSON.stringify(marker)}`,
-          timeout_ms: 5_000,
+          cmd: `touch ${JSON.stringify(marker)}`,
           workdir: workspace,
         },
         "call-decline",
@@ -227,7 +226,7 @@ describe("codex app-server integration", () => {
       responses.enqueueAssistantMessage("The command was declined safely.", "approval-2");
       writeFileSync(
         join(codexHome, "config.toml"),
-        mockProviderConfig(responses.origin, "untrusted", "user"),
+        mockProviderConfig(responses.origin, "on-request", "user"),
       );
 
       const client = new CodexAppServerClient({
@@ -248,7 +247,15 @@ describe("codex app-server integration", () => {
       try {
         await client.connect();
         const thread = await client.createThread({
-          approvalPolicy: "untrusted",
+          approvalPolicy: {
+            granular: {
+              sandbox_approval: true,
+              rules: false,
+              skill_approval: false,
+              request_permissions: false,
+              mcp_elicitations: false,
+            },
+          },
           approvalsReviewer: "user",
           cwd: workspace,
         });

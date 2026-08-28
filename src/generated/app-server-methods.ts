@@ -2,278 +2,318 @@
 
 import type { ClientRequest } from "./protocol/ClientRequest";
 import type { InitializeResponse as Response0 } from "./protocol/InitializeResponse";
-import type { ThreadStartResponse as Response1 } from "./protocol/v2/ThreadStartResponse";
-import type { ThreadResumeResponse as Response2 } from "./protocol/v2/ThreadResumeResponse";
-import type { ThreadForkResponse as Response3 } from "./protocol/v2/ThreadForkResponse";
-import type { ThreadArchiveResponse as Response4 } from "./protocol/v2/ThreadArchiveResponse";
-import type { ThreadDeleteResponse as Response5 } from "./protocol/v2/ThreadDeleteResponse";
-import type { ThreadUnsubscribeResponse as Response6 } from "./protocol/v2/ThreadUnsubscribeResponse";
-import type { ThreadIncrementElicitationResponse as Response7 } from "./protocol/v2/ThreadIncrementElicitationResponse";
-import type { ThreadDecrementElicitationResponse as Response8 } from "./protocol/v2/ThreadDecrementElicitationResponse";
-import type { ThreadSetNameResponse as Response9 } from "./protocol/v2/ThreadSetNameResponse";
-import type { ThreadGoalSetResponse as Response10 } from "./protocol/v2/ThreadGoalSetResponse";
-import type { ThreadGoalGetResponse as Response11 } from "./protocol/v2/ThreadGoalGetResponse";
-import type { ThreadGoalClearResponse as Response12 } from "./protocol/v2/ThreadGoalClearResponse";
-import type { ThreadMetadataUpdateResponse as Response13 } from "./protocol/v2/ThreadMetadataUpdateResponse";
-import type { ThreadSectionMoveResponse as Response14 } from "./protocol/v2/ThreadSectionMoveResponse";
-import type { ThreadSettingsUpdateResponse as Response15 } from "./protocol/v2/ThreadSettingsUpdateResponse";
-import type { ThreadMemoryModeSetResponse as Response16 } from "./protocol/v2/ThreadMemoryModeSetResponse";
-import type { MemoryResetResponse as Response17 } from "./protocol/v2/MemoryResetResponse";
-import type { ThreadUnarchiveResponse as Response18 } from "./protocol/v2/ThreadUnarchiveResponse";
-import type { ThreadCompactStartResponse as Response19 } from "./protocol/v2/ThreadCompactStartResponse";
-import type { ThreadShellCommandResponse as Response20 } from "./protocol/v2/ThreadShellCommandResponse";
-import type { ThreadApproveGuardianDeniedActionResponse as Response21 } from "./protocol/v2/ThreadApproveGuardianDeniedActionResponse";
-import type { ThreadBackgroundTerminalsCleanResponse as Response22 } from "./protocol/v2/ThreadBackgroundTerminalsCleanResponse";
-import type { ThreadBackgroundTerminalsListResponse as Response23 } from "./protocol/v2/ThreadBackgroundTerminalsListResponse";
-import type { ThreadBackgroundTerminalsTerminateResponse as Response24 } from "./protocol/v2/ThreadBackgroundTerminalsTerminateResponse";
-import type { ThreadRollbackResponse as Response25 } from "./protocol/v2/ThreadRollbackResponse";
-import type { ThreadListResponse as Response26 } from "./protocol/v2/ThreadListResponse";
-import type { ThreadSectionListResponse as Response27 } from "./protocol/v2/ThreadSectionListResponse";
-import type { ThreadSectionCreateResponse as Response28 } from "./protocol/v2/ThreadSectionCreateResponse";
-import type { ThreadSectionUpdateResponse as Response29 } from "./protocol/v2/ThreadSectionUpdateResponse";
-import type { ThreadSectionDeleteResponse as Response30 } from "./protocol/v2/ThreadSectionDeleteResponse";
-import type { ThreadSearchResponse as Response31 } from "./protocol/v2/ThreadSearchResponse";
-import type { ThreadSearchOccurrencesResponse as Response32 } from "./protocol/v2/ThreadSearchOccurrencesResponse";
-import type { ThreadLoadedListResponse as Response33 } from "./protocol/v2/ThreadLoadedListResponse";
-import type { ThreadReadResponse as Response34 } from "./protocol/v2/ThreadReadResponse";
-import type { ThreadTurnsListResponse as Response35 } from "./protocol/v2/ThreadTurnsListResponse";
-import type { ThreadItemsListResponse as Response36 } from "./protocol/v2/ThreadItemsListResponse";
-import type { ThreadInjectItemsResponse as Response37 } from "./protocol/v2/ThreadInjectItemsResponse";
-import type { SkillsListResponse as Response38 } from "./protocol/v2/SkillsListResponse";
-import type { SkillsExtraRootsSetResponse as Response39 } from "./protocol/v2/SkillsExtraRootsSetResponse";
-import type { HooksListResponse as Response40 } from "./protocol/v2/HooksListResponse";
-import type { MarketplaceAddResponse as Response41 } from "./protocol/v2/MarketplaceAddResponse";
-import type { MarketplaceRemoveResponse as Response42 } from "./protocol/v2/MarketplaceRemoveResponse";
-import type { MarketplaceUpgradeResponse as Response43 } from "./protocol/v2/MarketplaceUpgradeResponse";
-import type { PluginListResponse as Response44 } from "./protocol/v2/PluginListResponse";
-import type { PluginSearchResponse as Response45 } from "./protocol/v2/PluginSearchResponse";
-import type { PluginInstalledResponse as Response46 } from "./protocol/v2/PluginInstalledResponse";
-import type { PluginReadResponse as Response47 } from "./protocol/v2/PluginReadResponse";
-import type { PluginSkillReadResponse as Response48 } from "./protocol/v2/PluginSkillReadResponse";
-import type { PluginShareSaveResponse as Response49 } from "./protocol/v2/PluginShareSaveResponse";
-import type { PluginShareUpdateTargetsResponse as Response50 } from "./protocol/v2/PluginShareUpdateTargetsResponse";
-import type { PluginShareListResponse as Response51 } from "./protocol/v2/PluginShareListResponse";
-import type { PluginShareCheckoutResponse as Response52 } from "./protocol/v2/PluginShareCheckoutResponse";
-import type { PluginShareDeleteResponse as Response53 } from "./protocol/v2/PluginShareDeleteResponse";
-import type { AppsReadResponse as Response54 } from "./protocol/v2/AppsReadResponse";
-import type { AppsListResponse as Response55 } from "./protocol/v2/AppsListResponse";
-import type { AppsInstalledResponse as Response56 } from "./protocol/v2/AppsInstalledResponse";
-import type { FsReadFileResponse as Response57 } from "./protocol/v2/FsReadFileResponse";
-import type { FsWriteFileResponse as Response58 } from "./protocol/v2/FsWriteFileResponse";
-import type { FsCreateDirectoryResponse as Response59 } from "./protocol/v2/FsCreateDirectoryResponse";
-import type { FsGetMetadataResponse as Response60 } from "./protocol/v2/FsGetMetadataResponse";
-import type { FsReadDirectoryResponse as Response61 } from "./protocol/v2/FsReadDirectoryResponse";
-import type { FsRemoveResponse as Response62 } from "./protocol/v2/FsRemoveResponse";
-import type { FsCopyResponse as Response63 } from "./protocol/v2/FsCopyResponse";
-import type { FsWatchResponse as Response64 } from "./protocol/v2/FsWatchResponse";
-import type { FsUnwatchResponse as Response65 } from "./protocol/v2/FsUnwatchResponse";
-import type { SkillsConfigWriteResponse as Response66 } from "./protocol/v2/SkillsConfigWriteResponse";
-import type { PluginInstallResponse as Response67 } from "./protocol/v2/PluginInstallResponse";
-import type { PluginUninstallResponse as Response68 } from "./protocol/v2/PluginUninstallResponse";
-import type { TurnStartResponse as Response69 } from "./protocol/v2/TurnStartResponse";
-import type { TurnSteerResponse as Response70 } from "./protocol/v2/TurnSteerResponse";
-import type { TurnInterruptResponse as Response71 } from "./protocol/v2/TurnInterruptResponse";
-import type { ThreadRealtimeStartResponse as Response72 } from "./protocol/v2/ThreadRealtimeStartResponse";
-import type { ThreadRealtimeAppendAudioResponse as Response73 } from "./protocol/v2/ThreadRealtimeAppendAudioResponse";
-import type { ThreadRealtimeAppendTextResponse as Response74 } from "./protocol/v2/ThreadRealtimeAppendTextResponse";
-import type { ThreadRealtimeAppendSpeechResponse as Response75 } from "./protocol/v2/ThreadRealtimeAppendSpeechResponse";
-import type { ThreadRealtimeStopResponse as Response76 } from "./protocol/v2/ThreadRealtimeStopResponse";
-import type { ThreadRealtimeListVoicesResponse as Response77 } from "./protocol/v2/ThreadRealtimeListVoicesResponse";
-import type { ReviewStartResponse as Response78 } from "./protocol/v2/ReviewStartResponse";
-import type { ModelListResponse as Response79 } from "./protocol/v2/ModelListResponse";
-import type { ModelProviderCapabilitiesReadResponse as Response80 } from "./protocol/v2/ModelProviderCapabilitiesReadResponse";
-import type { ExperimentalFeatureListResponse as Response81 } from "./protocol/v2/ExperimentalFeatureListResponse";
-import type { PermissionProfileListResponse as Response82 } from "./protocol/v2/PermissionProfileListResponse";
-import type { ExperimentalFeatureEnablementSetResponse as Response83 } from "./protocol/v2/ExperimentalFeatureEnablementSetResponse";
-import type { RemoteControlEnableResponse as Response84 } from "./protocol/v2/RemoteControlEnableResponse";
-import type { RemoteControlDisableResponse as Response85 } from "./protocol/v2/RemoteControlDisableResponse";
-import type { RemoteControlStatusReadResponse as Response86 } from "./protocol/v2/RemoteControlStatusReadResponse";
-import type { RemoteControlPairingStartResponse as Response87 } from "./protocol/v2/RemoteControlPairingStartResponse";
-import type { RemoteControlPairingStatusResponse as Response88 } from "./protocol/v2/RemoteControlPairingStatusResponse";
-import type { RemoteControlClientsListResponse as Response89 } from "./protocol/v2/RemoteControlClientsListResponse";
-import type { RemoteControlClientsRevokeResponse as Response90 } from "./protocol/v2/RemoteControlClientsRevokeResponse";
-import type { CollaborationModeListResponse as Response91 } from "./protocol/v2/CollaborationModeListResponse";
-import type { MockExperimentalMethodResponse as Response92 } from "./protocol/v2/MockExperimentalMethodResponse";
-import type { EnvironmentAddResponse as Response93 } from "./protocol/v2/EnvironmentAddResponse";
-import type { EnvironmentInfoResponse as Response94 } from "./protocol/v2/EnvironmentInfoResponse";
-import type { EnvironmentStatusResponse as Response95 } from "./protocol/v2/EnvironmentStatusResponse";
-import type { McpServerOauthLoginResponse as Response96 } from "./protocol/v2/McpServerOauthLoginResponse";
-import type { McpServerRefreshResponse as Response97 } from "./protocol/v2/McpServerRefreshResponse";
-import type { ListMcpServerStatusResponse as Response98 } from "./protocol/v2/ListMcpServerStatusResponse";
-import type { McpResourceReadResponse as Response99 } from "./protocol/v2/McpResourceReadResponse";
-import type { McpServerToolCallResponse as Response100 } from "./protocol/v2/McpServerToolCallResponse";
-import type { WindowsSandboxSetupStartResponse as Response101 } from "./protocol/v2/WindowsSandboxSetupStartResponse";
-import type { WindowsSandboxReadinessResponse as Response102 } from "./protocol/v2/WindowsSandboxReadinessResponse";
-import type { LoginAccountResponse as Response103 } from "./protocol/v2/LoginAccountResponse";
-import type { CancelLoginAccountResponse as Response104 } from "./protocol/v2/CancelLoginAccountResponse";
-import type { LogoutAccountResponse as Response105 } from "./protocol/v2/LogoutAccountResponse";
-import type { GetAccountRateLimitsResponse as Response106 } from "./protocol/v2/GetAccountRateLimitsResponse";
-import type { ConsumeAccountRateLimitResetCreditResponse as Response107 } from "./protocol/v2/ConsumeAccountRateLimitResetCreditResponse";
-import type { GetAccountTokenUsageResponse as Response108 } from "./protocol/v2/GetAccountTokenUsageResponse";
-import type { GetWorkspaceMessagesResponse as Response109 } from "./protocol/v2/GetWorkspaceMessagesResponse";
-import type { SendAddCreditsNudgeEmailResponse as Response110 } from "./protocol/v2/SendAddCreditsNudgeEmailResponse";
-import type { FeedbackUploadResponse as Response111 } from "./protocol/v2/FeedbackUploadResponse";
-import type { CommandExecResponse as Response112 } from "./protocol/v2/CommandExecResponse";
-import type { CommandExecWriteResponse as Response113 } from "./protocol/v2/CommandExecWriteResponse";
-import type { CommandExecTerminateResponse as Response114 } from "./protocol/v2/CommandExecTerminateResponse";
-import type { CommandExecResizeResponse as Response115 } from "./protocol/v2/CommandExecResizeResponse";
-import type { ProcessSpawnResponse as Response116 } from "./protocol/v2/ProcessSpawnResponse";
-import type { ProcessWriteStdinResponse as Response117 } from "./protocol/v2/ProcessWriteStdinResponse";
-import type { ProcessKillResponse as Response118 } from "./protocol/v2/ProcessKillResponse";
-import type { ProcessResizePtyResponse as Response119 } from "./protocol/v2/ProcessResizePtyResponse";
-import type { ConfigReadResponse as Response120 } from "./protocol/v2/ConfigReadResponse";
-import type { ExternalAgentConfigDetectResponse as Response121 } from "./protocol/v2/ExternalAgentConfigDetectResponse";
-import type { ExternalAgentConfigImportResponse as Response122 } from "./protocol/v2/ExternalAgentConfigImportResponse";
-import type { ExternalAgentConfigImportHistoryRecordResponse as Response123 } from "./protocol/v2/ExternalAgentConfigImportHistoryRecordResponse";
-import type { ExternalAgentConfigImportHistoriesReadResponse as Response124 } from "./protocol/v2/ExternalAgentConfigImportHistoriesReadResponse";
-import type { ConfigWriteResponse as Response125 } from "./protocol/v2/ConfigWriteResponse";
-import type { ConfigRequirementsReadResponse as Response126 } from "./protocol/v2/ConfigRequirementsReadResponse";
-import type { GetAccountResponse as Response127 } from "./protocol/v2/GetAccountResponse";
-import type { GetConversationSummaryResponse as Response128 } from "./protocol/GetConversationSummaryResponse";
-import type { GitDiffToRemoteResponse as Response129 } from "./protocol/GitDiffToRemoteResponse";
-import type { GetAuthStatusResponse as Response130 } from "./protocol/GetAuthStatusResponse";
-import type { FuzzyFileSearchResponse as Response131 } from "./protocol/FuzzyFileSearchResponse";
-import type { FuzzyFileSearchSessionStartResponse as Response132 } from "./protocol/FuzzyFileSearchSessionStartResponse";
-import type { FuzzyFileSearchSessionUpdateResponse as Response133 } from "./protocol/FuzzyFileSearchSessionUpdateResponse";
-import type { FuzzyFileSearchSessionStopResponse as Response134 } from "./protocol/FuzzyFileSearchSessionStopResponse";
+import type { ServerDiagnosticsResponse as Response1 } from "./protocol/v2/ServerDiagnosticsResponse";
+import type { ThreadStartResponse as Response2 } from "./protocol/v2/ThreadStartResponse";
+import type { ThreadResumeResponse as Response3 } from "./protocol/v2/ThreadResumeResponse";
+import type { ThreadForkResponse as Response4 } from "./protocol/v2/ThreadForkResponse";
+import type { ThreadArchiveResponse as Response5 } from "./protocol/v2/ThreadArchiveResponse";
+import type { ThreadDeleteResponse as Response6 } from "./protocol/v2/ThreadDeleteResponse";
+import type { ThreadUnsubscribeResponse as Response7 } from "./protocol/v2/ThreadUnsubscribeResponse";
+import type { ThreadIncrementElicitationResponse as Response8 } from "./protocol/v2/ThreadIncrementElicitationResponse";
+import type { ThreadDecrementElicitationResponse as Response9 } from "./protocol/v2/ThreadDecrementElicitationResponse";
+import type { ThreadSetNameResponse as Response10 } from "./protocol/v2/ThreadSetNameResponse";
+import type { ThreadGoalSetResponse as Response11 } from "./protocol/v2/ThreadGoalSetResponse";
+import type { ThreadGoalGetResponse as Response12 } from "./protocol/v2/ThreadGoalGetResponse";
+import type { ThreadGoalClearResponse as Response13 } from "./protocol/v2/ThreadGoalClearResponse";
+import type { ThreadQueueAddResponse as Response14 } from "./protocol/v2/ThreadQueueAddResponse";
+import type { ThreadQueueListResponse as Response15 } from "./protocol/v2/ThreadQueueListResponse";
+import type { ThreadQueueUpdateResponse as Response16 } from "./protocol/v2/ThreadQueueUpdateResponse";
+import type { ThreadQueueDeleteResponse as Response17 } from "./protocol/v2/ThreadQueueDeleteResponse";
+import type { ThreadQueueReorderResponse as Response18 } from "./protocol/v2/ThreadQueueReorderResponse";
+import type { ThreadQueueStartResponse as Response19 } from "./protocol/v2/ThreadQueueStartResponse";
+import type { ThreadMetadataUpdateResponse as Response20 } from "./protocol/v2/ThreadMetadataUpdateResponse";
+import type { ThreadSectionMoveResponse as Response21 } from "./protocol/v2/ThreadSectionMoveResponse";
+import type { ThreadSettingsUpdateResponse as Response22 } from "./protocol/v2/ThreadSettingsUpdateResponse";
+import type { ThreadMemoryModeSetResponse as Response23 } from "./protocol/v2/ThreadMemoryModeSetResponse";
+import type { MemoryResetResponse as Response24 } from "./protocol/v2/MemoryResetResponse";
+import type { ThreadUnarchiveResponse as Response25 } from "./protocol/v2/ThreadUnarchiveResponse";
+import type { ThreadCompactStartResponse as Response26 } from "./protocol/v2/ThreadCompactStartResponse";
+import type { ThreadShellCommandResponse as Response27 } from "./protocol/v2/ThreadShellCommandResponse";
+import type { ThreadApproveGuardianDeniedActionResponse as Response28 } from "./protocol/v2/ThreadApproveGuardianDeniedActionResponse";
+import type { ThreadBackgroundTerminalsCleanResponse as Response29 } from "./protocol/v2/ThreadBackgroundTerminalsCleanResponse";
+import type { ThreadBackgroundTerminalsListResponse as Response30 } from "./protocol/v2/ThreadBackgroundTerminalsListResponse";
+import type { ThreadBackgroundTerminalsTerminateResponse as Response31 } from "./protocol/v2/ThreadBackgroundTerminalsTerminateResponse";
+import type { ThreadRollbackResponse as Response32 } from "./protocol/v2/ThreadRollbackResponse";
+import type { ThreadRevertResponse as Response33 } from "./protocol/v2/ThreadRevertResponse";
+import type { ThreadListResponse as Response34 } from "./protocol/v2/ThreadListResponse";
+import type { ProjectListResponse as Response35 } from "./protocol/v2/ProjectListResponse";
+import type { ProjectReadResponse as Response36 } from "./protocol/v2/ProjectReadResponse";
+import type { ProjectCreateResponse as Response37 } from "./protocol/v2/ProjectCreateResponse";
+import type { ProjectImportResponse as Response38 } from "./protocol/v2/ProjectImportResponse";
+import type { ProjectUpdateResponse as Response39 } from "./protocol/v2/ProjectUpdateResponse";
+import type { ProjectMoveResponse as Response40 } from "./protocol/v2/ProjectMoveResponse";
+import type { ProjectDeleteResponse as Response41 } from "./protocol/v2/ProjectDeleteResponse";
+import type { ThreadSectionListResponse as Response42 } from "./protocol/v2/ThreadSectionListResponse";
+import type { ThreadSectionCreateResponse as Response43 } from "./protocol/v2/ThreadSectionCreateResponse";
+import type { ThreadSectionUpdateResponse as Response44 } from "./protocol/v2/ThreadSectionUpdateResponse";
+import type { ThreadSectionDeleteResponse as Response45 } from "./protocol/v2/ThreadSectionDeleteResponse";
+import type { ThreadSearchResponse as Response46 } from "./protocol/v2/ThreadSearchResponse";
+import type { ThreadSearchOccurrencesResponse as Response47 } from "./protocol/v2/ThreadSearchOccurrencesResponse";
+import type { ThreadLoadedListResponse as Response48 } from "./protocol/v2/ThreadLoadedListResponse";
+import type { ThreadReadResponse as Response49 } from "./protocol/v2/ThreadReadResponse";
+import type { ThreadTurnsListResponse as Response50 } from "./protocol/v2/ThreadTurnsListResponse";
+import type { ThreadItemsListResponse as Response51 } from "./protocol/v2/ThreadItemsListResponse";
+import type { ThreadInjectItemsResponse as Response52 } from "./protocol/v2/ThreadInjectItemsResponse";
+import type { SkillsListResponse as Response53 } from "./protocol/v2/SkillsListResponse";
+import type { SkillsExtraRootsSetResponse as Response54 } from "./protocol/v2/SkillsExtraRootsSetResponse";
+import type { HooksListResponse as Response55 } from "./protocol/v2/HooksListResponse";
+import type { MarketplaceAddResponse as Response56 } from "./protocol/v2/MarketplaceAddResponse";
+import type { MarketplaceRemoveResponse as Response57 } from "./protocol/v2/MarketplaceRemoveResponse";
+import type { MarketplaceUpgradeResponse as Response58 } from "./protocol/v2/MarketplaceUpgradeResponse";
+import type { PluginListResponse as Response59 } from "./protocol/v2/PluginListResponse";
+import type { PluginSearchResponse as Response60 } from "./protocol/v2/PluginSearchResponse";
+import type { PluginInstalledResponse as Response61 } from "./protocol/v2/PluginInstalledResponse";
+import type { PluginReadResponse as Response62 } from "./protocol/v2/PluginReadResponse";
+import type { PluginSkillReadResponse as Response63 } from "./protocol/v2/PluginSkillReadResponse";
+import type { PluginShareSaveResponse as Response64 } from "./protocol/v2/PluginShareSaveResponse";
+import type { PluginShareUpdateTargetsResponse as Response65 } from "./protocol/v2/PluginShareUpdateTargetsResponse";
+import type { PluginShareListResponse as Response66 } from "./protocol/v2/PluginShareListResponse";
+import type { PluginShareCheckoutResponse as Response67 } from "./protocol/v2/PluginShareCheckoutResponse";
+import type { PluginShareDeleteResponse as Response68 } from "./protocol/v2/PluginShareDeleteResponse";
+import type { AppsReadResponse as Response69 } from "./protocol/v2/AppsReadResponse";
+import type { AppsListResponse as Response70 } from "./protocol/v2/AppsListResponse";
+import type { AppsInstalledResponse as Response71 } from "./protocol/v2/AppsInstalledResponse";
+import type { FsReadFileResponse as Response72 } from "./protocol/v2/FsReadFileResponse";
+import type { FsWriteFileResponse as Response73 } from "./protocol/v2/FsWriteFileResponse";
+import type { FsCreateDirectoryResponse as Response74 } from "./protocol/v2/FsCreateDirectoryResponse";
+import type { FsGetMetadataResponse as Response75 } from "./protocol/v2/FsGetMetadataResponse";
+import type { FsReadDirectoryResponse as Response76 } from "./protocol/v2/FsReadDirectoryResponse";
+import type { FsRemoveResponse as Response77 } from "./protocol/v2/FsRemoveResponse";
+import type { FsCopyResponse as Response78 } from "./protocol/v2/FsCopyResponse";
+import type { FsWatchResponse as Response79 } from "./protocol/v2/FsWatchResponse";
+import type { FsUnwatchResponse as Response80 } from "./protocol/v2/FsUnwatchResponse";
+import type { SkillsConfigWriteResponse as Response81 } from "./protocol/v2/SkillsConfigWriteResponse";
+import type { PluginInstallResponse as Response82 } from "./protocol/v2/PluginInstallResponse";
+import type { PluginUninstallResponse as Response83 } from "./protocol/v2/PluginUninstallResponse";
+import type { TurnStartResponse as Response84 } from "./protocol/v2/TurnStartResponse";
+import type { TurnSteerResponse as Response85 } from "./protocol/v2/TurnSteerResponse";
+import type { TurnInterruptResponse as Response86 } from "./protocol/v2/TurnInterruptResponse";
+import type { ThreadRealtimeStartResponse as Response87 } from "./protocol/v2/ThreadRealtimeStartResponse";
+import type { ThreadRealtimeAppendAudioResponse as Response88 } from "./protocol/v2/ThreadRealtimeAppendAudioResponse";
+import type { ThreadRealtimeAppendTextResponse as Response89 } from "./protocol/v2/ThreadRealtimeAppendTextResponse";
+import type { ThreadRealtimeAppendSpeechResponse as Response90 } from "./protocol/v2/ThreadRealtimeAppendSpeechResponse";
+import type { ThreadRealtimeStopResponse as Response91 } from "./protocol/v2/ThreadRealtimeStopResponse";
+import type { ThreadTimelineListResponse as Response92 } from "./protocol/v2/ThreadTimelineListResponse";
+import type { ThreadRealtimeListVoicesResponse as Response93 } from "./protocol/v2/ThreadRealtimeListVoicesResponse";
+import type { ReviewStartResponse as Response94 } from "./protocol/v2/ReviewStartResponse";
+import type { ModelListResponse as Response95 } from "./protocol/v2/ModelListResponse";
+import type { ModelProviderCapabilitiesReadResponse as Response96 } from "./protocol/v2/ModelProviderCapabilitiesReadResponse";
+import type { ExperimentalFeatureListResponse as Response97 } from "./protocol/v2/ExperimentalFeatureListResponse";
+import type { PermissionProfileListResponse as Response98 } from "./protocol/v2/PermissionProfileListResponse";
+import type { ExperimentalFeatureEnablementSetResponse as Response99 } from "./protocol/v2/ExperimentalFeatureEnablementSetResponse";
+import type { RemoteControlEnableResponse as Response100 } from "./protocol/v2/RemoteControlEnableResponse";
+import type { RemoteControlDisableResponse as Response101 } from "./protocol/v2/RemoteControlDisableResponse";
+import type { RemoteControlStatusReadResponse as Response102 } from "./protocol/v2/RemoteControlStatusReadResponse";
+import type { RemoteControlPairingStartResponse as Response103 } from "./protocol/v2/RemoteControlPairingStartResponse";
+import type { RemoteControlPairingStatusResponse as Response104 } from "./protocol/v2/RemoteControlPairingStatusResponse";
+import type { RemoteControlClientsListResponse as Response105 } from "./protocol/v2/RemoteControlClientsListResponse";
+import type { RemoteControlClientsRevokeResponse as Response106 } from "./protocol/v2/RemoteControlClientsRevokeResponse";
+import type { CollaborationModeListResponse as Response107 } from "./protocol/v2/CollaborationModeListResponse";
+import type { MockExperimentalMethodResponse as Response108 } from "./protocol/v2/MockExperimentalMethodResponse";
+import type { EnvironmentAddResponse as Response109 } from "./protocol/v2/EnvironmentAddResponse";
+import type { EnvironmentInfoResponse as Response110 } from "./protocol/v2/EnvironmentInfoResponse";
+import type { EnvironmentStatusResponse as Response111 } from "./protocol/v2/EnvironmentStatusResponse";
+import type { McpServerOauthLoginResponse as Response112 } from "./protocol/v2/McpServerOauthLoginResponse";
+import type { McpServerRefreshResponse as Response113 } from "./protocol/v2/McpServerRefreshResponse";
+import type { ListMcpServerStatusResponse as Response114 } from "./protocol/v2/ListMcpServerStatusResponse";
+import type { McpResourceReadResponse as Response115 } from "./protocol/v2/McpResourceReadResponse";
+import type { McpServerEventStreamStartResponse as Response116 } from "./protocol/v2/McpServerEventStreamStartResponse";
+import type { McpServerEventStreamStopResponse as Response117 } from "./protocol/v2/McpServerEventStreamStopResponse";
+import type { McpServerToolCallResponse as Response118 } from "./protocol/v2/McpServerToolCallResponse";
+import type { WindowsSandboxSetupStartResponse as Response119 } from "./protocol/v2/WindowsSandboxSetupStartResponse";
+import type { WindowsSandboxReadinessResponse as Response120 } from "./protocol/v2/WindowsSandboxReadinessResponse";
+import type { LoginAccountResponse as Response121 } from "./protocol/v2/LoginAccountResponse";
+import type { BedrockDiscoverResponse as Response122 } from "./protocol/v2/BedrockDiscoverResponse";
+import type { BedrockSetupResponse as Response123 } from "./protocol/v2/BedrockSetupResponse";
+import type { CancelLoginAccountResponse as Response124 } from "./protocol/v2/CancelLoginAccountResponse";
+import type { LogoutAccountResponse as Response125 } from "./protocol/v2/LogoutAccountResponse";
+import type { GetAccountRateLimitsResponse as Response126 } from "./protocol/v2/GetAccountRateLimitsResponse";
+import type { ConsumeAccountRateLimitResetCreditResponse as Response127 } from "./protocol/v2/ConsumeAccountRateLimitResetCreditResponse";
+import type { GetAccountTokenUsageResponse as Response128 } from "./protocol/v2/GetAccountTokenUsageResponse";
+import type { GetWorkspaceMessagesResponse as Response129 } from "./protocol/v2/GetWorkspaceMessagesResponse";
+import type { SendAddCreditsNudgeEmailResponse as Response130 } from "./protocol/v2/SendAddCreditsNudgeEmailResponse";
+import type { FeedbackUploadResponse as Response131 } from "./protocol/v2/FeedbackUploadResponse";
+import type { CommandExecResponse as Response132 } from "./protocol/v2/CommandExecResponse";
+import type { CommandExecWriteResponse as Response133 } from "./protocol/v2/CommandExecWriteResponse";
+import type { CommandExecTerminateResponse as Response134 } from "./protocol/v2/CommandExecTerminateResponse";
+import type { CommandExecResizeResponse as Response135 } from "./protocol/v2/CommandExecResizeResponse";
+import type { ProcessSpawnResponse as Response136 } from "./protocol/v2/ProcessSpawnResponse";
+import type { ProcessWriteStdinResponse as Response137 } from "./protocol/v2/ProcessWriteStdinResponse";
+import type { ProcessKillResponse as Response138 } from "./protocol/v2/ProcessKillResponse";
+import type { ProcessResizePtyResponse as Response139 } from "./protocol/v2/ProcessResizePtyResponse";
+import type { ConfigReadResponse as Response140 } from "./protocol/v2/ConfigReadResponse";
+import type { ExternalAgentConfigDetectResponse as Response141 } from "./protocol/v2/ExternalAgentConfigDetectResponse";
+import type { ExternalAgentConfigImportResponse as Response142 } from "./protocol/v2/ExternalAgentConfigImportResponse";
+import type { ExternalAgentConfigImportHistoryRecordResponse as Response143 } from "./protocol/v2/ExternalAgentConfigImportHistoryRecordResponse";
+import type { ExternalAgentConfigImportHistoriesReadResponse as Response144 } from "./protocol/v2/ExternalAgentConfigImportHistoriesReadResponse";
+import type { ConfigWriteResponse as Response145 } from "./protocol/v2/ConfigWriteResponse";
+import type { ConfigRequirementsReadResponse as Response146 } from "./protocol/v2/ConfigRequirementsReadResponse";
+import type { GetAccountResponse as Response147 } from "./protocol/v2/GetAccountResponse";
+import type { GetConversationSummaryResponse as Response148 } from "./protocol/GetConversationSummaryResponse";
+import type { GitDiffToRemoteResponse as Response149 } from "./protocol/GitDiffToRemoteResponse";
+import type { GetAuthStatusResponse as Response150 } from "./protocol/GetAuthStatusResponse";
+import type { FuzzyFileSearchResponse as Response151 } from "./protocol/FuzzyFileSearchResponse";
+import type { FuzzyFileSearchSessionStartResponse as Response152 } from "./protocol/FuzzyFileSearchSessionStartResponse";
+import type { FuzzyFileSearchSessionUpdateResponse as Response153 } from "./protocol/FuzzyFileSearchSessionUpdateResponse";
+import type { FuzzyFileSearchSessionStopResponse as Response154 } from "./protocol/FuzzyFileSearchSessionStopResponse";
 
 export interface AppServerResponseMap {
   "initialize": Response0;
-  "thread/start": Response1;
-  "thread/resume": Response2;
-  "thread/fork": Response3;
-  "thread/archive": Response4;
-  "thread/delete": Response5;
-  "thread/unsubscribe": Response6;
-  "thread/increment_elicitation": Response7;
-  "thread/decrement_elicitation": Response8;
-  "thread/name/set": Response9;
-  "thread/goal/set": Response10;
-  "thread/goal/get": Response11;
-  "thread/goal/clear": Response12;
-  "thread/metadata/update": Response13;
-  "thread/section/move": Response14;
-  "thread/settings/update": Response15;
-  "thread/memoryMode/set": Response16;
-  "memory/reset": Response17;
-  "thread/unarchive": Response18;
-  "thread/compact/start": Response19;
-  "thread/shellCommand": Response20;
-  "thread/approveGuardianDeniedAction": Response21;
-  "thread/backgroundTerminals/clean": Response22;
-  "thread/backgroundTerminals/list": Response23;
-  "thread/backgroundTerminals/terminate": Response24;
-  "thread/rollback": Response25;
-  "thread/list": Response26;
-  "threadSection/list": Response27;
-  "threadSection/create": Response28;
-  "threadSection/update": Response29;
-  "threadSection/delete": Response30;
-  "thread/search": Response31;
-  "thread/searchOccurrences": Response32;
-  "thread/loaded/list": Response33;
-  "thread/read": Response34;
-  "thread/turns/list": Response35;
-  "thread/items/list": Response36;
-  "thread/inject_items": Response37;
-  "skills/list": Response38;
-  "skills/extraRoots/set": Response39;
-  "hooks/list": Response40;
-  "marketplace/add": Response41;
-  "marketplace/remove": Response42;
-  "marketplace/upgrade": Response43;
-  "plugin/list": Response44;
-  "plugin/search": Response45;
-  "plugin/installed": Response46;
-  "plugin/read": Response47;
-  "plugin/skill/read": Response48;
-  "plugin/share/save": Response49;
-  "plugin/share/updateTargets": Response50;
-  "plugin/share/list": Response51;
-  "plugin/share/checkout": Response52;
-  "plugin/share/delete": Response53;
-  "app/read": Response54;
-  "app/list": Response55;
-  "app/installed": Response56;
-  "fs/readFile": Response57;
-  "fs/writeFile": Response58;
-  "fs/createDirectory": Response59;
-  "fs/getMetadata": Response60;
-  "fs/readDirectory": Response61;
-  "fs/remove": Response62;
-  "fs/copy": Response63;
-  "fs/watch": Response64;
-  "fs/unwatch": Response65;
-  "skills/config/write": Response66;
-  "plugin/install": Response67;
-  "plugin/uninstall": Response68;
-  "turn/start": Response69;
-  "turn/steer": Response70;
-  "turn/interrupt": Response71;
-  "thread/realtime/start": Response72;
-  "thread/realtime/appendAudio": Response73;
-  "thread/realtime/appendText": Response74;
-  "thread/realtime/appendSpeech": Response75;
-  "thread/realtime/stop": Response76;
-  "thread/realtime/listVoices": Response77;
-  "review/start": Response78;
-  "model/list": Response79;
-  "modelProvider/capabilities/read": Response80;
-  "experimentalFeature/list": Response81;
-  "permissionProfile/list": Response82;
-  "experimentalFeature/enablement/set": Response83;
-  "remoteControl/enable": Response84;
-  "remoteControl/disable": Response85;
-  "remoteControl/status/read": Response86;
-  "remoteControl/pairing/start": Response87;
-  "remoteControl/pairing/status": Response88;
-  "remoteControl/client/list": Response89;
-  "remoteControl/client/revoke": Response90;
-  "collaborationMode/list": Response91;
-  "mock/experimentalMethod": Response92;
-  "environment/add": Response93;
-  "environment/info": Response94;
-  "environment/status": Response95;
-  "mcpServer/oauth/login": Response96;
-  "config/mcpServer/reload": Response97;
-  "mcpServerStatus/list": Response98;
-  "mcpServer/resource/read": Response99;
-  "mcpServer/tool/call": Response100;
-  "windowsSandbox/setupStart": Response101;
-  "windowsSandbox/readiness": Response102;
-  "account/login/start": Response103;
-  "account/login/cancel": Response104;
-  "account/logout": Response105;
-  "account/rateLimits/read": Response106;
-  "account/rateLimitResetCredit/consume": Response107;
-  "account/usage/read": Response108;
-  "account/workspaceMessages/read": Response109;
-  "account/sendAddCreditsNudgeEmail": Response110;
-  "feedback/upload": Response111;
-  "command/exec": Response112;
-  "command/exec/write": Response113;
-  "command/exec/terminate": Response114;
-  "command/exec/resize": Response115;
-  "process/spawn": Response116;
-  "process/writeStdin": Response117;
-  "process/kill": Response118;
-  "process/resizePty": Response119;
-  "config/read": Response120;
-  "externalAgentConfig/detect": Response121;
-  "externalAgentConfig/import": Response122;
-  "externalAgentConfig/import/recordHistory": Response123;
-  "externalAgentConfig/import/readHistories": Response124;
-  "config/value/write": Response125;
-  "config/batchWrite": Response125;
-  "configRequirements/read": Response126;
-  "account/read": Response127;
-  "getConversationSummary": Response128;
-  "gitDiffToRemote": Response129;
-  "getAuthStatus": Response130;
-  "fuzzyFileSearch": Response131;
-  "fuzzyFileSearch/sessionStart": Response132;
-  "fuzzyFileSearch/sessionUpdate": Response133;
-  "fuzzyFileSearch/sessionStop": Response134;
+  "server/diagnostics": Response1;
+  "thread/start": Response2;
+  "thread/resume": Response3;
+  "thread/fork": Response4;
+  "thread/archive": Response5;
+  "thread/delete": Response6;
+  "thread/unsubscribe": Response7;
+  "thread/increment_elicitation": Response8;
+  "thread/decrement_elicitation": Response9;
+  "thread/name/set": Response10;
+  "thread/goal/set": Response11;
+  "thread/goal/get": Response12;
+  "thread/goal/clear": Response13;
+  "thread/queue/add": Response14;
+  "thread/queue/list": Response15;
+  "thread/queue/update": Response16;
+  "thread/queue/delete": Response17;
+  "thread/queue/reorder": Response18;
+  "thread/queue/start": Response19;
+  "thread/metadata/update": Response20;
+  "thread/section/move": Response21;
+  "thread/settings/update": Response22;
+  "thread/memoryMode/set": Response23;
+  "memory/reset": Response24;
+  "thread/unarchive": Response25;
+  "thread/compact/start": Response26;
+  "thread/shellCommand": Response27;
+  "thread/approveGuardianDeniedAction": Response28;
+  "thread/backgroundTerminals/clean": Response29;
+  "thread/backgroundTerminals/list": Response30;
+  "thread/backgroundTerminals/terminate": Response31;
+  "thread/rollback": Response32;
+  "thread/revert": Response33;
+  "thread/list": Response34;
+  "project/list": Response35;
+  "project/read": Response36;
+  "project/create": Response37;
+  "project/import": Response38;
+  "project/update": Response39;
+  "project/move": Response40;
+  "project/delete": Response41;
+  "threadSection/list": Response42;
+  "threadSection/create": Response43;
+  "threadSection/update": Response44;
+  "threadSection/delete": Response45;
+  "thread/search": Response46;
+  "thread/searchOccurrences": Response47;
+  "thread/loaded/list": Response48;
+  "thread/read": Response49;
+  "thread/turns/list": Response50;
+  "thread/items/list": Response51;
+  "thread/inject_items": Response52;
+  "skills/list": Response53;
+  "skills/extraRoots/set": Response54;
+  "hooks/list": Response55;
+  "marketplace/add": Response56;
+  "marketplace/remove": Response57;
+  "marketplace/upgrade": Response58;
+  "plugin/list": Response59;
+  "plugin/search": Response60;
+  "plugin/installed": Response61;
+  "plugin/read": Response62;
+  "plugin/skill/read": Response63;
+  "plugin/share/save": Response64;
+  "plugin/share/updateTargets": Response65;
+  "plugin/share/list": Response66;
+  "plugin/share/checkout": Response67;
+  "plugin/share/delete": Response68;
+  "app/read": Response69;
+  "app/list": Response70;
+  "app/installed": Response71;
+  "fs/readFile": Response72;
+  "fs/writeFile": Response73;
+  "fs/createDirectory": Response74;
+  "fs/getMetadata": Response75;
+  "fs/readDirectory": Response76;
+  "fs/remove": Response77;
+  "fs/copy": Response78;
+  "fs/watch": Response79;
+  "fs/unwatch": Response80;
+  "skills/config/write": Response81;
+  "plugin/install": Response82;
+  "plugin/uninstall": Response83;
+  "turn/start": Response84;
+  "turn/steer": Response85;
+  "turn/interrupt": Response86;
+  "thread/realtime/start": Response87;
+  "thread/realtime/appendAudio": Response88;
+  "thread/realtime/appendText": Response89;
+  "thread/realtime/appendSpeech": Response90;
+  "thread/realtime/stop": Response91;
+  "thread/timeline/list": Response92;
+  "thread/realtime/listVoices": Response93;
+  "review/start": Response94;
+  "model/list": Response95;
+  "modelProvider/capabilities/read": Response96;
+  "experimentalFeature/list": Response97;
+  "permissionProfile/list": Response98;
+  "experimentalFeature/enablement/set": Response99;
+  "remoteControl/enable": Response100;
+  "remoteControl/disable": Response101;
+  "remoteControl/status/read": Response102;
+  "remoteControl/pairing/start": Response103;
+  "remoteControl/pairing/status": Response104;
+  "remoteControl/client/list": Response105;
+  "remoteControl/client/revoke": Response106;
+  "collaborationMode/list": Response107;
+  "mock/experimentalMethod": Response108;
+  "environment/add": Response109;
+  "environment/info": Response110;
+  "environment/status": Response111;
+  "mcpServer/oauth/login": Response112;
+  "config/mcpServer/reload": Response113;
+  "mcpServerStatus/list": Response114;
+  "mcpServer/resource/read": Response115;
+  "mcpServer/event/stream/start": Response116;
+  "mcpServer/event/stream/stop": Response117;
+  "mcpServer/tool/call": Response118;
+  "windowsSandbox/setupStart": Response119;
+  "windowsSandbox/readiness": Response120;
+  "account/login/start": Response121;
+  "account/bedrock/discover": Response122;
+  "account/bedrock/setup": Response123;
+  "account/login/cancel": Response124;
+  "account/logout": Response125;
+  "account/rateLimits/read": Response126;
+  "account/rateLimitResetCredit/consume": Response127;
+  "account/usage/read": Response128;
+  "account/workspaceMessages/read": Response129;
+  "account/sendAddCreditsNudgeEmail": Response130;
+  "feedback/upload": Response131;
+  "command/exec": Response132;
+  "command/exec/write": Response133;
+  "command/exec/terminate": Response134;
+  "command/exec/resize": Response135;
+  "process/spawn": Response136;
+  "process/writeStdin": Response137;
+  "process/kill": Response138;
+  "process/resizePty": Response139;
+  "config/read": Response140;
+  "externalAgentConfig/detect": Response141;
+  "externalAgentConfig/import": Response142;
+  "externalAgentConfig/import/recordHistory": Response143;
+  "externalAgentConfig/import/readHistories": Response144;
+  "config/value/write": Response145;
+  "config/batchWrite": Response145;
+  "configRequirements/read": Response146;
+  "account/read": Response147;
+  "getConversationSummary": Response148;
+  "gitDiffToRemote": Response149;
+  "getAuthStatus": Response150;
+  "fuzzyFileSearch": Response151;
+  "fuzzyFileSearch/sessionStart": Response152;
+  "fuzzyFileSearch/sessionUpdate": Response153;
+  "fuzzyFileSearch/sessionStop": Response154;
 }
 
 export type AppServerMethod = keyof AppServerResponseMap;
@@ -282,6 +322,7 @@ export type AppServerParams<M extends AppServerMethod> = AppServerRequest<M>["pa
 
 export const appServerResponseSchemaRefs = {
   "initialize": { bundle: "base", definition: "InitializeResponse" },
+  "server/diagnostics": { bundle: "v2", definition: "ServerDiagnosticsResponse" },
   "thread/start": { bundle: "v2", definition: "ThreadStartResponse" },
   "thread/resume": { bundle: "v2", definition: "ThreadResumeResponse" },
   "thread/fork": { bundle: "v2", definition: "ThreadForkResponse" },
@@ -294,6 +335,12 @@ export const appServerResponseSchemaRefs = {
   "thread/goal/set": { bundle: "v2", definition: "ThreadGoalSetResponse" },
   "thread/goal/get": { bundle: "v2", definition: "ThreadGoalGetResponse" },
   "thread/goal/clear": { bundle: "v2", definition: "ThreadGoalClearResponse" },
+  "thread/queue/add": { bundle: "v2", definition: "ThreadQueueAddResponse" },
+  "thread/queue/list": { bundle: "v2", definition: "ThreadQueueListResponse" },
+  "thread/queue/update": { bundle: "v2", definition: "ThreadQueueUpdateResponse" },
+  "thread/queue/delete": { bundle: "v2", definition: "ThreadQueueDeleteResponse" },
+  "thread/queue/reorder": { bundle: "v2", definition: "ThreadQueueReorderResponse" },
+  "thread/queue/start": { bundle: "v2", definition: "ThreadQueueStartResponse" },
   "thread/metadata/update": { bundle: "v2", definition: "ThreadMetadataUpdateResponse" },
   "thread/section/move": { bundle: "v2", definition: "ThreadSectionMoveResponse" },
   "thread/settings/update": { bundle: "v2", definition: "ThreadSettingsUpdateResponse" },
@@ -307,7 +354,15 @@ export const appServerResponseSchemaRefs = {
   "thread/backgroundTerminals/list": { bundle: "v2", definition: "ThreadBackgroundTerminalsListResponse" },
   "thread/backgroundTerminals/terminate": { bundle: "v2", definition: "ThreadBackgroundTerminalsTerminateResponse" },
   "thread/rollback": { bundle: "v2", definition: "ThreadRollbackResponse" },
+  "thread/revert": { bundle: "v2", definition: "ThreadRevertResponse" },
   "thread/list": { bundle: "v2", definition: "ThreadListResponse" },
+  "project/list": { bundle: "v2", definition: "ProjectListResponse" },
+  "project/read": { bundle: "v2", definition: "ProjectReadResponse" },
+  "project/create": { bundle: "v2", definition: "ProjectCreateResponse" },
+  "project/import": { bundle: "v2", definition: "ProjectImportResponse" },
+  "project/update": { bundle: "v2", definition: "ProjectUpdateResponse" },
+  "project/move": { bundle: "v2", definition: "ProjectMoveResponse" },
+  "project/delete": { bundle: "v2", definition: "ProjectDeleteResponse" },
   "threadSection/list": { bundle: "v2", definition: "ThreadSectionListResponse" },
   "threadSection/create": { bundle: "v2", definition: "ThreadSectionCreateResponse" },
   "threadSection/update": { bundle: "v2", definition: "ThreadSectionUpdateResponse" },
@@ -358,6 +413,7 @@ export const appServerResponseSchemaRefs = {
   "thread/realtime/appendText": { bundle: "v2", definition: "ThreadRealtimeAppendTextResponse" },
   "thread/realtime/appendSpeech": { bundle: "v2", definition: "ThreadRealtimeAppendSpeechResponse" },
   "thread/realtime/stop": { bundle: "v2", definition: "ThreadRealtimeStopResponse" },
+  "thread/timeline/list": { bundle: "v2", definition: "ThreadTimelineListResponse" },
   "thread/realtime/listVoices": { bundle: "v2", definition: "ThreadRealtimeListVoicesResponse" },
   "review/start": { bundle: "v2", definition: "ReviewStartResponse" },
   "model/list": { bundle: "v2", definition: "ModelListResponse" },
@@ -381,10 +437,14 @@ export const appServerResponseSchemaRefs = {
   "config/mcpServer/reload": { bundle: "v2", definition: "McpServerRefreshResponse" },
   "mcpServerStatus/list": { bundle: "v2", definition: "ListMcpServerStatusResponse" },
   "mcpServer/resource/read": { bundle: "v2", definition: "McpResourceReadResponse" },
+  "mcpServer/event/stream/start": { bundle: "v2", definition: "McpServerEventStreamStartResponse" },
+  "mcpServer/event/stream/stop": { bundle: "v2", definition: "McpServerEventStreamStopResponse" },
   "mcpServer/tool/call": { bundle: "v2", definition: "McpServerToolCallResponse" },
   "windowsSandbox/setupStart": { bundle: "v2", definition: "WindowsSandboxSetupStartResponse" },
   "windowsSandbox/readiness": { bundle: "v2", definition: "WindowsSandboxReadinessResponse" },
   "account/login/start": { bundle: "v2", definition: "LoginAccountResponse" },
+  "account/bedrock/discover": { bundle: "v2", definition: "BedrockDiscoverResponse" },
+  "account/bedrock/setup": { bundle: "v2", definition: "BedrockSetupResponse" },
   "account/login/cancel": { bundle: "v2", definition: "CancelLoginAccountResponse" },
   "account/logout": { bundle: "v2", definition: "LogoutAccountResponse" },
   "account/rateLimits/read": { bundle: "v2", definition: "GetAccountRateLimitsResponse" },
