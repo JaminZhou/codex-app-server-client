@@ -1,5 +1,8 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
 import { CodexAppServerClient } from "../src";
+import type {
+  GetAccountTokenUsageResponse,
+} from "../src/generated/protocol/v2/GetAccountTokenUsageResponse";
 import type { ThreadListResponse } from "../src/generated/protocol/v2/ThreadListResponse";
 
 describe("typed handler registration", () => {
@@ -29,6 +32,10 @@ function typecheckCompleteRequestMap(client: CodexAppServerClient) {
     Promise<ThreadListResponse>
   >();
   void client.call("account/logout");
+  expectTypeOf(client.call("account/usage/read")).toEqualTypeOf<
+    Promise<GetAccountTokenUsageResponse>
+  >();
+  void client.call("account/usage/read", { threadId: "thread-1" });
   void client.call("remoteControl/enable", null);
 }
 
