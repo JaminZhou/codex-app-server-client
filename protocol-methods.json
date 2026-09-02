@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
-  "codexCliVersion": "0.150.1",
+  "codexCliVersion": "0.152.1",
   "source": {
     "repository": "https://github.com/openai/codex",
-    "tag": "rust-v0.150.1",
-    "commit": "90854393966b21e9ebfd21b122334eb09a20c93d",
+    "tag": "rust-v0.152.1",
+    "commit": "5adb68a49933ae446bf11935662c83dba55a0804",
     "path": "codex-rs/app-server-protocol/src/protocol/common.rs"
   },
   "methods": [
@@ -687,6 +687,14 @@
         "name": "TurnStartResponse"
       },
       "variant": "TurnStart"
+    },
+    {
+      "method": "turn/settings/update",
+      "response": {
+        "module": "v2/TurnSettingsUpdateResponse",
+        "name": "TurnSettingsUpdateResponse"
+      },
+      "variant": "TurnSettingsUpdate"
     },
     {
       "method": "turn/steer",
