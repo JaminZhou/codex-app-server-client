@@ -42,6 +42,8 @@ export const serverNotificationMethods = [
   "model/rerouted",
   "model/safetyBuffering/updated",
   "model/verification",
+  "modelProvider/authRecoveryCompleted",
+  "modelProvider/authRecoveryStarted",
   "process/exited",
   "process/outputDelta",
   "project/changed",
