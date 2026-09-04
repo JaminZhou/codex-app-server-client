@@ -12,12 +12,15 @@ import type { ThreadItemsListResponse } from "../src/generated/protocol/v2/Threa
 import { FakeAppServer } from "./fake-app-server";
 
 type IsOptional<T, Key extends keyof T> = {} extends Pick<T, Key> ? true : false;
+type AgentMessageItem = Extract<v2.ThreadItem, { type: "agentMessage" }>;
+type AppConfig = NonNullable<v2.AppsConfig["example"]>;
 type CommandExecutionItem = Extract<v2.ThreadItem, { type: "commandExecution" }>;
 
 describe("generated protocol runtime validation", () => {
   it("keeps version-skew fields optional for older wire shapes", () => {
     const optionalFields: [
       IsOptional<v2.AccountLoginCompletedNotification, "onboardingEntrypoint">,
+      IsOptional<AppConfig, "links">,
       IsOptional<v2.AppToolSummary, "isEnabled">,
       IsOptional<v2.AppToolSummary, "disabledReason">,
       IsOptional<v2.AppToolSummary, "isReadOnly">,
@@ -40,12 +43,16 @@ describe("generated protocol runtime validation", () => {
       IsOptional<v2.PluginSummary, "installedAt">,
       IsOptional<v2.PluginSummary, "disabledReason">,
       IsOptional<v2.PluginSummary, "eligiblePlanTypes">,
+      IsOptional<v2.ResponseUsageMetadata, "metadata">,
       IsOptional<v2.SkillInterface, "iconSmallUrl">,
       IsOptional<v2.SkillInterface, "iconLargeUrl">,
       IsOptional<v2.Thread, "isPinned">,
       IsOptional<v2.Thread, "section">,
       IsOptional<v2.Thread, "sectionEnteredAt">,
+      IsOptional<v2.Thread, "model">,
+      IsOptional<v2.Thread, "reasoningEffort">,
       IsOptional<v2.ToolRequestUserInputParams, "isBlocking">,
+      IsOptional<AgentMessageItem, "questions">,
       IsOptional<CommandExecutionItem, "pluginId">,
       IsOptional<CommandExecutionItem, "scriptPath">,
     ] = [
@@ -80,13 +87,32 @@ describe("generated protocol runtime validation", () => {
       true,
       true,
       true,
+      true,
+      true,
+      true,
+      true,
+      true,
     ];
 
-    expect(optionalFields).toHaveLength(31);
+    expect(optionalFields).toHaveLength(36);
   });
 
   it("validates generated request and response schemas without losing bigint values", async () => {
     const validator = await loadProtocolValidator();
+    expect(() => validator.assertClientRequest("plugin/reconcile", {})).not.toThrow();
+    expect(() =>
+      validator.assertClientRequest("plugin/reconcile", { reason: 42 }),
+    ).toThrow(AppServerProtocolValidationError);
+    expect(() =>
+      validator.assertResponse("plugin/reconcile", {
+        changedPlugins: [],
+        failedMaterializationRemotePluginIds: [],
+        failedRemotePluginIds: [],
+      }),
+    ).not.toThrow();
+    expect(() =>
+      validator.assertResponse("plugin/reconcile", { changedPlugins: [] }),
+    ).toThrow(AppServerProtocolValidationError);
     expect(() =>
       validator.assertClientRequest("thread/list", { limit: "not-an-integer" }),
     ).toThrow(AppServerProtocolValidationError);
@@ -291,8 +317,8 @@ describe("generated protocol runtime validation", () => {
     expect(protocolValidationMetadata).toMatchObject({
       defaultMode: "strict",
       validatedClientNotifications: 1,
-      validatedClientRequests: 157,
-      validatedClientResponses: 154,
+      validatedClientRequests: 158,
+      validatedClientResponses: 155,
       validatedServerNotifications: 83,
       validatedServerRequests: 11,
       unavailableResponseSchemas: [

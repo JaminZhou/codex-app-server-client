@@ -22,6 +22,7 @@ const methodMetadata = JSON.parse(readFileSync(join(root, "protocol-methods.json
 const expectedVersion = packageJson.dependencies?.["@openai/codex"];
 const wireOptionalGeneratedFields = {
   "v2/AccountLoginCompletedNotification.ts": ["onboardingEntrypoint"],
+  "v2/AppsConfig.ts": ["links"],
   "v2/AppToolSummary.ts": [
     "title",
     "isEnabled",
@@ -71,8 +72,16 @@ const wireOptionalGeneratedFields = {
   "v2/Project.ts": ["recencyAt"],
   "v2/RateLimitSnapshot.ts": ["spendControlReached"],
   "v2/RawResponseCompletedNotification.ts": ["usage", "usageMetadata"],
+  "v2/ResponseUsageMetadata.ts": ["metadata"],
   "v2/SkillInterface.ts": ["iconSmallUrl", "iconLargeUrl"],
-  "v2/Thread.ts": ["canAcceptDirectInput", "section", "sectionEnteredAt"],
+  "v2/Thread.ts": [
+    "canAcceptDirectInput",
+    "section",
+    "sectionEnteredAt",
+    "model",
+    "reasoningEffort",
+  ],
+  "v2/ThreadItem.ts": ["questions"],
   "v2/ThreadResumeResponse.ts": ["itemsBackwardsCursor", "turnsBackwardsCursor"],
   "v2/ThreadSearchOccurrencesResponse.ts": ["nextCursor"],
   "v2/TokenUsageBreakdown.ts": ["cacheWriteInputTokens"],
