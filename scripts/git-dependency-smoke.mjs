@@ -4,6 +4,7 @@ import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { execNpmSync } from "./npm-exec.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(import.meta.url);
@@ -12,9 +13,8 @@ const temporaryRoot = mkdtempSync(join(tmpdir(), "codex-app-server-client-git-sm
 const gitInstallNpmVersion = "11.6.2";
 
 function execGitInstallNpmSync(args, options) {
-  return execFileSync(
-    "pnpm",
-    ["--silent", "dlx", `npm@${gitInstallNpmVersion}`, ...args],
+  return execNpmSync(
+    ["exec", "--yes", "--package", `npm@${gitInstallNpmVersion}`, "--", "npm", ...args],
     options,
   );
 }
