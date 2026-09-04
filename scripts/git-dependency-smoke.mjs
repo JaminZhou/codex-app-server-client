@@ -4,15 +4,25 @@ import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { execNpmSync } from "./npm-exec.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(import.meta.url);
 const typescriptCompiler = require.resolve("typescript/bin/tsc");
 const temporaryRoot = mkdtempSync(join(tmpdir(), "codex-app-server-client-git-smoke-"));
+const gitInstallNpmVersion = "11.6.2";
+
+function execGitInstallNpmSync(args, options) {
+  return execFileSync(
+    "pnpm",
+    ["--silent", "dlx", `npm@${gitInstallNpmVersion}`, ...args],
+    options,
+  );
+}
 
 try {
-  execNpmSync(
+  // Pin the installer so this smoke is not coupled to the npm version bundled
+  // with a particular Node runner image.
+  execGitInstallNpmSync(
     [
       "install",
       "--no-audit",
@@ -22,7 +32,7 @@ try {
     ],
     { cwd: temporaryRoot, stdio: "pipe" },
   );
-  execNpmSync(
+  execGitInstallNpmSync(
     [
       "install",
       "--ignore-scripts",
@@ -97,7 +107,9 @@ try {
     { cwd: temporaryRoot, stdio: "inherit" },
   );
 
-  console.log(`Git dependency smoke passed on Node ${process.versions.node}.`);
+  console.log(
+    `Git dependency smoke passed on Node ${process.versions.node} with npm ${gitInstallNpmVersion}.`,
+  );
 } finally {
   rmSync(temporaryRoot, { force: true, recursive: true });
 }
