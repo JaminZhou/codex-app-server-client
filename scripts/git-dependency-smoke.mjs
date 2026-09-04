@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
@@ -12,17 +12,26 @@ const typescriptCompiler = require.resolve("typescript/bin/tsc");
 const temporaryRoot = mkdtempSync(join(tmpdir(), "codex-app-server-client-git-smoke-"));
 const gitInstallNpmVersion = "11.6.2";
 
-function execGitInstallNpmSync(args, options) {
-  return execNpmSync(
-    ["exec", "--yes", "--package", `npm@${gitInstallNpmVersion}`, "--", "npm", ...args],
-    options,
+function assertPinnedNpm() {
+  const npmCli = process.env.npm_execpath;
+  if (!npmCli) {
+    throw new Error("Git dependency smoke must be launched through the pinned npm CLI.");
+  }
+  const npmPackage = JSON.parse(
+    readFileSync(resolve(dirname(npmCli), "..", "package.json"), "utf8"),
   );
+  if (npmPackage.version !== gitInstallNpmVersion) {
+    throw new Error(
+      `Expected npm ${gitInstallNpmVersion}, but the active CLI is npm ${npmPackage.version}.`,
+    );
+  }
 }
 
 try {
+  assertPinnedNpm();
   // Pin the installer so this smoke is not coupled to the npm version bundled
   // with a particular Node runner image.
-  execGitInstallNpmSync(
+  execNpmSync(
     [
       "install",
       "--no-audit",
@@ -32,7 +41,7 @@ try {
     ],
     { cwd: temporaryRoot, stdio: "pipe" },
   );
-  execGitInstallNpmSync(
+  execNpmSync(
     [
       "install",
       "--ignore-scripts",
