@@ -45,7 +45,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "git:smoke": "node scripts/git-dependency-smoke.mjs",
+    "git:smoke": "pnpm --silent dlx npm@11.6.2 exec -- node scripts/git-dependency-smoke.mjs",
     "package:smoke": "node scripts/package-smoke.mjs",
     "prepare": "npm run build",
     "test": "vitest run",
@@ -62,7 +62,7 @@
   },
   "packageManager": "pnpm@11.7.0",
   "dependencies": {
-    "@openai/codex": "0.152.1",
+    "@openai/codex": "0.153.2",
     "@types/node": "26.1.1",
     "ajv": "8.20.0",
     "ws": "8.21.1"

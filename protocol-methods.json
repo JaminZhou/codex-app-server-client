@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
-  "codexCliVersion": "0.152.1",
+  "codexCliVersion": "0.153.2",
   "source": {
     "repository": "https://github.com/openai/codex",
-    "tag": "rust-v0.152.1",
-    "commit": "5adb68a49933ae446bf11935662c83dba55a0804",
+    "tag": "rust-v0.153.2",
+    "commit": "657a993cbee87acf52d14b758ce49dbd46d1b8eb",
     "path": "codex-rs/app-server-protocol/src/protocol/common.rs"
   },
   "methods": [
@@ -503,6 +503,14 @@
         "name": "PluginInstalledResponse"
       },
       "variant": "PluginInstalled"
+    },
+    {
+      "method": "plugin/reconcile",
+      "response": {
+        "module": "v2/PluginReconcileResponse",
+        "name": "PluginReconcileResponse"
+      },
+      "variant": "PluginReconcile"
     },
     {
       "method": "plugin/read",

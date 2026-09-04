@@ -1,8 +1,17 @@
 import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 
 export function execNpmSync(args, options) {
+  const inheritedNpmCli = process.env.npm_execpath;
+  if (
+    inheritedNpmCli &&
+    basename(inheritedNpmCli) === "npm-cli.js" &&
+    existsSync(inheritedNpmCli)
+  ) {
+    return execFileSync(process.execPath, [inheritedNpmCli, ...args], options);
+  }
+
   if (process.platform !== "win32") {
     return execFileSync("npm", args, options);
   }
