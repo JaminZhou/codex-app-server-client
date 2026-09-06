@@ -13,7 +13,7 @@ guarantee.
 
 | Reference | Pinned baseline | How it is used |
 | --- | --- | --- |
-| Public Codex CLI | `codex-cli 0.153.2` / `rust-v0.153.2` | Runtime binary and public app-server behavior |
+| Public Codex CLI | `codex-cli 0.153.4` / `rust-v0.153.4` | Runtime binary and public app-server behavior |
 | Generated app-server TypeScript | Generated from the pinned CLI | Request, response, notification, and server-request types |
 | Generated JSON Schema | Generated from the pinned CLI | Shipped schema artifacts and drift checks |
 | Official Python SDK | Public source at the same Codex tag | Lifecycle, routing, error, and high-level behavior reference |
@@ -58,7 +58,7 @@ experiments.
 ## Cross-version verification
 
 The scheduled compatibility smoke covers every exact stable release in
-`compatibility-matrix.json`, currently `0.150.1`, `0.152.1`, and the pinned `0.153.2`. On the minimum
+`compatibility-matrix.json`, currently `0.150.1`, `0.152.1`, and the pinned `0.153.4`. On the minimum
 supported Node.js 18 runtime it installs each CLI in isolation, starts its real stdio app-server with plugins
 disabled, uses strict current-Schema validation, and exercises initialization, model and thread
 listing, thread creation/read, and thread-goal access without calling a model service. The matrix is an
