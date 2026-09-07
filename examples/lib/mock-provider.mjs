@@ -5,6 +5,7 @@ import { createServer } from "node:http";
 // No credentials, external model service, or successful tool execution is needed.
 export async function startMockProvider(scenario, workspace) {
   const requests = [];
+  const sockets = new Set();
   let responseIndex = 0;
   const server = createServer(async (request, response) => {
     try {
@@ -65,14 +66,20 @@ export async function startMockProvider(scenario, workspace) {
       response.destroy(error instanceof Error ? error : new Error(String(error)));
     }
   });
+  server.on("connection", (socket) => {
+    sockets.add(socket);
+    socket.once("close", () => sockets.delete(socket));
+  });
   server.listen(0, "127.0.0.1");
   await once(server, "listening");
   return {
     origin: `http://127.0.0.1:${server.address().port}`,
     requests,
     async close() {
+      if (!server.listening) return;
       const closed = new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
-      server.closeAllConnections();
+      // Node 18.0/18.1 do not have closeAllConnections(). Explicitly close idle and held SSE sockets.
+      for (const socket of sockets) socket.destroy();
       await closed;
     },
   };
