@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
@@ -10,128 +10,103 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(import.meta.url);
 const typescriptCompiler = require.resolve("typescript/bin/tsc");
 const temporaryRoot = mkdtempSync(join(tmpdir(), "codex-app-server-client-package-smoke-"));
+const args = process.argv.slice(2);
+const usePnpm = args.includes("--pnpm");
+const artifactArgument = args.find((arg) => arg !== "--pnpm");
 
 try {
-  const packed = parsePackOutput(
+  const artifact = artifactArgument ? null : parsePackOutput(
     execNpmSync(["pack", "--json", "--pack-destination", temporaryRoot], {
-      cwd: root,
-      encoding: "utf8",
+      cwd: root, encoding: "utf8", timeout: 120_000,
     }),
-  );
-  const artifact = packed[0];
-  if (!artifact || typeof artifact.filename !== "string" || !Array.isArray(artifact.files)) {
-    throw new Error("npm pack did not return a package manifest.");
+  )[0];
+  const artifactPath = artifactArgument ? resolve(artifactArgument) : join(temporaryRoot, artifact.filename);
+  writeFileSync(join(temporaryRoot, "package.json"), JSON.stringify({
+    name: "codex-preview-consumer", version: "1.0.0", private: true, type: "module",
+  }));
+  if (usePnpm) {
+    // Pin the consumer's installer independently of Corepack and parent lifecycle environment.
+    execNpmSync(["exec", "--yes", "--package=pnpm@11.7.0", "--", "pnpm", "add", "--ignore-scripts", artifactPath], {
+      cwd: temporaryRoot, stdio: "pipe", timeout: 120_000,
+    });
+  } else {
+    execNpmSync(["install", "--ignore-scripts", "--include=optional", "--no-audit", "--no-fund", artifactPath], {
+      cwd: temporaryRoot, stdio: "pipe", timeout: 120_000,
+    });
   }
-
-  const packedPaths = new Set(artifact.files.map((file) => file.path));
-  for (const requiredPath of [
-    "SOURCES.md",
-    "THIRD_PARTY_LICENSES/Apache-2.0.txt",
-    "THIRD_PARTY_NOTICES.md",
+  const packageRoot = join(temporaryRoot, "node_modules", "@jaminzhou", "codex-app-server-client");
+  const manifest = JSON.parse(readFileSync(join(packageRoot, "package.json"), "utf8"));
+  for (const path of [
+    "README.md", "LICENSE", "COMPATIBILITY.md", "RELEASING.md", "docs/api.md",
+    "examples/README.md", "examples/stream.mjs", "examples/approvals.mjs", "examples/interrupt-resume.mjs",
+    "dist/index.js", "dist/index.d.ts", "dist/protocol.js", "dist/protocol.d.ts",
+    "SOURCES.md", "THIRD_PARTY_LICENSES/Apache-2.0.txt", "THIRD_PARTY_NOTICES.md",
     "schemas/runtime-validation.schemas.json",
   ]) {
-    if (!packedPaths.has(requiredPath)) {
-      throw new Error(`Packed artifact is missing ${requiredPath}.`);
-    }
+    if (!existsSync(join(packageRoot, path))) throw new Error("Installed artifact is missing " + path);
   }
-
-  const artifactPath = join(temporaryRoot, artifact.filename);
-  execNpmSync(
-    ["install", "--ignore-scripts", "--no-audit", "--no-fund", artifactPath],
-    { cwd: temporaryRoot, stdio: "pipe" },
-  );
-
-  writeFileSync(
-    join(temporaryRoot, "consumer.ts"),
-    [
-      'import type { ServerNotification, v2 } from "@jaminzhou/codex-app-server-client/protocol";',
-      "",
-      "export type InstalledProtocolTypes = [ServerNotification, v2.Thread];",
-      "",
-    ].join("\n"),
-  );
-  writeFileSync(
-    join(temporaryRoot, "tsconfig.json"),
-    `${JSON.stringify(
-      {
-        compilerOptions: {
-          module: "NodeNext",
-          moduleResolution: "NodeNext",
-          noEmit: true,
-          skipLibCheck: false,
-          strict: true,
-          target: "ES2022",
-        },
-        files: ["consumer.ts"],
-      },
-      null,
-      2,
-    )}\n`,
-  );
+  writeFileSync(join(temporaryRoot, "consumer.mts"), [
+    'import { CodexAppServerClient, type CodexTurn, resolveCodexBinary } from "@jaminzhou/codex-app-server-client";',
+    'import type { ServerNotification, v2 } from "@jaminzhou/codex-app-server-client/protocol";',
+    'export type InstalledProtocolTypes = [ServerNotification, v2.Thread];',
+    'const client = new CodexAppServerClient({ protocolValidation: "strict" });',
+    'client.onServerRequest("item/commandExecution/requestApproval", (params) => {',
+    '  const id: string = params.threadId;',
+    '  return { decision: "decline" };',
+    '});',
+    'client.onServerRequest("item/fileChange/requestApproval", () => ({ decision: "decline" }));',
+    'const thread = await client.createThread({ sandbox: "read-only", ephemeral: false });',
+    'const turn: CodexTurn = await thread.startTurn("hello");',
+    'for await (const event of turn.events()) {',
+    '  if (event.method === "item/agentMessage/delta") { const text: string = event.params.delta; }',
+    '}',
+    'await turn.interrupt();',
+    'await client.resumeThread(thread.id);',
+    'const executable: string = resolveCodexBinary().executablePath;',
+    '// @ts-expect-error Invalid approval decisions must not become valid package types.',
+    'client.onServerRequest("item/commandExecution/requestApproval", () => ({ decision: "approve-everything" }));',
+    "",
+  ].join("\n"));
+  writeFileSync(join(temporaryRoot, "tsconfig.json"), JSON.stringify({
+    compilerOptions: {
+      module: "NodeNext", moduleResolution: "NodeNext", noEmit: true,
+      skipLibCheck: false, strict: true, target: "ES2022",
+    },
+    files: ["consumer.mts"],
+  }));
   execFileSync(process.execPath, [typescriptCompiler, "--project", "tsconfig.json"], {
-    cwd: temporaryRoot,
-    stdio: "inherit",
+    cwd: temporaryRoot, stdio: "inherit",
   });
-
-  const smokeProgram = String.raw`
-    import { existsSync, mkdirSync, writeFileSync } from "node:fs";
-    import { createRequire } from "node:module";
-    import { join } from "node:path";
-    import {
-      CodexAppServerClient,
-      protocolValidationMetadata,
-      resolveCodexBinary,
-    } from "@jaminzhou/codex-app-server-client";
-
-    if (protocolValidationMetadata.validatedClientRequests !== 158) {
-      throw new Error("Installed runtime validation metadata is incomplete.");
-    }
-    const require = createRequire(import.meta.url);
-    const runtimeSchema = require.resolve(
-      "@jaminzhou/codex-app-server-client/schemas/runtime-validation.schemas.json",
-    );
-    if (!existsSync(runtimeSchema)) throw new Error("Installed runtime Schema is missing.");
-    const binary = resolveCodexBinary();
-    if (!existsSync(binary.executablePath)) throw new Error("Installed Codex binary is missing.");
-
-    const codexHome = join(process.cwd(), "codex-home");
-    mkdirSync(codexHome);
-    writeFileSync(join(codexHome, "config.toml"), "[features]\\nplugins = false\\n");
-    const client = new CodexAppServerClient({
-      env: {
-        CODEX_APP_SERVER_DISABLE_MANAGED_CONFIG: "1",
-        CODEX_HOME: codexHome,
-        RUST_LOG: "warn",
-      },
-      protocolValidation: "strict",
-      requestTimeoutMs: 10_000,
+  // Check runtime and protocol entry points without relying on the repository's node_modules.
+  writeFileSync(join(temporaryRoot, "entry-smoke.mjs"), [
+    'import { existsSync } from "node:fs";',
+    'import { createRequire } from "node:module";',
+    'import { protocolMetadata, protocolValidationMetadata, resolveCodexBinary } from "@jaminzhou/codex-app-server-client";',
+    'import { protocolMetadata as protocol } from "@jaminzhou/codex-app-server-client/protocol";',
+    'const require = createRequire(import.meta.url);',
+    'if (protocol.codexCliVersion !== protocolMetadata.codexCliVersion) throw new Error("Protocol export mismatch");',
+    'if (protocolValidationMetadata.validatedClientRequests !== 158) throw new Error("Incomplete validation metadata");',
+    'const schema = require.resolve("@jaminzhou/codex-app-server-client/schemas/runtime-validation.schemas.json");',
+    'if (!existsSync(schema) || !existsSync(resolveCodexBinary().executablePath)) throw new Error("Missing installed Schema or CLI");',
+  ].join("\n"));
+  execFileSync(process.execPath, [join(temporaryRoot, "entry-smoke.mjs")], {
+    cwd: temporaryRoot, stdio: "inherit", timeout: 30_000,
+  });
+  // Copy shipped examples out of the package so bare imports must resolve through the consumer.
+  cpSync(join(packageRoot, "examples"), join(temporaryRoot, "examples"), { recursive: true });
+  for (const example of ["stream", "approvals", "interrupt-resume"]) {
+    execFileSync(process.execPath, [join(temporaryRoot, "examples", example + ".mjs")], {
+      cwd: temporaryRoot, stdio: "inherit", timeout: 60_000,
     });
-    try {
-      const initialized = await client.connect();
-      if (!initialized.userAgent.includes("codex")) {
-        throw new Error("Installed package did not initialize the real app-server.");
-      }
-    } finally {
-      await client.close();
-    }
-  `;
-  execFileSync(process.execPath, ["--input-type=module", "--eval", smokeProgram], {
-    cwd: temporaryRoot,
-    stdio: "pipe",
-  });
-  console.log(
-    `Node ${process.versions.node} installed-package smoke passed (${artifact.filename}).`,
-  );
+  }
+  console.log("Node " + process.versions.node + " " + (usePnpm ? "pnpm" : "npm")
+    + " installed-package smoke passed (" + manifest.name + "@" + manifest.version + ").");
 } finally {
   rmSync(temporaryRoot, { force: true, recursive: true });
 }
 
 function parsePackOutput(output) {
-  const matches = [...output.matchAll(/(?:^|\n)(\[\s*\{\s*"id"\s*:)/g)];
-  const match = matches.at(-1);
-  if (!match || match.index === undefined) {
-    throw new Error("npm pack did not emit its JSON manifest.");
-  }
-  const start = match.index + (output[match.index] === "\n" ? 1 : 0);
-  return JSON.parse(output.slice(start));
+  const match = [...output.matchAll(/(?:^|\n)(\[\s*\{\s*"id"\s*:)/g)].at(-1);
+  if (!match) throw new Error("npm pack did not emit its JSON manifest.");
+  return JSON.parse(output.slice(match.index + (output[match.index] === "\n" ? 1 : 0)));
 }

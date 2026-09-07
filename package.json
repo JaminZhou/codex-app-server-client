@@ -1,8 +1,7 @@
 {
   "name": "@jaminzhou/codex-app-server-client",
-  "version": "0.0.0",
-  "private": true,
-  "description": "A TypeScript client for the public codex app-server JSON-RPC protocol.",
+  "version": "0.1.0-preview.0",
+  "description": "Unofficial TypeScript client for streaming Codex conversations, explicit approvals, and persistent threads over the public app-server protocol.",
   "keywords": [
     "codex",
     "app-server",
@@ -19,11 +18,20 @@
     "url": "https://github.com/JaminZhou/codex-app-server-client/issues"
   },
   "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "tag": "next",
+    "registry": "https://registry.npmjs.org/"
+  },
   "type": "module",
   "sideEffects": false,
   "files": [
+    "CHANGELOG.md",
     "COMPATIBILITY.md",
     "dist",
+    "examples",
+    "docs",
+    "RELEASING.md",
     "schemas",
     "SOURCES.md",
     "THIRD_PARTY_LICENSES",
@@ -44,9 +52,11 @@
     "./schemas/*": "./schemas/*"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && node scripts/finalize-declarations.mjs",
     "git:smoke": "pnpm --silent dlx npm@11.6.2 exec -- node scripts/git-dependency-smoke.mjs",
     "package:smoke": "node scripts/package-smoke.mjs",
+    "preview:pack": "node scripts/preview-pack.mjs",
+    "examples:smoke": "pnpm build && node scripts/examples-smoke.mjs",
     "prepare": "npm run build",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
