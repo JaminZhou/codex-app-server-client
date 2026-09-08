@@ -37,7 +37,7 @@ try {
   const packageRoot = join(temporaryRoot, "node_modules", "@jaminzhou", "codex-app-server-client");
   const manifest = JSON.parse(readFileSync(join(packageRoot, "package.json"), "utf8"));
   for (const path of [
-    "README.md", "LICENSE", "COMPATIBILITY.md", "RELEASING.md", "docs/api.md",
+    "README.md", "LICENSE", "COMPATIBILITY.md", "CONTRIBUTING.md", "RELEASING.md", "docs/api.md",
     "examples/README.md", "examples/stream.mjs", "examples/approvals.mjs", "examples/interrupt-resume.mjs",
     "dist/index.js", "dist/index.d.ts", "dist/protocol.js", "dist/protocol.d.ts",
     "SOURCES.md", "THIRD_PARTY_LICENSES/Apache-2.0.txt", "THIRD_PARTY_NOTICES.md",

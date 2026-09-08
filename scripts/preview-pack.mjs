@@ -26,7 +26,7 @@ try {
   const match = [...output.matchAll(/(?:^|\n)(\[\s*\{\s*"id"\s*:)/g)].at(-1);
   if (!match) throw new Error("npm pack did not emit a manifest");
   const [artifact] = JSON.parse(output.slice(match.index + (output[match.index] === "\n" ? 1 : 0)));
-  const allowed = /^(dist\/|schemas\/|examples\/|docs\/|THIRD_PARTY_LICENSES\/|(?:package\.json|README\.md|LICENSE|CHANGELOG\.md|COMPATIBILITY\.md|SOURCES\.md|THIRD_PARTY_NOTICES\.md|RELEASING\.md)$)/;
+  const allowed = /^(dist\/|schemas\/|examples\/|docs\/|THIRD_PARTY_LICENSES\/|(?:package\.json|README\.md|LICENSE|CHANGELOG\.md|COMPATIBILITY\.md|CONTRIBUTING\.md|SOURCES\.md|THIRD_PARTY_NOTICES\.md|RELEASING\.md)$)/;
   for (const file of artifact.files) {
     if (!allowed.test(file.path)) throw new Error("Unexpected published file: " + file.path);
   }

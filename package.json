@@ -28,6 +28,7 @@
   "files": [
     "CHANGELOG.md",
     "COMPATIBILITY.md",
+    "CONTRIBUTING.md",
     "dist",
     "examples",
     "docs",
