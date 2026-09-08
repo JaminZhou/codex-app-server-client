@@ -309,9 +309,15 @@ describe("JsonlRpcPeer", () => {
 
     const closedHarness = createHarness();
     const closed = closedHarness.peer.request("thread/read", {});
+    const anotherClosed = closedHarness.peer.request("model/list", {});
+    const failures = Promise.all([
+      expect(closed).rejects.toBeInstanceOf(AppServerConnectionClosedError),
+      expect(anotherClosed).rejects.toBeInstanceOf(AppServerConnectionClosedError),
+    ]);
+    await closedHarness.outbound.next();
     await closedHarness.outbound.next();
     closedHarness.serverToClient.end();
-    await expect(closed).rejects.toBeInstanceOf(AppServerConnectionClosedError);
+    await failures;
   });
 });
 

@@ -1,8 +1,14 @@
 # Preview releases
 
-The first candidate is `@jaminzhou/codex-app-server-client@0.1.0-preview.0`, targeting the npm
-`next` dist-tag. It has not been published. Package metadata permits a scoped public release;
-this repository has no automatic publishing workflow.
+The first preview, `@jaminzhou/codex-app-server-client@0.1.0-preview.0`, was published on
+2026-09-08 using `--tag next`. The registry also assigned `latest` to that preview; attempting to
+remove `latest` returned HTTP 400. Neither alias makes this a stable release. Exact-version
+registry installation and downloaded-archive integrity were verified with npm and pnpm.
+This repository has no automatic publishing workflow.
+
+The published `.0` archive is immutable. The commands below describe preparation/publication gates,
+not permission to republish `.0`. Choose a new, explicitly approved version before any future
+publication; local rebuilds of this checkout are development artifacts, not the published bytes.
 
 ## Version and support policy
 
@@ -11,8 +17,10 @@ this repository has no automatic publishing workflow.
 - Iterate previews as `0.1.0-preview.1`, `0.1.0-preview.2`, etc. Record changes and migration notes.
   Pre-1.0 APIs and generated experimental protocol types may change; consumers should pin exact
   versions and keep their lockfiles.
-- Reserve `0.1.0` and `latest` for a separately approved non-preview release. Do not move `latest`
-  as part of a preview publication. Never reuse a published name/version.
+- Reserve `0.1.0` for a separately approved non-preview release. Preview commands use `--tag next`;
+  do not deliberately promote a preview to `latest`. Always read back all registry tags: the first
+  publication demonstrated that `--tag next` is not a guarantee that `latest` will be absent.
+  Never reuse a published name/version or publish a stable version merely to repair tag naming.
 - A runtime update is a separate compatibility change, not an automatic consequence of a newer
   npm dist-tag. Update provenance, generated artifacts, and tests together.
 
@@ -69,13 +77,18 @@ the preparation commands.
 Only after approval, from the checkout whose candidate has been verified:
 
 ```bash
-npm publish artifacts/jaminzhou-codex-app-server-client-0.1.0-preview.0.tgz --tag next --access public --registry https://registry.npmjs.org/
+# Replace with the retained archive for a NEW approved preview version, never the published .0:
+npm publish /absolute/path/to/approved-new-preview.tgz --tag next --access public --registry https://registry.npmjs.org/ --ignore-scripts
 ```
 
 Publish the inspected tarball, not a freshly rebuilt directory. Then read back the registry version,
 dist-tag and `dist.integrity`, compare them with the saved evidence, install that exact registry
 version into a new consumer, and repeat the examples. Update the README's publication status only
 after verifying success. If the publish response is uncertain, query the version before retrying.
+
+For the first non-preview `0.1.0`, complete [release acceptance](./docs/release-readiness.md),
+review the version bump and `publishConfig.tag` change to `latest`, retain the exact reviewed
+candidate, and obtain explicit publication approval. Passing tests does not authorize that write.
 
 See npm's [package metadata](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/) and
 [publish command](https://docs.npmjs.com/cli/v11/commands/npm-publish/) documentation.

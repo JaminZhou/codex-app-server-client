@@ -2,7 +2,11 @@
 
 ## Supported versions
 
-Until the first npm release, security fixes are developed against the latest `main` revision.
+The published preview line is `0.1.0-preview.x`, currently `0.1.0-preview.0`.
+Security fixes are developed on `main` and require a separately reviewed and authorized release;
+updating `main` alone does not fix an already installed package. Consumers should pin a reviewed
+version, retain their lockfile, and update when a security-fix release is announced. Older preview
+versions may be superseded rather than maintained as separate backport branches.
 
 ## Reporting a vulnerability
 

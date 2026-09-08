@@ -124,6 +124,32 @@ describe("turn event routing and handles", () => {
       { type: "text", text: "hello", text_elements: [] },
     ]);
   });
+
+  it("fails all waiting consumers on disconnect and discards buffered old-connection events", async () => {
+    const router = new TurnEventRouter();
+    const first = router.open("first");
+    const second = router.open("second");
+    const firstFailure = expect(first.next()).rejects.toThrow("connection lost");
+    const secondFailure = expect(second.next()).rejects.toThrow("connection lost");
+    router.route({ method: "turn/started", params: { threadId: "old", turn: turn("buffered", "inProgress") } });
+    router.failAll(new Error("connection lost"));
+    await Promise.all([firstFailure, secondFailure]);
+    const fresh = router.open("buffered");
+    router.route({ method: "turn/completed", params: { threadId: "new", turn: turn("buffered", "completed") } });
+    expect((await fresh.next()).value?.method).toBe("turn/completed");
+    expect((await fresh.next()).done).toBe(true);
+  });
+
+  it("does not cancel a sibling stream when one consumer stops reading", async () => {
+    const router = new TurnEventRouter();
+    const first = router.open("first");
+    const second = router.open("second");
+    await first.return();
+    router.route({ method: "turn/completed", params: { threadId: "second-thread", turn: turn("second", "completed") } });
+    expect((await first.next()).done).toBe(true);
+    expect((await second.next()).value?.method).toBe("turn/completed");
+    expect((await second.next()).done).toBe(true);
+  });
 });
 
 function turn(id: string, status: Turn["status"]): Turn {

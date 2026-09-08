@@ -8,7 +8,7 @@ app-server process, typed requests, and event routing so you can focus on your a
 > endorsed by OpenAI. Codex and OpenAI are trademarks of OpenAI.
 
 **Package:** `@jaminzhou/codex-app-server-client`.
-**Status:** `0.1.0-preview.0` release candidate; not yet published to npm.
+**Status:** `0.1.0-preview.0` is published on npm; it is a preview, not a stable API commitment.
 The unscoped npm name belongs to a different project.
 
 ## Is this for your app?
@@ -40,13 +40,12 @@ See [compatibility and upgrade guidance](./COMPATIBILITY.md) before changing the
 
 ## First run: no account or model usage required
 
-Until npm publication, build a local candidate from a reviewed checkout:
+Install the published preview in a new consumer directory:
 
 ```bash
-git clone https://github.com/JaminZhou/codex-app-server-client.git
-cd codex-app-server-client
-pnpm install --frozen-lockfile
-node examples/stream.mjs
+npm init -y
+npm install --save-exact --ignore-scripts --include=optional @jaminzhou/codex-app-server-client@0.1.0-preview.0
+node node_modules/@jaminzhou/codex-app-server-client/examples/stream.mjs
 ```
 
 Expected output:
@@ -64,8 +63,8 @@ It tests integration plumbing; the mock text is not a model-quality or live-acco
 Two more complete examples exercise the interaction lifecycle:
 
 ```bash
-node examples/approvals.mjs
-node examples/interrupt-resume.mjs
+node node_modules/@jaminzhou/codex-app-server-client/examples/approvals.mjs
+node node_modules/@jaminzhou/codex-app-server-client/examples/interrupt-resume.mjs
 ```
 
 They verify that a declined command never executes and that an interrupted conversation resumes
@@ -73,7 +72,9 @@ after restarting the app-server. See [example commands, output, and recovery](./
 
 ## Install into your own project
 
-Create and validate a ready-built tarball:
+Use the exact registry version above (or `pnpm add --save-exact --ignore-scripts
+@jaminzhou/codex-app-server-client@0.1.0-preview.0`). For unpublished source changes, build and
+validate a local tarball instead:
 
 ```bash
 # In the source checkout, using Node.js 22+:
@@ -93,10 +94,9 @@ For pnpm, use `pnpm add --ignore-scripts <absolute-path-to-tarball>` instead. Ta
 not need to allow this package's build scripts or install a compiler. The preparation command
 verifies the same tarball in clean npm and pnpm consumers, including declarations and all examples.
 
-After an authorized npm preview release, the registry install will be
-`npm install --save-exact @jaminzhou/codex-app-server-client@next`.
-That command is **not available yet**. See [release preparation](./RELEASING.md) for the candidate
-manifest, version policy, and remaining publication gates.
+The initial publication used `--tag next`, but the registry also assigned `latest` to this preview.
+Neither tag is a stability guarantee. Pin the exact version and retain your lockfile.
+See [release preparation](./RELEASING.md) and the [0.1.0 acceptance checklist](./docs/release-readiness.md).
 
 If you need Git installation, pin a reviewed full SHA:
 `npm install 'github:JaminZhou/codex-app-server-client#<full-commit-sha>'`.
