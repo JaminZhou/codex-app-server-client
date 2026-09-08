@@ -42,6 +42,14 @@ exact historical CLI packages declared in the matrix.
 The real-turn integration test never calls an external model service. It starts the pinned
 app-server with a temporary `CODEX_HOME` configured to use a loopback mock Responses provider.
 
+`tests/release-readiness.test.ts` extends this with explicitly held model streams: overlapping
+threads complete in reverse order, an interrupted turn is followed by another turn, approval
+policy survives restart/resume/fork, and an exact test-owned managed process is killed to verify
+stream failure and explicit recovery. Fixtures have deadlines and clean up their temporary homes
+and connections. RPC/router tests separately cover pending-request and waiting-consumer failure.
+See [release acceptance](./docs/release-readiness.md) for the boundary between these deterministic
+checks and the separately authorized live-account acceptance.
+
 The shipped examples are also executable checks: `pnpm examples:smoke` runs streaming, explicit
 command decline, and interrupt/restart/resume against the real pinned app-server with isolated
 loopback providers. `pnpm package:smoke` copies those shipped files into a clean installed consumer

@@ -6,7 +6,7 @@ import {
   type Server,
   type ServerResponse,
 } from "node:http";
-import type { AddressInfo } from "node:net";
+import type { AddressInfo, Socket } from "node:net";
 
 export interface CapturedResponsesRequest {
   body: Record<string, unknown>;
@@ -23,13 +23,18 @@ type ResponsesEvent = Record<string, unknown> & { type: string };
  */
 export class MockResponsesServer {
   readonly requests: CapturedResponsesRequest[] = [];
-  private readonly responses: string[] = [];
+  private readonly responses: Array<string | ((response: ServerResponse) => void)> = [];
+  private readonly sockets = new Set<Socket>();
   private readonly server: Server;
   private originValue: string | null = null;
 
   constructor() {
     this.server = createServer((request, response) => {
       void this.handle(request, response);
+    });
+    this.server.on("connection", (socket) => {
+      this.sockets.add(socket);
+      socket.once("close", () => this.sockets.delete(socket));
     });
   }
 
@@ -49,7 +54,40 @@ export class MockResponsesServer {
     if (!this.server.listening) return;
     await new Promise<void>((resolve, reject) => {
       this.server.close((error) => (error ? reject(error) : resolve()));
+      for (const socket of this.sockets) socket.destroy();
     });
+  }
+
+  /** Hold a real model stream until the test explicitly releases it; no timing sleeps. */
+  enqueueControlledMessage(text: string, responseId: string): {
+    started: Promise<void>;
+    finish: () => void;
+  } {
+    let markStarted!: () => void;
+    const started = new Promise<void>((resolve) => { markStarted = resolve; });
+    let active: ServerResponse | undefined;
+    this.responses.push((response) => {
+      active = response;
+      const events = [
+        responseCreated(responseId),
+        { type: "response.output_item.added", item: {
+          type: "message", role: "assistant", id: `msg-${responseId}`,
+          content: [{ type: "output_text", text: "" }],
+        } },
+        { type: "response.output_text.delta", delta: text },
+      ];
+      for (const event of events) response.write(formatEvent(event));
+      markStarted();
+    });
+    return {
+      started,
+      finish: () => {
+        if (!active) throw new Error("Controlled response has not started.");
+        if (active.destroyed || active.writableEnded) return;
+        active.end(formatEvent(assistantMessage(`msg-${responseId}`, text)) +
+          formatEvent(responseCompleted(responseId)));
+      },
+    };
   }
 
   enqueueAssistantMessage(text: string, responseId: string): void {
@@ -142,11 +180,16 @@ export class MockResponsesServer {
         "cache-control": "no-cache",
         "content-type": "text/event-stream",
       });
-      response.end(payload);
+      if (typeof payload === "function") payload(response);
+      else response.end(payload);
     } catch (error) {
       response.writeHead(500).end(error instanceof Error ? error.message : String(error));
     }
   }
+}
+
+function formatEvent(event: ResponsesEvent): string {
+  return `event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`;
 }
 
 function responseCreated(responseId: string): ResponsesEvent {
