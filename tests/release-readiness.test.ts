@@ -56,8 +56,8 @@ plugins = false
   } finally {
     try { await client?.close(); }
     finally {
-      await provider.close();
-      rmSync(root, { recursive: true, force: true });
+      try { await provider.close(); }
+      finally { rmSync(root, { recursive: true, force: true }); }
     }
   }
 }
@@ -172,6 +172,27 @@ describe("release readiness with the real pinned app-server", () => {
         expect(result.items).toContainEqual(expect.objectContaining({ id: callId, type: "commandExecution", status: "declined" }));
         expect(existsSync(marker)).toBe(false);
       }
+      expect(approvals).toEqual([resumed.thread.id, forked.thread.id]);
+
+      // Exercise the override's effective policy, not only the response field. A request for
+      // escalation must be rejected by the runtime under "never", without calling our handler.
+      const deniedMarker = join(workspace, "overridden-fork-must-not-write");
+      provider.enqueueFunctionCall("exec_command", {
+        cmd: `touch ${JSON.stringify(deniedMarker)}`,
+        workdir: workspace,
+        sandbox_permissions: "require_escalated",
+        justification: "Test-only escalation that the never policy must reject",
+      }, "denied-override", "override-request");
+      provider.enqueueAssistantMessage("policy denied escalation", "override-result");
+      const denied = await (await client.startTurn(overridden.thread.id, "try the fixture escalation")).result();
+      expect(denied.turn.status).toBe("completed");
+      // A forbidden escalation is rejected before creating a command-execution item.
+      expect(denied.items.some((item) => item.type === "commandExecution")).toBe(false);
+      expect(provider.requests.at(-1)?.body.input).toContainEqual(expect.objectContaining({
+        type: "function_call_output", call_id: "denied-override",
+        output: expect.stringMatching(/approval policy.*never/i),
+      }));
+      expect(existsSync(deniedMarker)).toBe(false);
       expect(approvals).toEqual([resumed.thread.id, forked.thread.id]);
     });
   }, 30_000);
