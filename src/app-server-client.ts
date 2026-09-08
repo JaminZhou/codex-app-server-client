@@ -1,5 +1,6 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { once } from "node:events";
+import { version as clientVersion } from "../package.json";
 import { prependPathDirectories, resolveCodexBinary } from "./codex-binary";
 import {
   AppServerConnectionClosedError,
@@ -141,7 +142,7 @@ export type AppServerClientTransportOptions =
 const DEFAULT_CLIENT_INFO: ClientInfo = {
   name: "codex_app_server_client_ts",
   title: "Codex App Server Client for TypeScript",
-  version: "0.0.0",
+  version: clientVersion,
 };
 
 const DEFAULT_CAPABILITIES: InitializeCapabilities = {

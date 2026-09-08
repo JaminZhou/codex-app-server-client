@@ -25,6 +25,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
       - run: pnpm git:smoke
+      # pnpm's isolated dependency layout must resolve the shipped Node.js declarations.
+      - run: pnpm package:smoke --pnpm
       - uses: actions/setup-node@v7
         with:
           node-version: 18

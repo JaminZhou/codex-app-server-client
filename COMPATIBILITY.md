@@ -1,13 +1,37 @@
-# Compatibility and parity
+# Compatibility and upgrades
 
-This document separates verified public-protocol coverage from higher-level convenience APIs that
-are still being built. It is intentionally narrower than a claim of parity with any private Codex
-Desktop implementation.
+**Use the bundled `@openai/codex@0.153.4` runtime for this client preview.** Its bindings and runtime
+validation schemas are generated together. The client version (`0.1.0-preview.0`) and runtime version
+are separate; installing a newer global CLI does not update the client's bundled runtime.
 
-Upstream classifies [`codex app-server`](https://developers.openai.com/codex/app-server/) itself as
-experimental and primarily intended for development or debugging. It may change without notice, so
-every verification claim here is tied to exact versions rather than a general upstream stability
-guarantee.
+The public [app-server protocol](https://learn.chatgpt.com/docs/app-server) evolves, and its generated
+experimental fields are version-sensitive. Keep both the client and your lockfile pinned. Neither
+raw method coverage nor a successful basic smoke means all workflows work on an arbitrary version.
+
+## What has actually been verified?
+
+| Scope | Versions / environment | Evidence |
+| --- | --- | --- |
+| Basic initialization, thread and goal access | Exact runtimes `0.150.1`, `0.152.1`, `0.153.4` | Real isolated stdio compatibility smoke; no model calls |
+| Streaming, explicit command decline, interruption and process-restart resume | Bundled `0.153.4` | Shipped examples run against the real runtime with a local mock provider |
+| Packed ESM, declarations, schemas, and bundled binary | Node.js 18 on Linux, macOS, Windows | Installed-package CI; not every OS/architecture pairing |
+| Preview tarball without consumer build scripts | npm and pnpm 11 consumers | `pnpm preview:pack`; evidence records the local Node version |
+| Live account entitlement, model quality, every protocol workflow | Not established by these tests | Requires separate application-specific acceptance |
+
+## How to upgrade
+
+Consumers should install an exact reviewed client version, retain their lockfile, and run their
+own conversation/approval recovery checks. Let the package supply its pinned runtime. Use
+`codexPath` only for a deliberate compatibility experiment; disabling validation does not prove
+the new runtime compatible.
+
+Maintainers update the exact runtime, lockfile, public-tag provenance, generated types/schemas and
+compatibility matrix together, then run the required checks described in [CONTRIBUTING.md](./CONTRIBUTING.md).
+The scheduled drift alarm means an upstream stable release differs; it does not by itself mean
+the current client is broken. Preview publication is covered by [RELEASING.md](./RELEASING.md).
+
+The detailed tables below describe this pinned public baseline, not parity with private Codex
+Desktop functionality.
 
 ## Normative baseline
 

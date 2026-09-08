@@ -15,6 +15,10 @@ an empty temporary project, type-checks its public protocol declarations with de
 enabled, verifies its exported Schema/CLI/provenance files, and initializes a strictly validated
 real app-server on the declared minimum Node.js 18 runtime.
 
+Linux CI also verifies a pnpm 11 tarball consumer on Node.js 22. The shared declaration rollup has an
+explicit Node type reference so it resolves the package's own `@types/node` dependency without
+requiring consumers to hoist it or disable declaration checking.
+
 The installed-package smoke runs on Linux, macOS, and Windows, so the public package exports and the
 platform-specific bundled Codex CLI are exercised on each supported operating system before a pull
 request is merged. The protected `check` context aggregates all platform jobs and succeeds only
@@ -37,6 +41,15 @@ exact historical CLI packages declared in the matrix.
 
 The real-turn integration test never calls an external model service. It starts the pinned
 app-server with a temporary `CODEX_HOME` configured to use a loopback mock Responses provider.
+
+The shipped examples are also executable checks: `pnpm examples:smoke` runs streaming, explicit
+command decline, and interrupt/restart/resume against the real pinned app-server with isolated
+loopback providers. `pnpm package:smoke` copies those shipped files into a clean installed consumer
+and runs them there, in addition to checking ESM, schemas, and strict public declarations.
+
+For a candidate archive plus verification in both npm and pnpm consumers, run `pnpm preview:pack`
+on Node.js 22+. See [RELEASING.md](./RELEASING.md) for the exact artifacts, version strategy, and
+publication gates. Preparing a candidate does not publish it.
 
 ## Updating the Codex protocol
 
