@@ -1,8 +1,9 @@
 # Compatibility and upgrades
 
 **Use the bundled `@openai/codex@0.153.4` runtime for this client.** Its bindings and runtime
-validation schemas are generated together. This checkout is the unpublished `0.1.0` candidate;
-the currently published client is `0.1.0-preview.0`. The client version and runtime version
+validation schemas are generated together. This document covers client `0.1.0`, with
+`0.1.0-preview.0` as its historical published baseline. Check the registry for exact-version
+availability; this document is also included in local candidates. The client version and runtime version
 are separate; installing a newer global CLI does not update the client's bundled runtime.
 
 The public [app-server protocol](https://learn.chatgpt.com/docs/app-server) evolves, and its generated

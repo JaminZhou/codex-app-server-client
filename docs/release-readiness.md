@@ -1,8 +1,10 @@
 # Acceptance for the first non-preview release
 
-Target: evaluate the prepared `0.1.0` candidate, not promise a date or a stable 1.0 API. Current published version:
-`0.1.0-preview.0`, bundled public runtime `0.153.4`. Changes in the candidate changelog are not in
+Target: evaluate `0.1.0`, not promise a date or a stable 1.0 API. Historical published baseline:
+`0.1.0-preview.0`, bundled public runtime `0.153.4`. Changes in the `0.1.0` changelog are not in
 that already-published archive. Client and runtime versions remain independent.
+This checklist is a procedure, not live publication status; consult exact registry availability
+and source/hash-specific acceptance records for completed releases.
 
 ## Supported scope and evidence
 

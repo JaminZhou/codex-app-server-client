@@ -1,6 +1,6 @@
 # 0.1.0 candidate compared with 0.1.0-preview.0
 
-Status: preparation only, not a published release announcement.
+This comparison also ships in local candidates; it is not a publication-status announcement.
 
 Baseline: published `0.1.0-preview.0`, source `3829953920ad37757178e2892f17e585ddd93006`.
 Candidate: the proposed `0.1.0` version branch; use the exact committed source and integrity

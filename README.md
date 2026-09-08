@@ -8,9 +8,10 @@ app-server process, typed requests, and event routing so you can focus on your a
 > endorsed by OpenAI. Codex and OpenAI are trademarks of OpenAI.
 
 **Package:** `@jaminzhou/codex-app-server-client`.
-**Status:** `0.1.0-preview.0` is published on npm; it is a preview, not a stable API commitment.
-This checkout prepares **`0.1.0` (not yet published)**. It remains a pre-1.0 API; registry examples
-below deliberately retain the available preview until publication is verified.
+**Version covered:** `0.1.0`, a non-preview 0.x API, not a 1.0 stability commitment.
+This document ships in both local candidates and registry packages; its presence does not confirm
+publication. Check exact-version registry availability before installation, or use the verified
+local archive instructions below.
 The unscoped npm name belongs to a different project.
 
 ## Is this for your app?
@@ -42,13 +43,18 @@ See [compatibility and upgrade guidance](./COMPATIBILITY.md) before changing the
 
 ## First run: no account or model usage required
 
-Install the published preview in a new consumer directory:
+Check availability, then install the exact version in a new consumer directory:
 
 ```bash
 npm init -y
-npm install --save-exact --ignore-scripts --include=optional @jaminzhou/codex-app-server-client@0.1.0-preview.0
+npm view @jaminzhou/codex-app-server-client@0.1.0 version --registry https://registry.npmjs.org/
+npm install --save-exact --ignore-scripts --include=optional @jaminzhou/codex-app-server-client@0.1.0
 node node_modules/@jaminzhou/codex-app-server-client/examples/stream.mjs
 ```
+
+If the exact-version query reports that `0.1.0` is unavailable, it has not been made available in
+that registry: use a verified local candidate below, or explicitly choose the historical
+`0.1.0-preview.0` preview. Do not infer publication from a source checkout's version number.
 
 Expected output:
 
@@ -75,7 +81,7 @@ after restarting the app-server. See [example commands, output, and recovery](./
 ## Install into your own project
 
 Use the exact registry version above (or `pnpm add --save-exact --ignore-scripts
-@jaminzhou/codex-app-server-client@0.1.0-preview.0`). For unpublished source changes, build and
+@jaminzhou/codex-app-server-client@0.1.0`). For unpublished source changes, build and
 validate a local tarball instead:
 
 ```bash

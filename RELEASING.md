@@ -1,8 +1,8 @@
 # Releases and candidate preparation
 
-This checkout prepares `0.1.0`, with intended tag `latest`; **it has not been published**.
-Preparation, PR creation and merge are distinct from permission to publish. The historical
-preview remains the current registry release until a new publication is verified.
+This procedure targets `0.1.0`, with intended tag `latest`; it is not a publication-status report.
+Preparation, PR creation and merge are distinct from permission to publish. Query the exact registry
+version and retained publication evidence to establish whether publication has completed.
 
 The first preview, `@jaminzhou/codex-app-server-client@0.1.0-preview.0`, was published on
 2026-09-08 using `--tag next`. The registry also assigned `latest` to that preview; attempting to
@@ -95,8 +95,10 @@ npm publish /absolute/path/to/approved-0.1.0.tgz --tag latest --access public --
 
 Publish the inspected tarball, not a freshly rebuilt directory. Then read back the registry version,
 dist-tag and `dist.integrity`, compare them with the saved evidence, install that exact registry
-version into a new consumer, and repeat the examples. Update the README's publication status only
-after verifying success. If the publish response is uncertain, query the version before retrying.
+version into a new consumer, and repeat the examples. Record publication status separately from
+the immutable archive. The packed README uses time-neutral exact-version guidance so publishing
+does not require replacing the already-verified bytes. If the publish response is uncertain,
+query the version before retrying.
 
 For the first non-preview `0.1.0`, complete [release acceptance](./docs/release-readiness.md),
 review the version bump and `publishConfig.tag` change to `latest`, inspect the

@@ -1,6 +1,9 @@
 # Changelog
 
-## 0.1.0 (candidate — not yet published)
+## 0.1.0
+
+These version notes also accompany local candidates. Registry availability and publication dates
+are recorded separately; inclusion here is not evidence that publication has occurred.
 
 - Deterministic real-runtime regression coverage for concurrent thread streams, approval-policy
   inheritance, interruption followed by another turn, and managed-process death/recovery.
