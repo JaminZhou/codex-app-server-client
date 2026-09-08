@@ -1,10 +1,11 @@
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { execNpmSync } from "./npm-exec.mjs";
 import { candidateMode } from "./release-policy.mjs";
+import { promoteCandidate } from "./promote-candidate.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const manifest = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
@@ -57,8 +58,9 @@ try {
     intendedTag: manifest.publishConfig.tag,
   };
   const finalTarball = join(destination, artifact.filename);
-  copyFileSync(tarball, finalTarball);
-  writeFileSync(join(destination, `${mode}-evidence.json`), JSON.stringify(evidence, null, 2) + "\n");
+  const stagedEvidence = join(staging, `${mode}-evidence.json`);
+  writeFileSync(stagedEvidence, JSON.stringify(evidence, null, 2) + "\n");
+  promoteCandidate(tarball, stagedEvidence, finalTarball, join(destination, `${mode}-evidence.json`));
   console.log(`Verified ${mode} candidate: ` + finalTarball + "\nIntegrity: " + integrity + "\nNo registry publication was performed.");
 } finally {
   rmSync(staging, { recursive: true, force: true });

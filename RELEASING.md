@@ -59,9 +59,14 @@ Outputs:
 Preview-version checkouts instead produce a versioned preview tarball and `preview-evidence.json`.
 Retain previous approved evidence and archives before preparing a different candidate.
 
-Artifacts are git-ignored. Successful preparation replaces the local candidate and evidence only
-after both consumers pass; a failed run leaves the previous verified pair untouched. Inspect the
-command's exit status and the evidence's source commit before selecting a candidate.
+Artifacts are git-ignored. Both consumers and the staged evidence write must succeed before
+promotion begins. Failures before promotion leave the previous verified pair untouched. During
+promotion, old evidence is removed before replacing the archive, and new evidence is installed
+last. An interruption or rename failure can therefore leave no evidence file: that means no
+candidate is selected, even if a tarball exists. Regenerate before release; never pair a tarball
+with a separately retained older evidence file. This is process-failure protection, not a claim
+of power-loss durability or support for concurrent preparation in the same checkout. Inspect the
+command's exit status and evidence source/hash before selecting a candidate.
 For release approval, regenerate from a clean committed checkout so `sourceDirty` is `false`,
 review the archive's contents/integrity and PR CI, and retain those exact bytes. Package consumers
 get built ESM/declarations, schemas, examples, docs, and licenses, not source build tooling.
