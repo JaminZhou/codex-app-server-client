@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 // @ts-expect-error Repository-only JavaScript tooling has no public declaration.
 import { candidateMode } from "../scripts/release-policy.mjs";
 
@@ -6,6 +7,12 @@ const manifest = (version: string, tag: string) => ({
   version, publishConfig: { tag, access: "public", registry: "https://registry.npmjs.org/" },
 });
 describe("candidate packaging policy", () => {
+  it("keeps shipped exact-version troubleshooting aligned with the package", () => {
+    const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+    const examples = readFileSync(new URL("../examples/README.md", import.meta.url), "utf8");
+    const row = examples.split("\n").find((line) => line.startsWith("| npm returns 404"));
+    expect(row).toContain(`npm view ${pkg.name}@${pkg.version} version`);
+  });
   it("keeps previews and non-preview candidates explicit", () => {
     expect(candidateMode(manifest("0.1.0-preview.1", "next"), [])).toBe("preview");
     expect(candidateMode(manifest("0.1.0", "latest"), ["--release"])).toBe("release");
