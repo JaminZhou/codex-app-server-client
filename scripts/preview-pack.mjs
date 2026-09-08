@@ -4,14 +4,11 @@ import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSy
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { execNpmSync } from "./npm-exec.mjs";
+import { candidateMode } from "./release-policy.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const manifest = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
-if (manifest.private || !/^0\.\d+\.\d+-preview\.\d+$/.test(manifest.version)
-  || manifest.publishConfig?.tag !== "next" || manifest.publishConfig?.access !== "public"
-  || manifest.publishConfig?.registry !== "https://registry.npmjs.org/") {
-  throw new Error("Preview packaging requires a publishable 0.x.y-preview.N version and the public npm next tag.");
-}
+const mode = candidateMode(manifest, process.argv.slice(2));
 const git = (args) => execFileSync("git", args, { cwd: root, encoding: "utf8" }).trim();
 const sourceCommit = git(["rev-parse", "HEAD"]);
 const sourceStatus = git(["status", "--porcelain"]);
@@ -57,11 +54,12 @@ try {
     node: process.versions.node,
     verified: ["npm --ignore-scripts install", "pnpm --ignore-scripts install", "ESM and protocol exports", "strict TypeScript consumer", "real app-server startup", "3 shipped mock-provider examples"],
     published: false,
+    intendedTag: manifest.publishConfig.tag,
   };
   const finalTarball = join(destination, artifact.filename);
   copyFileSync(tarball, finalTarball);
-  writeFileSync(join(destination, "preview-evidence.json"), JSON.stringify(evidence, null, 2) + "\n");
-  console.log("Verified preview candidate: " + finalTarball + "\nIntegrity: " + integrity + "\nNo registry publication was performed.");
+  writeFileSync(join(destination, `${mode}-evidence.json`), JSON.stringify(evidence, null, 2) + "\n");
+  console.log(`Verified ${mode} candidate: ` + finalTarball + "\nIntegrity: " + integrity + "\nNo registry publication was performed.");
 } finally {
   rmSync(staging, { recursive: true, force: true });
 }

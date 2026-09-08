@@ -9,6 +9,8 @@ app-server process, typed requests, and event routing so you can focus on your a
 
 **Package:** `@jaminzhou/codex-app-server-client`.
 **Status:** `0.1.0-preview.0` is published on npm; it is a preview, not a stable API commitment.
+This checkout prepares **`0.1.0` (not yet published)**. It remains a pre-1.0 API; registry examples
+below deliberately retain the available preview until publication is verified.
 The unscoped npm name belongs to a different project.
 
 ## Is this for your app?
@@ -78,7 +80,7 @@ validate a local tarball instead:
 
 ```bash
 # In the source checkout, using Node.js 22+:
-pnpm preview:pack
+pnpm release:pack
 ```
 
 In a separate consumer directory, install the printed artifact path (the example below assumes
@@ -86,7 +88,7 @@ the checkout is a sibling directory):
 
 ```bash
 npm init -y
-npm install --ignore-scripts --include=optional ../codex-app-server-client/artifacts/jaminzhou-codex-app-server-client-0.1.0-preview.0.tgz
+npm install --ignore-scripts --include=optional ../codex-app-server-client/artifacts/jaminzhou-codex-app-server-client-0.1.0.tgz
 node node_modules/@jaminzhou/codex-app-server-client/examples/stream.mjs
 ```
 

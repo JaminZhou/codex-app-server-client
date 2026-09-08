@@ -1,6 +1,6 @@
 {
   "name": "@jaminzhou/codex-app-server-client",
-  "version": "0.1.0-preview.0",
+  "version": "0.1.0",
   "description": "Unofficial TypeScript client for streaming Codex conversations, explicit approvals, and persistent threads over the public app-server protocol.",
   "keywords": [
     "codex",
@@ -20,7 +20,7 @@
   "license": "MIT",
   "publishConfig": {
     "access": "public",
-    "tag": "next",
+    "tag": "latest",
     "registry": "https://registry.npmjs.org/"
   },
   "type": "module",
@@ -57,6 +57,7 @@
     "git:smoke": "pnpm --silent dlx npm@11.6.2 exec -- node scripts/git-dependency-smoke.mjs",
     "package:smoke": "node scripts/package-smoke.mjs",
     "preview:pack": "node scripts/preview-pack.mjs",
+    "release:pack": "node scripts/preview-pack.mjs --release",
     "examples:smoke": "pnpm build && node scripts/examples-smoke.mjs",
     "prepare": "npm run build",
     "test": "vitest run",

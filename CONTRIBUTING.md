@@ -55,9 +55,10 @@ command decline, and interrupt/restart/resume against the real pinned app-server
 loopback providers. `pnpm package:smoke` copies those shipped files into a clean installed consumer
 and runs them there, in addition to checking ESM, schemas, and strict public declarations.
 
-For a candidate archive plus verification in both npm and pnpm consumers, run `pnpm preview:pack`
+For a non-preview candidate archive plus verification in both npm and pnpm consumers, run `pnpm release:pack`
 on Node.js 22+. See [RELEASING.md](./RELEASING.md) for the exact artifacts, version strategy, and
 publication gates. Preparing a candidate does not publish it.
+For a future preview-version checkout, `pnpm preview:pack` retains the separate `next`-tag guard.
 
 ## Updating the Codex protocol
 
