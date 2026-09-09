@@ -10,7 +10,8 @@ in `artifacts/release-evidence.json` when selecting bytes for approval.
 | --- | --- |
 | Root and protocol ESM exports / public TypeScript signatures | None intended; compare generated declarations and export maps during candidate verification |
 | Generated protocol types, schemas and method maps | Unchanged; runtime remains exactly `0.153.4` |
-| Dependencies / lockfile / Node engine range | Unchanged; installed Node 18+ compatibility, Node 22+ source build |
+| Runtime dependencies / Node engine range | Unchanged; installed Node 18+ compatibility, Node 22+ source build |
+| Development dependencies / lockfile | Vitest floor raised to `^4.1.11`, with `@vitest/mocker` and related development/build transitive resolutions updated for the redirect-mock security fix |
 | Transport, approval and turn lifecycle implementation | Unchanged; new deterministic tests exercise existing behavior |
 | Default initialize client-info version | `0.1.0-preview.0` → `0.1.0`, derived from package metadata; explicit clientInfo overrides remain available |
 | Release metadata and preparation tooling | Version `0.1.0`, intended `latest` tag, guarded `release:pack`; no publishing command is run automatically |
@@ -28,3 +29,7 @@ Preparation check on 2026-09-08: no source/schema/lockfile diff against that bas
 built declaration files (`index.d.ts`, `protocol.d.ts`, `_tsup-dts-rollup.d.ts`) were byte-identical
 to the retained registry preview archive, and exports/dependencies/engines matched. Repeat the
 comparison if a later review changes code or dependencies.
+
+Security follow-up on 2026-09-09 changes the development dependency lockfile described above;
+the earlier no-lockfile-diff observation is historical, not a claim about this updated candidate.
+Regenerate candidate evidence after the toolchain change; do not reuse an earlier archive hash.

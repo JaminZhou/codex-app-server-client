@@ -10,7 +10,9 @@ are recorded separately; inclusion here is not evidence that publication has occ
 - Document the published preview and explicit acceptance gates for a future `0.1.0` release.
 - Prepare the first non-preview candidate with explicit `release:pack` verification and intended
   npm `latest` tag. This is still a pre-1.0 API, not a 1.0 stability guarantee.
-- No public API, protocol, dependency, or transport behavior changes from `0.1.0-preview.0`;
+- Raise the Vitest development dependency floor to `4.1.11` and update its lockfile graph,
+  including `@vitest/mocker`, to address the redirect-mock path traversal/arbitrary-read advisory.
+- No public API, protocol, runtime dependency, or transport behavior changes from `0.1.0-preview.0`;
   default initialize client-info version becomes `0.1.0`. See [API comparison](./docs/api-diff-0.1.0.md).
 
 ## 0.1.0-preview.0 (2026-09-08)
