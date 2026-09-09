@@ -1,7 +1,9 @@
 # Compatibility and upgrades
 
-**Use the bundled `@openai/codex@0.153.4` runtime for this client preview.** Its bindings and runtime
-validation schemas are generated together. The client version (`0.1.0-preview.0`) and runtime version
+**Use the bundled `@openai/codex@0.153.4` runtime for this client.** Its bindings and runtime
+validation schemas are generated together. This document covers client `0.1.0`, with
+`0.1.0-preview.0` as its historical published baseline. Check the registry for exact-version
+availability; this document is also included in local candidates. The client version and runtime version
 are separate; installing a newer global CLI does not update the client's bundled runtime.
 
 The public [app-server protocol](https://learn.chatgpt.com/docs/app-server) evolves, and its generated
@@ -15,8 +17,14 @@ raw method coverage nor a successful basic smoke means all workflows work on an 
 | Basic initialization, thread and goal access | Exact runtimes `0.150.1`, `0.152.1`, `0.153.4` | Real isolated stdio compatibility smoke; no model calls |
 | Streaming, explicit command decline, interruption and process-restart resume | Bundled `0.153.4` | Shipped examples run against the real runtime with a local mock provider |
 | Packed ESM, declarations, schemas, and bundled binary | Node.js 18 on Linux, macOS, Windows | Installed-package CI; not every OS/architecture pairing |
-| Preview tarball without consumer build scripts | npm and pnpm 11 consumers | `pnpm preview:pack`; evidence records the local Node version |
+| Published `0.1.0-preview.0` archive without consumer build scripts | npm and pnpm 11 consumers | Historical exact-archive verification; not evidence for new candidate bytes |
 | Live account entitlement, model quality, every protocol workflow | Not established by these tests | Requires separate application-specific acceptance |
+
+For a new `0.1.0` candidate, `pnpm release:pack` must verify the exact chosen bytes. Until a
+successful run records the selected source commit and integrity in `artifacts/release-evidence.json`,
+that candidate gate is pending. Check the current PR's validation report as well; this historical
+coverage table and an unchecked release checklist are not a final-candidate attestation.
+Preview-version checkouts use `pnpm preview:pack` and separate preview evidence.
 
 ## How to upgrade
 
@@ -28,7 +36,7 @@ the new runtime compatible.
 Maintainers update the exact runtime, lockfile, public-tag provenance, generated types/schemas and
 compatibility matrix together, then run the required checks described in [CONTRIBUTING.md](./CONTRIBUTING.md).
 The scheduled drift alarm means an upstream stable release differs; it does not by itself mean
-the current client is broken. Preview publication is covered by [RELEASING.md](./RELEASING.md).
+the current client is broken. Candidate preparation and publication are covered by [RELEASING.md](./RELEASING.md).
 
 The detailed tables below describe this pinned public baseline, not parity with private Codex
 Desktop functionality.

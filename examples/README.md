@@ -101,7 +101,7 @@ uses `--live`; the mock checks do not verify real account entitlement or model a
 
 | Symptom | Recovery |
 | --- | --- |
-| npm returns 404 for the scoped package | Confirm the registry is `https://registry.npmjs.org/` and the exact name/version is `@jaminzhou/codex-app-server-client@0.1.0-preview.0`. Check registry/network access; do not substitute the unscoped package. |
+| npm returns 404 for the scoped package | Check `npm view @jaminzhou/codex-app-server-client@0.1.0 version --registry https://registry.npmjs.org/`. If unavailable, use a verified local candidate. Check network access; do not infer publication from a source version or substitute the unscoped package. |
 | Missing `dist/index.js` after a Git install | Build from source with Node.js 22+ or allow the exact Git source's `prepare` script in pnpm. A ready-built tarball avoids this build. |
 | Cannot resolve the bundled CLI | Reinstall with optional dependencies enabled (`npm install --include=optional`). Check the OS/architecture in the error. The client does not search global PATH. |
 | Login required / expired credentials | Run the pinned CLI's `login status`, then `login`, as the same user with the same `CODEX_HOME`. A home change selects different credentials/history. |

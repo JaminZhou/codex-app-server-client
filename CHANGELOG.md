@@ -1,10 +1,17 @@
 # Changelog
 
-## Unreleased
+## 0.1.0
+
+These version notes also accompany local candidates. Registry availability and publication dates
+are recorded separately; inclusion here is not evidence that publication has occurred.
 
 - Deterministic real-runtime regression coverage for concurrent thread streams, approval-policy
   inheritance, interruption followed by another turn, and managed-process death/recovery.
 - Document the published preview and explicit acceptance gates for a future `0.1.0` release.
+- Prepare the first non-preview candidate with explicit `release:pack` verification and intended
+  npm `latest` tag. This is still a pre-1.0 API, not a 1.0 stability guarantee.
+- No public API, protocol, dependency, or transport behavior changes from `0.1.0-preview.0`;
+  default initialize client-info version becomes `0.1.0`. See [API comparison](./docs/api-diff-0.1.0.md).
 
 ## 0.1.0-preview.0 (2026-09-08)
 

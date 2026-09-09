@@ -1,8 +1,10 @@
 # Acceptance for the first non-preview release
 
-Target: evaluate `0.1.0`, not promise a date or a stable 1.0 API. Current published version:
-`0.1.0-preview.0`, bundled public runtime `0.153.4`. Source changes under Unreleased are not in
+Target: evaluate `0.1.0`, not promise a date or a stable 1.0 API. Historical published baseline:
+`0.1.0-preview.0`, bundled public runtime `0.153.4`. Changes in the `0.1.0` changelog are not in
 that already-published archive. Client and runtime versions remain independent.
+This checklist is a procedure, not live publication status; consult exact registry availability
+and source/hash-specific acceptance records for completed releases.
 
 ## Supported scope and evidence
 
@@ -18,7 +20,7 @@ or a promise of high-level wrappers for every generated method.
 | Approval inheritance | Same suite: persisted restart/resume, fork, explicit override, original policy unchanged, actual command declines | Every approval type or permission profile |
 | Interruption / recovery | Same suite: same-process follow-up; shipped `interrupt-resume.mjs`: new-process resume and prior history | Exactly-once replay after a lost connection |
 | Process failure | Same suite: kill only the exact test-owned child, fail active stream, explicit reconnect without replay; RPC tests reject pending calls | Recovery of unfinished external side effects |
-| Consumer installation | `pnpm preview:pack`, npm/pnpm archive checks, three-platform CI | Successful future registry publication |
+| Consumer installation | `pnpm release:pack`, npm/pnpm archive checks, three-platform CI | Successful future registry publication |
 | Public source baseline | Exact generated protocol provenance and compatibility matrix | Private Desktop feature parity |
 | Real account path | Manual acceptance below, pending explicit authorization | Covered by the mock tests |
 
@@ -48,6 +50,21 @@ private prompts, raw stderr, or personal thread history. List any untested API-k
 Unix-attachment path explicitly; do not infer its live acceptance from a different account path.
 Authentication changes, credential cleanup, real command/file execution, and extra paid attempts
 need separate approval when outside the agreed scope.
+
+### Development baseline evidence, not final-candidate acceptance
+
+PR [#31](https://github.com/JaminZhou/codex-app-server-client/pull/31) passed 53 deterministic tests,
+cross-platform CI, npm/pnpm and Git installation checks, and a fresh clean bot review after two
+test findings were fixed. On 2026-09-08, Jamin authorized three live ChatGPT turns using the
+development archive from `447b77f`: completed, interrupted, completed. Restart/resume recovered
+the first turn's synthetic marker, with no tool calls observed or workspace changes. A one-off
+harness double-consumption error was corrected without replaying the first turn. Usage for the
+first and interrupted turns was unavailable; no total-usage claim is made.
+
+That archive was still labeled `0.1.0-preview.0` and was never published. Its live acceptance
+does not automatically certify new candidate bytes. [The API comparison](./api-diff-0.1.0.md)
+records the planned delta; repeat account acceptance on final candidate bytes only with renewed
+authorization. Do not silently spend additional model usage based on the completed three-turn budget.
 
 ## Candidate decision
 
