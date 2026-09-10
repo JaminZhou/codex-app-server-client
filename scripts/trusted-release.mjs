@@ -3,6 +3,7 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { appendFileSync, lstatSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { setTimeout as delay } from "node:timers/promises";
 import { pathToFileURL } from "node:url";
 import { candidateMode } from "./release-policy.mjs";
 
@@ -13,6 +14,10 @@ const versionPattern = /^0\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 const shaPattern = /^[a-f0-9]{40}$/;
 const integrityPattern = /^sha512-[A-Za-z0-9+/]{86}==$/;
 const ciJobs = ["linux-check", "macos-package-smoke", "windows-package-smoke", "check"];
+const registryReadDelays = [2_000, 5_000, 10_000, 20_000, 30_000];
+
+class RegistryVisibilityError extends Error {}
+const otherTags = ({ latest, ...others }) => others;
 
 export function releaseInputs(env, needsArtifact = false) {
   assert.match(env.RELEASE_VERSION ?? "", versionPattern, "An exact non-preview 0.x.y version is required");
@@ -150,13 +155,72 @@ export function validateNewVersion(existing, metadata, version) {
   assert.ok(minor > oldMinor || (minor === oldMinor && patch > oldPatch), "Refuse latest downgrade or reuse");
 }
 
-export function validateRegistry(metadata, version, integrity) {
+function validateRegistryEntry(metadata, version, integrity) {
   const entry = metadata.versions?.[version];
   assert.equal(entry?.name, packageName);
   assert.equal(entry?.version, version);
   assert.equal(entry?.dist?.integrity, integrity, "Registry bytes differ from approved bytes");
+  return entry;
+}
+
+export function validateRegistry(metadata, version, integrity) {
+  const entry = validateRegistryEntry(metadata, version, integrity);
   assert.equal(metadata["dist-tags"]?.latest, version, "latest does not identify this release");
   return entry;
+}
+
+// Retry only publication visibility lag, never a registry write or a safety mismatch.
+// At most 67 seconds of backoff plus twelve 30-second HTTP reads.
+// Publication itself is never retried.
+export async function readPublishedRegistry(expected, manifest, before, {
+  fetcher = fetch, sleep = delay, onRetry = (message) => console.warn(message),
+} = {}) {
+  assert.match(before.latest ?? "", versionPattern, "Invalid pre-publication latest tag");
+  const freshRead = (url, options) => fetcher(url, {
+    ...options, method: "GET", headers: { ...options.headers, "Cache-Control": "no-cache" },
+  });
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const metadata = await npmMetadata(undefined, freshRead);
+      assert.ok(metadata?.versions && typeof metadata.versions === "object"
+        && !Array.isArray(metadata.versions), "Invalid registry version metadata");
+      const tags = metadata["dist-tags"];
+      assert.ok(tags && typeof tags === "object" && !Array.isArray(tags), "Invalid registry tags");
+      assert.deepEqual(otherTags(tags), otherTags(before), "Unrelated registry tags changed");
+      assert.ok(tags.latest === before.latest || tags.latest === expected.version,
+        "Unexpected latest tag; inspect the registry before retrying publication");
+      if (metadata.versions[expected.version] === undefined) {
+        throw new RegistryVisibilityError("The new version is not visible in registry metadata yet");
+      }
+      // Check immutable identity and safety constraints even when latest is still stale.
+      const entry = validateRegistryEntry(metadata, expected.version, expected.integrity);
+      assert.deepEqual(entry.dependencies, manifest.dependencies);
+      const url = new URL(entry.dist.tarball);
+      assert.equal(url.origin, new URL(registry).origin, "Unexpected registry tarball host");
+      if (tags.latest !== expected.version) {
+        throw new RegistryVisibilityError("latest still identifies the pre-publication version");
+      }
+      const response = await freshRead(url, { signal: AbortSignal.timeout(30_000), redirect: "error" });
+      if (response.status === 404) {
+        await response.body?.cancel();
+        throw new RegistryVisibilityError("The published tarball is not visible yet");
+      }
+      assert.equal(response.status, 200, "Registry tarball read failed");
+      const bytes = Buffer.from(await response.arrayBuffer());
+      assert.equal("sha512-" + createHash("sha512").update(bytes).digest("base64"), expected.integrity,
+        "Downloaded registry bytes differ from approved bytes");
+      return { metadata, entry, bytes };
+    } catch (error) {
+      if (!(error instanceof RegistryVisibilityError)) throw error;
+      if (attempt === registryReadDelays.length) {
+        throw new Error(`Registry publication is still not visible after ${attempt + 1} read attempts; `
+          + "it may already be published. Inspect npm before any publish retry.", { cause: error });
+      }
+      const waitMs = registryReadDelays[attempt];
+      onRetry(`Registry read attempt ${attempt + 1}: ${error.message}. Retrying GETs in ${waitMs}ms; not republishing.`);
+      await sleep(waitMs);
+    }
+  }
 }
 
 export async function main(command, env = process.env) {
@@ -182,19 +246,9 @@ export async function main(command, env = process.env) {
     mkdirSync("artifacts", { recursive: true });
     writeFileSync("artifacts/registry-before.json", JSON.stringify(metadata["dist-tags"], null, 2) + "\n");
   } else if (command === "after") {
-    const metadata = await npmMetadata();
-    const entry = validateRegistry(metadata, expected.version, expected.integrity);
     const { manifest } = verifyArtifact(env.CANDIDATE_DIRECTORY ?? "candidate", expected);
-    assert.deepEqual(entry.dependencies, manifest.dependencies);
     const before = JSON.parse(readFileSync("artifacts/registry-before.json", "utf8"));
-    const otherTags = ({ latest, ...others }) => others;
-    assert.deepEqual(otherTags(metadata["dist-tags"]), otherTags(before), "Unrelated registry tags changed");
-    const url = new URL(entry.dist.tarball);
-    assert.equal(url.origin, new URL(registry).origin, "Unexpected registry tarball host");
-    const response = await fetch(url, { signal: AbortSignal.timeout(30_000), redirect: "error" });
-    assert.equal(response.status, 200);
-    const bytes = Buffer.from(await response.arrayBuffer());
-    assert.equal("sha512-" + createHash("sha512").update(bytes).digest("base64"), expected.integrity);
+    const { metadata, entry, bytes } = await readPublishedRegistry(expected, manifest, before);
     const receipt = { name: packageName, version: expected.version, sourceCommit: expected.sha,
       integrity: expected.integrity, distTags: metadata["dist-tags"], publishedAt: metadata.time?.[expected.version],
       verifiedAt: new Date().toISOString(), tarball: entry.dist.tarball, bytes: bytes.length,
