@@ -103,8 +103,10 @@ Resuming does not automatically repeat the interrupted tool or turn.
 
 ## Opt into real model output
 
-See [authentication and usage](../README.md#run-with-your-codex-account), then append `--live` to
-any command above. It uses your working directory and selected Codex home, and may consume model
+See [authentication and usage](../README.md#run-with-your-codex-account), then append `--live` to an
+individual example command, such as `node examples/stream.mjs --live`. The aggregate
+`pnpm examples:smoke` is mock-only and rejects arguments, including `--live`; it is never a live-account
+acceptance command. An individual live example uses your working directory and selected Codex home, and may consume model
 usage. Live output and whether a model requests a tool are not deterministic. No automatic test
 uses `--live`; the mock checks do not verify real account entitlement or model availability.
 

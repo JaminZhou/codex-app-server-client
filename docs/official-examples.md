@@ -81,7 +81,8 @@ Installed-package verification copies the **shipped** examples into fresh npm/pn
 checks their catalog, ESM/schema imports, strict declarations and runtime binary. Platform CI runs
 the npm package suite on Linux/macOS/Windows, with an additional pnpm consumer on Linux.
 
-No automatic check uses `--live`. In groups 01–14, `--live` uses the selected existing Codex home and
+No automatic check uses `--live`; the aggregate `pnpm examples:smoke` explicitly rejects all arguments.
+Only individual example commands accept `--live`. In groups 01–14, it uses the selected existing Codex home and
 working directory; lifecycle examples create/persist their own threads and the mini CLI can keep
 running until you exit. Non-interactive mock runs have a 45-second per-example deadline; interactive
 input and live turns have no imposed total deadline. The smoke runner bounds every child process,

@@ -1,4 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { inflateSync } from "node:zlib";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -6,6 +8,17 @@ const exampleModule = (name: string) => import(new URL(`../examples/lib/${name}.
 afterEach(() => { vi.restoreAllMocks(); vi.useRealTimers(); });
 
 describe("official example catalog", () => {
+  it("rejects aggregate smoke arguments before starting any mock or live example", () => {
+    const script = fileURLToPath(new URL("../scripts/examples-smoke.mjs", import.meta.url));
+    for (const flag of ["--live", "--interactive", "--unknown"]) {
+      const result = spawnSync(process.execPath, [script, flag], { encoding: "utf8", timeout: 5_000 });
+      expect(result.error).toBeUndefined();
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain("examples:smoke is mock-only and accepts no arguments");
+      expect(result.stdout).toBe("");
+    }
+  });
+
   it("ships all 15 pinned official groups and the 3 additional safety examples", async () => {
     const { officialExamples, smokeExamples } = await exampleModule("catalog");
     expect(officialExamples).toHaveLength(15);
