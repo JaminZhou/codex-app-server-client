@@ -24,6 +24,11 @@ platform-specific bundled Codex CLI are exercised on each supported operating sy
 request is merged. The protected `check` context aggregates all platform jobs and succeeds only
 when all have passed.
 
+`node --test scripts/tests/smoke-cleanup.node.mjs` checks the installed-consumer cleanup policy
+on Node.js 18 in every platform job. Windows additionally holds a real file handle without delete
+sharing to exercise bounded native filesystem retries. Persistent cleanup errors still fail CI,
+both errors are retained if the consumer also fails, and a smoke reports success only after cleanup.
+
 A separate scheduled workflow runs `pnpm protocol:latest-check` against npm's latest stable Codex
 release. It always verifies that the pinned public Rust tag still resolves to the recorded commit
 and method map. It also fails when the pinned runtime is behind and reports whether the newer

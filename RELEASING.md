@@ -1,6 +1,9 @@
 # Releases and candidate preparation
 
-This procedure targets `0.1.0`, with intended tag `latest`; it is not a publication-status report.
+`0.1.0` was published on 2026-09-09; its [release record](./docs/releases/0.1.0.md) identifies the
+source, immutable archive and verification scope. Do not republish this version.
+
+The procedure below retains the `0.1.0`/`latest` example; it is not authorization for a new release.
 Preparation, PR creation and merge are distinct from permission to publish. Query the exact registry
 version and retained publication evidence to establish whether publication has completed.
 

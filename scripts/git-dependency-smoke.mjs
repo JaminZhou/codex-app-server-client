@@ -1,10 +1,11 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { execNpmSync } from "./npm-exec.mjs";
+import { withSmokeCleanup } from "./smoke-cleanup.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(import.meta.url);
@@ -27,7 +28,7 @@ function assertPinnedNpm() {
   }
 }
 
-try {
+withSmokeCleanup(temporaryRoot, () => {
   assertPinnedNpm();
   // Pin the installer so this smoke is not coupled to the npm version bundled
   // with a particular Node runner image.
@@ -116,9 +117,7 @@ try {
     { cwd: temporaryRoot, stdio: "inherit" },
   );
 
-  console.log(
-    `Git dependency smoke passed on Node ${process.versions.node} with npm ${gitInstallNpmVersion}.`,
-  );
-} finally {
-  rmSync(temporaryRoot, { force: true, recursive: true });
-}
+});
+console.log(
+  `Git dependency smoke passed on Node ${process.versions.node} with npm ${gitInstallNpmVersion}; cleanup complete.`,
+);
