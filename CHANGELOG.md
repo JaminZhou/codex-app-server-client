@@ -1,9 +1,16 @@
 # Changelog
 
-## 0.1.0
+## Unreleased
 
-These version notes also accompany local candidates. Registry availability and publication dates
-are recorded separately; inclusion here is not evidence that publication has occurred.
+- Bound retries for temporary-directory cleanup in npm/pnpm and Git installed-consumer smokes;
+  retain both errors when the consumer and cleanup fail, and report success only after cleanup.
+- Add a Windows file-sharing regression fixture and the historical `0.1.0` release record.
+- No client runtime, protocol or dependency change; these maintenance changes are not in the
+  immutable npm `0.1.0` archive and do not require republishing it.
+
+## 0.1.0 (2026-09-09)
+
+Published with `latest` pointing to `0.1.0`; see the [release record](./docs/releases/0.1.0.md).
 
 - Deterministic real-runtime regression coverage for concurrent thread streams, approval-policy
   inheritance, interruption followed by another turn, and managed-process death/recovery.

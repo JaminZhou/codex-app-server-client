@@ -1,10 +1,11 @@
 import { execFileSync } from "node:child_process";
-import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { execNpmSync } from "./npm-exec.mjs";
+import { withSmokeCleanup } from "./smoke-cleanup.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(import.meta.url);
@@ -14,7 +15,7 @@ const args = process.argv.slice(2);
 const usePnpm = args.includes("--pnpm");
 const artifactArgument = args.find((arg) => arg !== "--pnpm");
 
-try {
+const manifest = withSmokeCleanup(temporaryRoot, () => {
   const artifact = artifactArgument ? null : parsePackOutput(
     execNpmSync(["pack", "--json", "--pack-destination", temporaryRoot], {
       cwd: root, encoding: "utf8", timeout: 120_000,
@@ -99,11 +100,10 @@ try {
       cwd: temporaryRoot, stdio: "inherit", timeout: 60_000,
     });
   }
-  console.log("Node " + process.versions.node + " " + (usePnpm ? "pnpm" : "npm")
-    + " installed-package smoke passed (" + manifest.name + "@" + manifest.version + ").");
-} finally {
-  rmSync(temporaryRoot, { force: true, recursive: true });
-}
+  return manifest;
+});
+console.log("Node " + process.versions.node + " " + (usePnpm ? "pnpm" : "npm")
+  + " installed-package smoke passed (" + manifest.name + "@" + manifest.version + "; cleanup complete).");
 
 function parsePackOutput(output) {
   const match = [...output.matchAll(/(?:^|\n)(\[\s*\{\s*"id"\s*:)/g)].at(-1);

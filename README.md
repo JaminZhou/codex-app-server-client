@@ -9,9 +9,8 @@ app-server process, typed requests, and event routing so you can focus on your a
 
 **Package:** `@jaminzhou/codex-app-server-client`.
 **Version covered:** `0.1.0`, a non-preview 0.x API, not a 1.0 stability commitment.
-This document ships in both local candidates and registry packages; its presence does not confirm
-publication. Check exact-version registry availability before installation, or use the verified
-local archive instructions below.
+`0.1.0` was published on 2026-09-09; see the [release record](./docs/releases/0.1.0.md) for exact
+source and archive integrity. A later source checkout or local rebuild is not the published archive.
 The unscoped npm name belongs to a different project.
 
 ## Is this for your app?
@@ -102,7 +101,8 @@ For pnpm, use `pnpm add --ignore-scripts <absolute-path-to-tarball>` instead. Ta
 not need to allow this package's build scripts or install a compiler. The preparation command
 verifies the same tarball in clean npm and pnpm consumers, including declarations and all examples.
 
-The initial publication used `--tag next`, but the registry also assigned `latest` to this preview.
+The initial preview publication used `--tag next`, but the registry also assigned `latest` to it.
+At the `0.1.0` release verification, `latest` pointed to `0.1.0` and `next` retained the preview.
 Neither tag is a stability guarantee. Pin the exact version and retain your lockfile.
 See [release preparation](./RELEASING.md) and the [0.1.0 acceptance checklist](./docs/release-readiness.md).
 

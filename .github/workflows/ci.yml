@@ -31,6 +31,7 @@ jobs:
         with:
           node-version: 18
       # pnpm 11 itself requires Node 22; invoke the Node 18 smoke script directly.
+      - run: node --test scripts/tests/smoke-cleanup.node.mjs
       - run: node scripts/package-smoke.mjs
 
   macos-package-smoke:
@@ -51,6 +52,7 @@ jobs:
         with:
           node-version: 18
       # pnpm 11 itself requires Node 22; invoke the Node 18 smoke script directly.
+      - run: node --test scripts/tests/smoke-cleanup.node.mjs
       - run: node scripts/package-smoke.mjs
 
   windows-package-smoke:
@@ -73,6 +75,7 @@ jobs:
         with:
           node-version: 18
       # pnpm 11 itself requires Node 22; invoke the Node 18 smoke script directly.
+      - run: node --test scripts/tests/smoke-cleanup.node.mjs
       - run: node scripts/package-smoke.mjs
 
   check:
