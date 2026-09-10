@@ -7,37 +7,49 @@ import { fileURLToPath } from "node:url";
 import { execNpmSync } from "./npm-exec.mjs";
 import { withSmokeCleanup } from "./smoke-cleanup.mjs";
 import { runExamples } from "./run-examples.mjs";
+import { smokeOptions, verifyConsumerLock } from "./package-smoke-options.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(import.meta.url);
 const typescriptCompiler = require.resolve("typescript/bin/tsc");
+const options = smokeOptions(process.argv.slice(2));
+const usePnpm = options.usePnpm;
+const artifactArgument = options.artifact;
+const publicRegistry = "https://registry.npmjs.org/";
 const temporaryRoot = mkdtempSync(join(tmpdir(), "codex-app-server-client-package-smoke-"));
-const args = process.argv.slice(2);
-const usePnpm = args.includes("--pnpm");
-const artifactArgument = args.find((arg) => arg !== "--pnpm");
 
 const manifest = withSmokeCleanup(temporaryRoot, () => {
-  const artifact = artifactArgument ? null : parsePackOutput(
+  const artifact = artifactArgument || options.registry ? null : parsePackOutput(
     execNpmSync(["pack", "--json", "--pack-destination", temporaryRoot], {
       cwd: root, encoding: "utf8", timeout: 120_000,
     }),
   )[0];
-  const artifactPath = artifactArgument ? resolve(artifactArgument) : join(temporaryRoot, artifact.filename);
+  const artifactPath = options.registry ? `@jaminzhou/codex-app-server-client@${options.registry.version}`
+    : artifactArgument ? resolve(artifactArgument) : join(temporaryRoot, artifact.filename);
   writeFileSync(join(temporaryRoot, "package.json"), JSON.stringify({
     name: "codex-preview-consumer", version: "1.0.0", private: true, type: "module",
   }));
   if (usePnpm) {
     // Pin the consumer's installer independently of Corepack and parent lifecycle environment.
-    execNpmSync(["exec", "--yes", "--package=pnpm@11.7.0", "--", "pnpm", "add", "--ignore-scripts", artifactPath], {
+    execNpmSync(["exec", "--yes", "--package=pnpm@11.7.0", "--", "pnpm", "add", "--ignore-scripts", "--save-exact", "--registry=" + publicRegistry, artifactPath], {
       cwd: temporaryRoot, stdio: "pipe", timeout: 120_000,
     });
   } else {
-    execNpmSync(["install", "--ignore-scripts", "--include=optional", "--no-audit", "--no-fund", artifactPath], {
+    execNpmSync(["install", "--ignore-scripts", "--include=optional", "--no-audit", "--no-fund", "--save-exact", "--registry=" + publicRegistry, artifactPath], {
       cwd: temporaryRoot, stdio: "pipe", timeout: 120_000,
     });
   }
   const packageRoot = join(temporaryRoot, "node_modules", "@jaminzhou", "codex-app-server-client");
   const manifest = JSON.parse(readFileSync(join(packageRoot, "package.json"), "utf8"));
+  if (options.registry) {
+    if (manifest.name !== "@jaminzhou/codex-app-server-client" || manifest.version !== options.registry.version) {
+      throw new Error("Registry-installed package identity mismatch");
+    }
+    const consumer = JSON.parse(readFileSync(join(temporaryRoot, "package.json"), "utf8"));
+    if (consumer.dependencies?.[manifest.name] !== options.registry.version) throw new Error("Consumer is not pinned to the approved version");
+    verifyConsumerLock(readFileSync(join(temporaryRoot, usePnpm ? "pnpm-lock.yaml" : "package-lock.json"), "utf8"),
+      usePnpm, manifest.name, manifest.version, options.registry.integrity);
+  }
   for (const path of [
     "README.md", "LICENSE", "COMPATIBILITY.md", "CONTRIBUTING.md", "RELEASING.md", "docs/api.md",
     "examples/README.md", "examples/stream.mjs", "examples/approvals.mjs", "examples/interrupt-resume.mjs",
@@ -112,7 +124,7 @@ const manifest = withSmokeCleanup(temporaryRoot, () => {
   runExamples(join(temporaryRoot, "examples"), temporaryRoot);
   return manifest;
 });
-console.log("Node " + process.versions.node + " " + (usePnpm ? "pnpm" : "npm")
+console.log((options.registry ? "Exact public registry " : "") + "Node " + process.versions.node + " " + (usePnpm ? "pnpm" : "npm")
   + " installed-package smoke passed (" + manifest.name + "@" + manifest.version + "; cleanup complete).");
 
 function parsePackOutput(output) {
