@@ -11,7 +11,10 @@ The first preview, `@jaminzhou/codex-app-server-client@0.1.0-preview.0`, was pub
 2026-09-08 using `--tag next`. The registry also assigned `latest` to that preview; attempting to
 remove `latest` returned HTTP 400. Neither alias makes this a stable release. Exact-version
 registry installation and downloaded-archive integrity were verified with npm and pnpm.
-This repository has no automatic publishing workflow.
+This repository has no push-, tag-, or schedule-triggered publishing workflow. The optional
+[manual trusted-publishing workflow](./docs/trusted-publishing.md) separates candidate preparation
+from publication of an explicitly approved archive. Adding these workflow files alone does not
+configure npm permissions or establish that any package has been published.
 
 The published `.0` archive is immutable. The commands below describe preparation/publication gates,
 not permission to republish `.0`. Choose a new, explicitly approved version before any future
@@ -90,11 +93,16 @@ Preparation can be completed without registry permissions. Publication still req
    (`latest` for `0.2.0`, `next` only for a preview).
 2. An npm account authorized for `@jaminzhou` and the package name; registry 404 alone does not
    prove name ownership or publish rights.
-3. npm's required authentication/2FA or an approved trusted-publishing setup.
+3. npm's required authentication/2FA or an approved, main-restricted trusted-publishing setup.
 4. Passing current-commit CI, reviewed changes, and a clean source commit matching the evidence.
 
 No account setup, token creation, login, registry write, or GitHub release is implied by running
 the preparation commands.
+
+For recurring releases, prefer [GitHub Actions with npm OIDC](./docs/trusted-publishing.md):
+manually prepare a candidate, approve its version/source/integrity, then manually dispatch the
+separate publish workflow. The publisher downloads those retained bytes; it never rebuilds.
+The local CLI procedure below remains available and requires npm's interactive authentication.
 
 Only after approval, from the checkout whose candidate has been verified:
 
