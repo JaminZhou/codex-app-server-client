@@ -8,9 +8,9 @@ app-server process, typed requests, and event routing so you can focus on your a
 > endorsed by OpenAI. Codex and OpenAI are trademarks of OpenAI.
 
 **Package:** `@jaminzhou/codex-app-server-client`.
-**Version covered:** `0.1.0`, a non-preview 0.x API, not a 1.0 stability commitment.
-`0.1.0` was published on 2026-09-09; see the [release record](./docs/releases/0.1.0.md) for exact
-source and archive integrity. A later source checkout or local rebuild is not the published archive.
+**Version covered:** `0.2.0`, a non-preview 0.x API, not a 1.0 stability commitment.
+Check exact registry availability; a source checkout or local rebuild is not proof of publication.
+See the [0.2.0 release guide](./docs/releases/0.2.0.md) and [migration notes from 0.1.0](./docs/api-diff-0.2.0.md).
 The unscoped npm name belongs to a different project.
 
 ## Is this for your app?
@@ -29,14 +29,14 @@ This package is independently maintained and has its own pre-1.0 API.
   Use a currently maintained Node.js release for a new app.
 - **Build from source / Git:** Node.js 22+ and pnpm 11.7.0. A Git install runs a build; a tarball
   already contains JavaScript, declarations, schemas, and examples.
-- **Runtime:** npm `0.1.0` bundles `@openai/codex@0.153.4`; this unreleased source checkout pins
-  `@openai/codex@0.154.0`. No global CLI installation is needed.
+- **Runtime:** client `0.2.0` pins `@openai/codex@0.154.0`. No global CLI installation is needed.
+  The historical npm `0.1.0` archive still bundles `0.153.4`.
   Keep optional dependencies enabled because they carry the platform binary.
 - **Platforms:** installed-package CI covers Linux, macOS, and Windows. Binary resolution supports
   x64 and arm64 where the pinned upstream CLI ships them; CI does not cover every architecture.
 - **Transports:** managed local stdio by default; Unix socket attachment is also available.
   TCP WebSocket remains experimental for this pinned baseline.
-- **Source version boundary:** basic runtime smoke covers `0.150.1`, `0.152.1`, `0.153.4`, and `0.154.0`.
+- **Version boundary:** basic runtime smoke covers `0.150.1`, `0.152.1`, `0.153.4`, and `0.154.0`.
   Current rich turn/approval examples use `0.154.0`. Other releases are not implied compatible.
 
 See [compatibility and upgrade guidance](./COMPATIBILITY.md) before changing the runtime.
@@ -47,14 +47,14 @@ Check availability, then install the exact version in a new consumer directory:
 
 ```bash
 npm init -y
-npm view @jaminzhou/codex-app-server-client@0.1.0 version --registry https://registry.npmjs.org/
-npm install --save-exact --ignore-scripts --include=optional @jaminzhou/codex-app-server-client@0.1.0
+npm view @jaminzhou/codex-app-server-client@0.2.0 version --registry https://registry.npmjs.org/
+npm install --save-exact --ignore-scripts --include=optional @jaminzhou/codex-app-server-client@0.2.0
 node node_modules/@jaminzhou/codex-app-server-client/examples/stream.mjs
 ```
 
-If the exact-version query reports that `0.1.0` is unavailable, it has not been made available in
-that registry: use a verified local candidate below, or explicitly choose the historical
-`0.1.0-preview.0` preview. Do not infer publication from a source checkout's version number.
+If the exact-version query reports that `0.2.0` is unavailable, it has not been made available in
+that registry: use a verified local candidate below, or explicitly choose an available historical
+release with its older feature set. Do not infer publication from a source checkout's version number.
 
 Expected output:
 
@@ -78,16 +78,16 @@ node node_modules/@jaminzhou/codex-app-server-client/examples/interrupt-resume.m
 They verify that a declined command never executes and that an interrupted conversation resumes
 after restarting the app-server. See [example commands, output, and recovery](./examples/README.md).
 
-Source checkouts also include [16 numbered equivalents of the official Python app-server examples](./docs/official-examples.md),
+Version `0.2.0` also includes [16 numbered equivalents of the official Python app-server examples](./docs/official-examples.md),
 covering lifecycle, images, structured output, model selection, a small terminal loop, login cancellation
 and untrusted `ExternalMessage` input with independent joined-turn handles.
 Their public example references are unchanged, and they now run on the pinned `0.154.0` baseline.
-They are unreleased additions, not files in the immutable npm `0.1.0` archive.
+These additions are not files in the immutable npm `0.1.0` archive.
 
 ## Install into your own project
 
 Use the exact registry version above (or `pnpm add --save-exact --ignore-scripts
-@jaminzhou/codex-app-server-client@0.1.0`). For unpublished source changes, build and
+@jaminzhou/codex-app-server-client@0.2.0`). For unpublished source changes, build and
 validate a local tarball instead:
 
 ```bash
@@ -100,7 +100,7 @@ the checkout is a sibling directory):
 
 ```bash
 npm init -y
-npm install --ignore-scripts --include=optional ../codex-app-server-client/artifacts/jaminzhou-codex-app-server-client-0.1.0.tgz
+npm install --ignore-scripts --include=optional ../codex-app-server-client/artifacts/jaminzhou-codex-app-server-client-0.2.0.tgz
 node node_modules/@jaminzhou/codex-app-server-client/examples/stream.mjs
 ```
 
@@ -111,7 +111,7 @@ verifies the same tarball in clean npm and pnpm consumers, including declaration
 The initial preview publication used `--tag next`, but the registry also assigned `latest` to it.
 At the `0.1.0` release verification, `latest` pointed to `0.1.0` and `next` retained the preview.
 Neither tag is a stability guarantee. Pin the exact version and retain your lockfile.
-See [release preparation](./RELEASING.md) and the [0.1.0 acceptance checklist](./docs/release-readiness.md).
+See [release preparation](./RELEASING.md) and the [0.2.0 release gates](./docs/releases/0.2.0.md#release-gates).
 
 If you need Git installation, pin a reviewed full SHA:
 `npm install 'github:JaminZhou/codex-app-server-client#<full-commit-sha>'`.
@@ -130,15 +130,15 @@ See [troubleshooting](./examples/README.md#troubleshooting) if the binary or bui
 
 The default examples above use no credentials. To opt into real model output, first authenticate
 the same pinned CLI, under the same user and `CODEX_HOME` you will use for your app.
-For the published npm `0.1.0` archive:
+For client `0.2.0`:
 
 ```bash
-npm exec --package=@openai/codex@0.153.4 -- codex login
-npm exec --package=@openai/codex@0.153.4 -- codex login status
+npm exec --package=@openai/codex@0.154.0 -- codex login
+npm exec --package=@openai/codex@0.154.0 -- codex login status
 node examples/stream.mjs --live
 ```
 
-For this unreleased source checkout, use `@openai/codex@0.154.0` in both login commands instead.
+For the historical client `0.1.0` archive, use its matching `@openai/codex@0.153.4` instead.
 
 From an installed consumer, use
 `node node_modules/@jaminzhou/codex-app-server-client/examples/stream.mjs --live`.

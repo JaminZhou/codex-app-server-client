@@ -1,6 +1,9 @@
 # Changelog
 
-## Unreleased
+## 0.2.0
+
+Non-preview release scope; check exact npm availability before installing. See the
+[release guide](./docs/releases/0.2.0.md) and [migration notes](./docs/api-diff-0.2.0.md).
 
 - Upgrade the exact bundled Codex runtime and generated public protocol to `0.154.0`.
   Add four raw `userVerification/*` methods (162 typed requests, 159 validated responses),
@@ -14,13 +17,14 @@
   race protection. Add official example 16 and expand installed-package verification to 19 examples.
 - Add 15 runnable Node equivalents of the pinned official Python app-server SDK examples, with an
   explicit upstream version boundary and no separate consumer application or blocking API.
-- Expand npm/pnpm and cross-platform installed-example checks to all 18 scenarios and four CLI input
+- Expand npm/pnpm and cross-platform installed-example checks to all 19 scenarios and four CLI input
   cases. Model output remains local/scripted; login cancellation defaults to a strict RPC fixture, not OAuth.
 - Bound retries for temporary-directory cleanup in npm/pnpm and Git installed-consumer smokes;
   retain both errors when the consumer and cleanup fail, and report success only after cleanup.
 - Add a Windows file-sharing regression fixture and the historical `0.1.0` release record.
+- Default initialize client-info version becomes `0.2.0`, derived from package metadata.
 - These runtime/protocol upgrades, new client APIs and maintenance changes are not in the immutable
-  npm `0.1.0` archive; distributing them requires a new reviewed release and a new client version.
+  npm `0.1.0` archive; install the separately verified `0.2.0` archive to obtain them.
 
 ## 0.1.0 (2026-09-09)
 

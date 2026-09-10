@@ -3,11 +3,12 @@
 ## Supported versions
 
 The historical preview is `0.1.0-preview.0`; `0.1.0` was published on 2026-09-09.
-The newest published `0.1.x` release is the maintained line; earlier previews are superseded, with no
-separate backport commitment. Runtime compatibility does not imply security maintenance of
+The newest published non-preview client release is maintained; older client versions and previews
+are superseded, with no separate backport commitment. Preparing `0.2.0` does not supersede `0.1.0`
+until the new version is actually published. Runtime compatibility does not imply security maintenance of
 end-of-life Node.js releases; prefer a maintained Node.js runtime.
-Check exact registry availability and release announcements; this policy is also shipped in
-local candidates and does not itself attest that a release or security fix has been published.
+Check exact registry availability and release announcements; this repository policy does not
+itself attest that a release or security fix has been published.
 Security fixes are developed on `main` and require a separately reviewed and authorized release;
 updating `main` alone does not fix an already installed package. Consumers should pin a reviewed
 version, retain their lockfile, and update when a security-fix release is announced. Older preview
