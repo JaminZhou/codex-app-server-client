@@ -123,7 +123,40 @@ for await (const notification of turn.events()) {
 }
 ```
 
-Each turn event stream has a single consumer. Use either `turn.events()` for manual streaming or `turn.result()` / `thread.run()` to collect the final response, completed items, final turn state, and token usage.
+Each turn **handle** has a single consumer. Use either `turn.events()` for manual streaming or `turn.result()` / `thread.run()` to collect the final response, completed items, final turn state, and token usage.
+
+### Untrusted external messages (unreleased)
+
+```ts
+import { ExternalMessage } from "@jaminzhou/codex-app-server-client";
+
+await thread.run("Summarize deployment notifications. Do not deploy or change files.");
+const result = await thread.run(new ExternalMessage({
+  toolName: "notifications",
+  namespace: "slack", // Optional; omitted becomes null.
+  content: "Staging health check returned HTTP 503.",
+}), { turnTrigger: "slack_notification" });
+```
+
+`content` accepts text or generated `FunctionCallOutputContentItem` objects (`input_text`,
+`input_image`, `input_audio`, `encrypted_content`). It is sent as `toolOutput`, with empty user
+input, and remains tool-level content—not user permission, instructions or an approval. Pass an
+`ExternalMessage` as the whole input to `client.startTurn()`, `thread.startTurn()` or `thread.run()`.
+Mixing it with user-input arrays or passing it to `turn.steer()` is rejected. Do not also specify a
+second `toolOutput` option. `turnTrigger` maps to Python's `source` and grants no additional authority.
+
+An external message can join an active regular turn. The returned handle then has the **same turn
+ID**, but its own event consumer, so both handles can independently call `result()`. Joining replays
+completed items, latest usage and unread events; historical consumed token deltas are not retained.
+Early completion before the joining RPC response is preserved. An iterator's `return()` releases
+that reader only; `interrupt()` requests a server-side interruption visible to every handle.
+
+Tool-output requests require a reported CLI version of at least `0.151.0`. Unknown versions and
+prereleases at the minimum are rejected before submission, including raw `call("turn/start", ...)`
+and `protocolValidation: "off"`; disabling shape checks cannot establish this semantic capability.
+The bundled `0.153.4` is verified. This API is new source/local-candidate content, not in npm `0.1.0`.
+
+### Goals
 
 Persisted thread goals are also available at both the raw typed layer and through `CodexThread`:
 

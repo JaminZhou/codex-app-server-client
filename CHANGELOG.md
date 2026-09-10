@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add high-level `ExternalMessage`, preserving untrusted tool authority through the already-generated
+  `turn/start.toolOutput` field; reject mixed user input, user steering and unsupported/unknown runtimes.
+- Give joining turn handles independent event streams, retained result snapshots and pending-start
+  race protection. Add official example 16 and expand installed-package verification to 19 examples.
 - Add 15 runnable Node equivalents of the pinned official Python app-server SDK examples, with an
   explicit upstream version boundary and no separate consumer application or blocking API.
 - Expand npm/pnpm and cross-platform installed-example checks to all 18 scenarios and four CLI input
@@ -9,8 +13,8 @@
 - Bound retries for temporary-directory cleanup in npm/pnpm and Git installed-consumer smokes;
   retain both errors when the consumer and cleanup fail, and report success only after cleanup.
 - Add a Windows file-sharing regression fixture and the historical `0.1.0` release record.
-- No client runtime, protocol or dependency change; these maintenance changes are not in the
-  immutable npm `0.1.0` archive and do not require republishing it.
+- No bundled CLI, generated protocol or dependency change. The new client APIs and maintenance
+  changes are not in the immutable npm `0.1.0` archive; distributing them requires a new reviewed release.
 
 ## 0.1.0 (2026-09-09)
 

@@ -56,12 +56,18 @@ See [release acceptance](./docs/release-readiness.md) for the boundary between t
 checks and the separately authorized live-account acceptance.
 
 The shipped examples are executable checks: `pnpm examples:smoke` runs the three safety scenarios
-and all 15 [official-example equivalents](./docs/official-examples.md), plus four mini CLI input cases.
-Seventeen examples use the real pinned app-server with isolated loopback providers; login/account
+and all 16 [official-example equivalents](./docs/official-examples.md), plus four mini CLI input cases.
+Eighteen examples use the real pinned app-server with isolated loopback providers; login/account
 uses a strictly validated RPC fixture without OAuth. `pnpm package:smoke` checks the shipped catalog,
 copies those files into a clean installed consumer and runs them there, in addition to checking ESM,
 schemas and strict public declarations. `node scripts/package-smoke.mjs --pnpm` checks isolated pnpm
 resolution. No automatic test may add `--live` or rely on a developer's authenticated Codex home.
+
+External-message regressions cover tool-level authority through restart/resume, structured content,
+runtime truncation, active-turn joins with independent consumers, and completion-before-reply races.
+Keep the minimum-version guard, prohibit mixed user/external input, and release consumed transient
+events and completed router state. Do not treat fixture output as proof of model-level resistance to
+malicious external instructions.
 
 For a non-preview candidate archive plus verification in both npm and pnpm consumers, run `pnpm release:pack`
 on Node.js 22+. See [RELEASING.md](./RELEASING.md) for the exact artifacts, version strategy, and

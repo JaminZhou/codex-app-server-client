@@ -77,8 +77,9 @@ node node_modules/@jaminzhou/codex-app-server-client/examples/interrupt-resume.m
 They verify that a declined command never executes and that an interrupted conversation resumes
 after restarting the app-server. See [example commands, output, and recovery](./examples/README.md).
 
-Source checkouts also include [15 numbered equivalents of the official Python app-server examples](./docs/official-examples.md),
-covering lifecycle, images, structured output, model selection, a small terminal loop and login cancellation.
+Source checkouts also include [16 numbered equivalents of the official Python app-server examples](./docs/official-examples.md),
+covering lifecycle, images, structured output, model selection, a small terminal loop, login cancellation
+and untrusted `ExternalMessage` input with independent joined-turn handles.
 They target the pinned `0.153.4` baseline and are unreleased additions, not files in the immutable npm `0.1.0` archive.
 
 ## Install into your own project
@@ -158,7 +159,7 @@ to finish before reconnecting and resuming the saved thread ID.
 
 The [API guide](./docs/api.md) covers collected results, raw typed `call()`, notifications,
 login, goals, cancellation, transports, and exported protocol types. It documents limitations such
-as one consumer per turn stream and no automatic reconnect/replay.
+as one consumer per turn handle and no automatic reconnect/replay.
 
 ## Development and sources
 

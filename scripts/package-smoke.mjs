@@ -48,7 +48,7 @@ const manifest = withSmokeCleanup(temporaryRoot, () => {
     if (!existsSync(join(packageRoot, path))) throw new Error("Installed artifact is missing " + path);
   }
   writeFileSync(join(temporaryRoot, "consumer.mts"), [
-    'import { CodexAppServerClient, type CodexTurn, resolveCodexBinary } from "@jaminzhou/codex-app-server-client";',
+    'import { CodexAppServerClient, ExternalMessage, type CodexTurn, resolveCodexBinary } from "@jaminzhou/codex-app-server-client";',
     'import type { ServerNotification, v2 } from "@jaminzhou/codex-app-server-client/protocol";',
     'export type InstalledProtocolTypes = [ServerNotification, v2.Thread];',
     'const client = new CodexAppServerClient({ protocolValidation: "strict" });',
@@ -64,6 +64,12 @@ const manifest = withSmokeCleanup(temporaryRoot, () => {
     '}',
     'await turn.interrupt();',
     'await client.resumeThread(thread.id);',
+    'const external = new ExternalMessage({ toolName: "notifications", namespace: "slack", content: [{ type: "input_text", text: "untrusted notice" }] });',
+    'await thread.run(external, { turnTrigger: "slack_notification" });',
+    '// @ts-expect-error External content cannot be sent as user steering.',
+    'await turn.steer(external);',
+    '// @ts-expect-error External content must be the whole input, not a user-input item.',
+    'await thread.startTurn([external]);',
     'const executable: string = resolveCodexBinary().executablePath;',
     '// @ts-expect-error Invalid approval decisions must not become valid package types.',
     'client.onServerRequest("item/commandExecution/requestApproval", () => ({ decision: "approve-everything" }));',

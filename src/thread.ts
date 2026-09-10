@@ -1,5 +1,6 @@
 import type { CodexAppServerClient } from "./app-server-client";
 import { CodexTurnFailedError } from "./errors";
+import { ExternalMessage } from "./external-message";
 import type { CodexGoal, GoalStartOptions } from "./goal";
 import type { ServerNotificationEnvelope as ServerNotification } from "./generated/protocol/ServerNotificationEnvelope";
 import type { Thread } from "./generated/protocol/v2/Thread";
@@ -21,7 +22,8 @@ import type { UserInput } from "./generated/protocol/v2/UserInput";
 import type { RequestOptions } from "./types";
 import type { TurnEventStream } from "./turn-event-router";
 
-export type CodexTurnInput = string | UserInput | readonly UserInput[];
+export type CodexUserInput = string | UserInput | readonly UserInput[];
+export type CodexTurnInput = CodexUserInput | ExternalMessage;
 export type CodexTurnStartOptions = Omit<TurnStartParams, "input" | "threadId">;
 export type CodexTurnSteerOptions = Omit<
   TurnSteerParams,
@@ -124,7 +126,7 @@ export class CodexTurn {
   }
 
   steer(
-    input: CodexTurnInput,
+    input: CodexUserInput,
     options: CodexTurnSteerOptions = {},
     requestOptions: RequestOptions = {},
   ): Promise<TurnSteerResponse> {
@@ -182,11 +184,15 @@ export async function collectTurnResult(
     };
 }
 
-export function normalizeTurnInput(input: CodexTurnInput): UserInput[] {
+export function normalizeTurnInput(input: CodexUserInput): UserInput[] {
   if (typeof input === "string") {
     return [{ type: "text", text: input, text_elements: [] }];
   }
-  return Array.isArray(input) ? [...input] : [input as UserInput];
+  const items = Array.isArray(input) ? [...input] : [input as UserInput];
+  if (items.some((item) => item instanceof ExternalMessage)) {
+    throw new TypeError("ExternalMessage must be the whole turn input; it cannot be mixed with user input or sent through steer().");
+  }
+  return items;
 }
 
 function finalAssistantResponse(items: readonly ThreadItem[]): string | null {

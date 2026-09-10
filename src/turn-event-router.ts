@@ -5,7 +5,7 @@ const MAX_PENDING_TURNS = 128;
 const MAX_PENDING_EVENTS_PER_TURN = 2_000;
 
 export class TurnEventStream implements AsyncIterableIterator<ServerNotification> {
-  private readonly onDispose: () => void;
+  private onDispose: (() => void) | null;
   private readonly values: ServerNotification[] = [];
   private readonly waiters: Array<{
     reject: (error: Error) => void;
@@ -43,10 +43,15 @@ export class TurnEventStream implements AsyncIterableIterator<ServerNotification
     else this.values.push(value);
   }
 
+  /** Internal replay view: a joining handle must not steal another handle's unread events. */
+  unread(): readonly ServerNotification[] {
+    return this.values;
+  }
+
   complete(): void {
     if (this.done || this.failure) return;
     this.done = true;
-    this.onDispose();
+    this.dispose();
     if (this.values.length === 0) {
       for (const waiter of this.waiters.splice(0)) {
         waiter.resolve({ done: true, value: undefined });
@@ -58,29 +63,71 @@ export class TurnEventStream implements AsyncIterableIterator<ServerNotification
     if (this.done || this.failure) return;
     this.failure = error;
     this.values.length = 0;
-    this.onDispose();
+    this.dispose();
     for (const waiter of this.waiters.splice(0)) waiter.reject(error);
+  }
+
+  private dispose(): void {
+    const callback = this.onDispose;
+    this.onDispose = null;
+    callback?.();
   }
 }
 
+interface TurnState {
+  threadId: string;
+  streams: Set<TurnEventStream>;
+  early: ServerNotification[];
+  items: Map<string, ServerNotification>;
+  usage?: ServerNotification;
+  terminal?: ServerNotification;
+  subscribed: boolean;
+  sequence: WeakMap<ServerNotification, number>;
+  nextSequence: number;
+}
+
 export class TurnEventRouter {
-  private readonly active = new Map<string, TurnEventStream>();
-  private readonly pending = new Map<string, ServerNotification[]>();
+  private readonly states = new Map<string, TurnState>();
+  private readonly starts = new Map<string, Set<object>>();
 
-  open(turnId: string): TurnEventStream {
-    if (this.active.has(turnId)) {
-      throw new Error(`Turn ${turnId} already has an active event stream.`);
-    }
+  reserveStart(threadId: string): () => void {
+    const token = {};
+    const reservations = this.starts.get(threadId) ?? new Set<object>();
+    reservations.add(token);
+    this.starts.set(threadId, reservations);
+    return () => {
+      // An old connection's finally must not release a new connection's reservation.
+      if (this.starts.get(threadId) !== reservations || !reservations.delete(token)) return;
+      if (reservations.size) return;
+      this.starts.delete(threadId);
+      for (const [key, state] of this.states) {
+        if (state.threadId !== threadId) continue;
+        state.early.length = 0;
+        if (!state.subscribed || (state.terminal && !state.streams.size)) this.discard(key, state);
+      }
+    };
+  }
+
+  open(turnId: string, threadId: string): TurnEventStream {
+    const key = JSON.stringify([threadId, turnId]);
+    const state = this.state(key, threadId);
+    // Keep semantic snapshots and unread/transient events in original order, without duplicates.
+    const replay = new Set<ServerNotification>(state.early);
+    for (const event of state.items.values()) replay.add(event);
+    if (state.usage) replay.add(state.usage);
+    if (state.terminal) replay.add(state.terminal);
+    for (const subscriber of state.streams) for (const event of subscriber.unread()) replay.add(event);
     const stream = new TurnEventStream(() => {
-      if (this.active.get(turnId) === stream) this.active.delete(turnId);
+      state.streams.delete(stream);
+      if (state.terminal && !state.streams.size && !this.pendingStart(state)) this.discard(key, state);
     });
-    this.active.set(turnId, stream);
-
-    for (const notification of this.pending.get(turnId) ?? []) {
+    state.subscribed = true;
+    state.streams.add(stream);
+    for (const notification of [...replay].sort((a, b) => state.sequence.get(a)! - state.sequence.get(b)!)) {
       stream.push(notification);
       if (isCompletion(notification, turnId)) stream.complete();
     }
-    this.pending.delete(turnId);
+    if (!this.pendingStart(state)) state.early.length = 0;
     return stream;
   }
 
@@ -88,33 +135,76 @@ export class TurnEventRouter {
     const turnId = notificationTurnId(notification);
     if (!turnId) return;
     const typed = notification as ServerNotification;
-    const stream = this.active.get(turnId);
-    if (stream) {
-      stream.push(typed);
-      if (isCompletion(typed, turnId)) stream.complete();
-      return;
-    }
+    const params = notification.params;
+    const threadId = isRecord(params) && typeof params.threadId === "string" ? params.threadId : undefined;
+    if (!threadId) return;
+    // Forks can replay the same historical turn ID under a different thread.
+    const key = JSON.stringify([threadId, turnId]);
+    const state = this.state(key, threadId);
+    state.sequence.set(typed, state.nextSequence++);
+    if (typed.method === "item/completed") state.items.set(typed.params.item.id, typed);
+    if (typed.method === "thread/tokenUsage/updated") state.usage = typed;
+    if (isCompletion(typed, turnId)) state.terminal = typed;
 
-    if (!this.pending.has(turnId) && this.pending.size >= MAX_PENDING_TURNS) {
-      const oldest = this.pending.keys().next().value;
-      if (oldest) this.pending.delete(oldest);
+    if (!state.subscribed || this.pendingStart(state)) {
+      state.early.push(typed);
+      if (state.early.length > MAX_PENDING_EVENTS_PER_TURN) state.early.shift();
     }
-    const events = this.pending.get(turnId) ?? [];
-    events.push(typed);
-    if (events.length > MAX_PENDING_EVENTS_PER_TURN) events.shift();
-    this.pending.set(turnId, events);
+    for (const stream of [...state.streams]) {
+      stream.push(typed);
+      if (state.terminal) stream.complete();
+    }
+    if (state.subscribed && state.terminal && !state.streams.size && !this.pendingStart(state)) {
+      this.discard(key, state);
+    }
+    this.trimUnclaimed();
   }
 
   failAll(error: Error): void {
-    for (const stream of this.active.values()) stream.fail(error);
-    this.active.clear();
-    this.pending.clear();
+    this.starts.clear();
+    for (const [key, state] of this.states) {
+      for (const stream of [...state.streams]) stream.fail(error);
+      this.discard(key, state);
+    }
   }
 
   clear(): void {
-    for (const stream of this.active.values()) stream.complete();
-    this.active.clear();
-    this.pending.clear();
+    this.starts.clear();
+    for (const [key, state] of this.states) {
+      for (const stream of [...state.streams]) stream.complete();
+      this.discard(key, state);
+    }
+  }
+
+  private state(key: string, threadId: string): TurnState {
+    let state = this.states.get(key);
+    if (!state) {
+      state = { threadId, streams: new Set(), early: [], items: new Map(), subscribed: false,
+        sequence: new WeakMap(), nextSequence: 0 };
+      this.states.set(key, state);
+    }
+    return state;
+  }
+
+  private pendingStart(state: TurnState): boolean {
+    return this.starts.has(state.threadId);
+  }
+
+  private discard(key: string, state: TurnState): void {
+    if (this.states.get(key) === state) this.states.delete(key);
+    state.early.length = 0;
+    state.items.clear();
+    state.usage = undefined;
+    state.terminal = undefined;
+  }
+
+  private trimUnclaimed(): void {
+    const unclaimed = [...this.states].filter(([, state]) => !state.subscribed && !this.pendingStart(state));
+    for (const [key, state] of unclaimed.slice(0, -MAX_PENDING_TURNS)) this.discard(key, state);
+    // Unsolicited histories remain bounded; in-flight starts and owned turns retain complete results.
+    for (const [, state] of unclaimed.slice(-MAX_PENDING_TURNS)) {
+      while (state.items.size > MAX_PENDING_EVENTS_PER_TURN) state.items.delete(state.items.keys().next().value!);
+    }
   }
 }
 

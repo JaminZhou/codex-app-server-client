@@ -18,6 +18,7 @@ raw method coverage nor a successful basic smoke means all workflows work on an 
 | Streaming, explicit command decline, interruption and process-restart resume | Bundled `0.153.4` | Shipped examples run against the real runtime with a local mock provider |
 | Official example workflows, groups 01–14 | Bundled `0.153.4`; new source/local candidates | Real-runtime local-provider suite; [mapping and boundaries](./docs/official-examples.md), not model-quality acceptance |
 | Official login/account example, group 15 | New source/local candidates | Strict client + scripted RPC fixture; not real OAuth or successful sign-in |
+| ExternalMessage, group 16, and independent joined-turn consumers | Bundled `0.153.4`; new source/local candidates | Real-runtime tool authority, restart/resume, active join, structured content and truncation; deterministic subscription races |
 | Packed ESM, declarations, schemas, and bundled binary | Node.js 18 on Linux, macOS, Windows | Installed-package CI; not every OS/architecture pairing |
 | Published `0.1.0-preview.0` archive without consumer build scripts | npm and pnpm 11 consumers | Historical exact-archive verification; not evidence for new candidate bytes |
 | Live account entitlement, model quality, every protocol workflow | Not established by these tests | Requires separate application-specific acceptance |
@@ -27,6 +28,12 @@ successful run records the selected source commit and integrity in `artifacts/re
 that candidate gate is pending. Check the current PR's validation report as well; this historical
 coverage table and an unchecked release checklist are not a final-candidate attestation.
 Preview-version checkouts use `pnpm preview:pack` and separate preview evidence.
+
+External messages use `turn/start.toolOutput`, already present in the pinned generated protocol.
+They are not `UserInput` variants and do not require a protocol upgrade from `0.153.4`. Like the
+official Python SDK feature, tool-output requests require a reported CLI version >= `0.151.0`;
+unknown versions and prereleases at the minimum are rejected. The basic `0.150.1` matrix check
+does not promise this newer workflow. No private checkout-schema probe or user-text fallback is used.
 
 ## How to upgrade
 

@@ -23,7 +23,7 @@ export class FakeAppServer {
   private readonly server: WebSocketServer;
   private socket: WebSocket | null = null;
 
-  private constructor(server: WebSocketServer, handler: FakeRequestHandler) {
+  private constructor(server: WebSocketServer, handler: FakeRequestHandler, userAgent: string) {
     this.server = server;
     this.handler = handler;
     const address = server.address() as AddressInfo;
@@ -38,7 +38,7 @@ export class FakeAppServer {
             codexHome: "/tmp/codex-test",
             platformFamily: "unix",
             platformOs: "macos",
-            userAgent: "codex-test",
+            userAgent,
           });
           return;
         }
@@ -52,10 +52,10 @@ export class FakeAppServer {
     });
   }
 
-  static async listen(handler: FakeRequestHandler): Promise<FakeAppServer> {
+  static async listen(handler: FakeRequestHandler, userAgent = "codex-test"): Promise<FakeAppServer> {
     const server = new WebSocketServer({ host: "127.0.0.1", port: 0 });
     await once(server, "listening");
-    return new FakeAppServer(server, handler);
+    return new FakeAppServer(server, handler, userAgent);
   }
 
   reply(request: FakeRpcMessage, result: unknown): void {

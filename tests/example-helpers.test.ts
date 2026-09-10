@@ -19,11 +19,11 @@ describe("official example catalog", () => {
     }
   });
 
-  it("ships all 15 pinned official groups and the 3 additional safety examples", async () => {
+  it("ships all 16 official groups and the 3 additional safety examples", async () => {
     const { officialExamples, smokeExamples } = await exampleModule("catalog");
-    expect(officialExamples).toHaveLength(15);
-    expect(smokeExamples).toHaveLength(18);
-    expect(new Set(smokeExamples).size).toBe(18);
+    expect(officialExamples).toHaveLength(16);
+    expect(smokeExamples).toHaveLength(19);
+    expect(new Set(smokeExamples).size).toBe(19);
     officialExamples.forEach((name: string, index: number) => {
       expect(name.startsWith(String(index + 1).padStart(2, "0") + "_")).toBe(true);
     });
