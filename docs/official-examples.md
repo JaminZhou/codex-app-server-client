@@ -7,9 +7,10 @@ SDK [ExternalMessage change](https://github.com/openai/codex/commit/1a4096e273e8
 using protocol fields already present in that runtime. These are independently written Node.js
 equivalents of those workflows, not a Python API port or a separate consumer application.
 
-This batch is **unreleased source / local-candidate content**. The immutable npm `0.1.0` archive
-contains the three earlier safety examples, not these 16 numbered files or the high-level `ExternalMessage` API. Use this checkout or a
-verified candidate built from it; do not expect a reinstall of `0.1.0` to add them.
+These examples are included in **client `0.2.0`**; check exact registry availability before installing.
+The immutable npm `0.1.0` archive contains the three earlier safety examples, not these 16 numbered
+files or the high-level `ExternalMessage` API. A verified local candidate also includes them;
+do not expect a reinstall of `0.1.0` to add them.
 
 ## Mapping and observable checks
 

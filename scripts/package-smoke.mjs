@@ -48,7 +48,7 @@ const manifest = withSmokeCleanup(temporaryRoot, () => {
     if (!existsSync(join(packageRoot, path))) throw new Error("Installed artifact is missing " + path);
   }
   writeFileSync(join(temporaryRoot, "consumer.mts"), [
-    'import { CodexAppServerClient, ExternalMessage, type CodexTurn, resolveCodexBinary } from "@jaminzhou/codex-app-server-client";',
+    'import { CodexAppServerClient, ExternalMessage, type CodexTurn, type CodexUserInput, resolveCodexBinary } from "@jaminzhou/codex-app-server-client";',
     'import type { ServerNotification, v2 } from "@jaminzhou/codex-app-server-client/protocol";',
     'export type InstalledProtocolTypes = [ServerNotification, v2.Thread];',
     'const client = new CodexAppServerClient({ protocolValidation: "strict" });',
@@ -74,6 +74,7 @@ const manifest = withSmokeCleanup(temporaryRoot, () => {
     'const proof: v2.UserVerificationVerifyResponse = await client.call("userVerification/verify", { challenge: "YQ", title: "Test", description: "Type check only" });',
     'await client.call("account/rateLimits/read");',
     'await client.call("account/rateLimits/read", { excludeResetCreditDetails: true });',
+    'function steerUser(turn: CodexTurn, input: CodexUserInput) { return turn.steer(input); }',
     '// @ts-expect-error Native verification requires the complete display context.',
     'await client.call("userVerification/verify", { challenge: "YQ" });',
     'const executable: string = resolveCodexBinary().executablePath;',

@@ -125,7 +125,7 @@ for await (const notification of turn.events()) {
 
 Each turn **handle** has a single consumer. Use either `turn.events()` for manual streaming or `turn.result()` / `thread.run()` to collect the final response, completed items, final turn state, and token usage.
 
-### Untrusted external messages (unreleased)
+### Untrusted external messages
 
 ```ts
 import { ExternalMessage } from "@jaminzhou/codex-app-server-client";
@@ -154,8 +154,8 @@ that reader only; `interrupt()` requests a server-side interruption visible to e
 Tool-output requests require a reported CLI version of at least `0.151.0`. Unknown versions and
 prereleases at the minimum are rejected before submission, including raw `call("turn/start", ...)`
 and `protocolValidation: "off"`; disabling shape checks cannot establish this semantic capability.
-The source checkout's bundled `0.154.0` is verified (the original implementation was verified on `0.153.4`).
-This API is new source/local-candidate content, not in npm `0.1.0`.
+Client `0.2.0` bundles the verified `0.154.0` runtime (the original implementation was verified on `0.153.4`).
+This API is introduced in `0.2.0`, not present in npm `0.1.0`.
 
 ### Goals
 

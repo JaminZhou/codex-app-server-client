@@ -1,13 +1,13 @@
 # Runnable examples
 
-In this source checkout, the three safety examples and numbered groups 01–14 and 16 use the **real bundled Codex 0.154.0 app-server**,
+In client `0.2.0`, the three safety examples and numbered groups 01–14 and 16 use the **real bundled Codex 0.154.0 app-server**,
 with a local scripted Responses provider by default. They need no account, send no requests to a
 model service, and do not execute the command proposed in the approval fixture. Each gets a temporary
 workspace and Codex home; both are deleted on normal exit. Group 15 instead uses a scripted login RPC
 fixture, so automatic tests do not start OAuth. Installation may download npm packages.
 
 The [official-example mapping](../docs/official-examples.md) lists all 16 groups, their assertions and
-the version boundary. These numbered examples are new source/local-candidate content, **not present
+the version boundary. These numbered examples are introduced in `0.2.0`, **not present
 in the already-published `0.1.0` tarball**. The commands for the three safety examples below also work
 with that published release.
 
@@ -54,7 +54,7 @@ Hello from the local mock.
 Each turn handle has exactly one consumer. Choose `turn.events()` for streaming or `turn.result()`
 / `thread.run()` for collection. Do not call `result()` after consuming `events()`.
 An external message may join an active turn; the two handles have the same turn ID but independent
-streams. See [external-message semantics](../docs/api.md#untrusted-external-messages-unreleased).
+streams. See [external-message semantics](../docs/api.md#untrusted-external-messages).
 An RPC timeout limits request acknowledgement, not the total time a model turn may take.
 
 ## 2. Handle an approval explicitly
@@ -122,7 +122,7 @@ before using live lifecycle, model-selection or interactive CLI examples.
 
 | Symptom | Recovery |
 | --- | --- |
-| npm returns 404 for the scoped package | Check `npm view @jaminzhou/codex-app-server-client@0.1.0 version --registry https://registry.npmjs.org/`. If unavailable, use a verified local candidate. Check network access; do not infer publication from a source version or substitute the unscoped package. |
+| npm returns 404 for the scoped package | Check `npm view @jaminzhou/codex-app-server-client@0.2.0 version --registry https://registry.npmjs.org/`. If unavailable, use a verified local candidate. Check network access; do not infer publication from a source version or substitute the unscoped package. |
 | Missing `dist/index.js` after a Git install | Build from source with Node.js 22+ or allow the exact Git source's `prepare` script in pnpm. A ready-built tarball avoids this build. |
 | Cannot resolve the bundled CLI | Reinstall with optional dependencies enabled (`npm install --include=optional`). Check the OS/architecture in the error. The client does not search global PATH. |
 | Login required / expired credentials | Run the pinned CLI's `login status`, then `login`, as the same user with the same `CODEX_HOME`. A home change selects different credentials/history. |

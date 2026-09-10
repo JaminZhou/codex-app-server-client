@@ -3,7 +3,7 @@
 `0.1.0` was published on 2026-09-09; its [release record](./docs/releases/0.1.0.md) identifies the
 source, immutable archive and verification scope. Do not republish this version.
 
-The procedure below retains the `0.1.0`/`latest` example; it is not authorization for a new release.
+The procedure below targets `0.2.0`/`latest`; it is not a claim that publication has completed.
 Preparation, PR creation and merge are distinct from permission to publish. Query the exact registry
 version and retained publication evidence to establish whether publication has completed.
 
@@ -19,13 +19,13 @@ publication; local rebuilds of this checkout are development artifacts, not the 
 
 ## Version and support policy
 
-- Client versions are independent of the Codex runtime version. The current unreleased source pins
+- Client versions are independent of the Codex runtime version. Client `0.2.0` pins
   `@openai/codex@0.154.0`; the published `0.1.0` archive still bundles `0.153.4`.
   See [COMPATIBILITY.md](./COMPATIBILITY.md).
-- Iterate previews as `0.1.0-preview.1`, `0.1.0-preview.2`, etc. Record changes and migration notes.
+- Future previews use a new target version and increasing `preview.N` suffix. Record changes and migration notes.
   Pre-1.0 APIs and generated experimental protocol types may change; consumers should pin exact
   versions and keep their lockfiles.
-- `0.1.0` is a separately reviewed non-preview candidate, still a pre-1.0 API. Preview commands use `--tag next`;
+- `0.2.0` is a separately reviewed non-preview candidate, still a pre-1.0 API. Preview commands use `--tag next`;
   do not deliberately promote a preview to `latest`. Always read back all registry tags: the first
   publication demonstrated that `--tag next` is not a guarantee that `latest` will be absent.
   Never reuse a published name/version or publish a stable version merely to repair tag naming.
@@ -56,12 +56,13 @@ npm, start real OAuth or model sessions, or publish.
 
 Outputs:
 
-- `artifacts/jaminzhou-codex-app-server-client-0.1.0.tgz`
+- `artifacts/jaminzhou-codex-app-server-client-0.2.0.tgz`
 - `artifacts/release-evidence.json`: source SHA, dirty-checkout flag, SHA-512 integrity, sizes,
   exact file list, Node version, and completed consumer checks.
 
 Preview-version checkouts instead produce a versioned preview tarball and `preview-evidence.json`.
-Retain previous approved evidence and archives before preparing a different candidate.
+Retain previous approved evidence and archives before preparing a different candidate. In particular,
+copy the `0.1.0` evidence into a version-specific archive before replacing `release-evidence.json`.
 
 Artifacts are git-ignored. Both consumers and the staged evidence write must succeed before
 promotion begins. Failures before promotion leave the previous verified pair untouched. During
@@ -86,7 +87,7 @@ Git-install path; it does not test uncommitted files.
 Preparation can be completed without registry permissions. Publication still requires:
 
 1. Jamin's explicit approval of the candidate version, exact tarball integrity, and intended tag
-   (`latest` for `0.1.0`, `next` only for a preview).
+   (`latest` for `0.2.0`, `next` only for a preview).
 2. An npm account authorized for `@jaminzhou` and the package name; registry 404 alone does not
    prove name ownership or publish rights.
 3. npm's required authentication/2FA or an approved trusted-publishing setup.
@@ -98,8 +99,8 @@ the preparation commands.
 Only after approval, from the checkout whose candidate has been verified:
 
 ```bash
-# Only the retained, explicitly approved 0.1.0 candidate:
-npm publish /absolute/path/to/approved-0.1.0.tgz --tag latest --access public --registry https://registry.npmjs.org/ --ignore-scripts
+# Only the retained, explicitly approved 0.2.0 candidate:
+npm publish /absolute/path/to/approved-0.2.0.tgz --tag latest --access public --registry https://registry.npmjs.org/ --ignore-scripts
 ```
 
 Publish the inspected tarball, not a freshly rebuilt directory. Then read back the registry version,
@@ -109,10 +110,11 @@ the immutable archive. The packed README uses time-neutral exact-version guidanc
 does not require replacing the already-verified bytes. If the publish response is uncertain,
 query the version before retrying.
 
-For the first non-preview `0.1.0`, complete [release acceptance](./docs/release-readiness.md),
-review the version bump and `publishConfig.tag` change to `latest`, inspect the
-[API comparison](./docs/api-diff-0.1.0.md), retain the exact reviewed
-candidate, and obtain explicit publication approval. Passing tests does not authorize that write.
+For `0.2.0`, complete its [release gates](./docs/releases/0.2.0.md#release-gates), inspect the
+[API comparison and migration notes](./docs/api-diff-0.2.0.md), retain the exact reviewed candidate,
+and obtain explicit publication approval. The [0.1.0 acceptance checklist](./docs/release-readiness.md)
+and [release record](./docs/releases/0.1.0.md) remain historical evidence, not a new live-account
+acceptance for changed `0.2.0` bytes. Passing tests does not authorize publication or model usage.
 
 See npm's [package metadata](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/) and
 [publish command](https://docs.npmjs.com/cli/v11/commands/npm-publish/) documentation.
