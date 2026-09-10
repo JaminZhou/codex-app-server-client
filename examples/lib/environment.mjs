@@ -76,7 +76,7 @@ shell_snapshot = false
     if (live) {
       const account = await client.account(false);
       if (account.requiresOpenaiAuth && !account.account) {
-        throw new Error("Sign in first: npm exec --package=@openai/codex@0.153.4 -- codex login");
+        throw new Error("Sign in first: npm exec --package=@openai/codex@0.154.0 -- codex login");
       }
     }
     await run({

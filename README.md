@@ -29,14 +29,15 @@ This package is independently maintained and has its own pre-1.0 API.
   Use a currently maintained Node.js release for a new app.
 - **Build from source / Git:** Node.js 22+ and pnpm 11.7.0. A Git install runs a build; a tarball
   already contains JavaScript, declarations, schemas, and examples.
-- **Runtime:** exact dependency `@openai/codex@0.153.4`; no global CLI installation is needed.
+- **Runtime:** npm `0.1.0` bundles `@openai/codex@0.153.4`; this unreleased source checkout pins
+  `@openai/codex@0.154.0`. No global CLI installation is needed.
   Keep optional dependencies enabled because they carry the platform binary.
 - **Platforms:** installed-package CI covers Linux, macOS, and Windows. Binary resolution supports
   x64 and arm64 where the pinned upstream CLI ships them; CI does not cover every architecture.
 - **Transports:** managed local stdio by default; Unix socket attachment is also available.
   TCP WebSocket remains experimental for this pinned baseline.
-- **Version boundary:** basic runtime smoke is verified for `0.150.1`, `0.152.1`, and `0.153.4`.
-  Rich turn/approval examples use `0.153.4`. Other releases are not implied compatible.
+- **Source version boundary:** basic runtime smoke covers `0.150.1`, `0.152.1`, `0.153.4`, and `0.154.0`.
+  Current rich turn/approval examples use `0.154.0`. Other releases are not implied compatible.
 
 See [compatibility and upgrade guidance](./COMPATIBILITY.md) before changing the runtime.
 
@@ -80,7 +81,8 @@ after restarting the app-server. See [example commands, output, and recovery](./
 Source checkouts also include [16 numbered equivalents of the official Python app-server examples](./docs/official-examples.md),
 covering lifecycle, images, structured output, model selection, a small terminal loop, login cancellation
 and untrusted `ExternalMessage` input with independent joined-turn handles.
-They target the pinned `0.153.4` baseline and are unreleased additions, not files in the immutable npm `0.1.0` archive.
+Their public example references are unchanged, and they now run on the pinned `0.154.0` baseline.
+They are unreleased additions, not files in the immutable npm `0.1.0` archive.
 
 ## Install into your own project
 
@@ -127,13 +129,16 @@ See [troubleshooting](./examples/README.md#troubleshooting) if the binary or bui
 ## Run with your Codex account
 
 The default examples above use no credentials. To opt into real model output, first authenticate
-the same pinned CLI, under the same user and `CODEX_HOME` you will use for your app:
+the same pinned CLI, under the same user and `CODEX_HOME` you will use for your app.
+For the published npm `0.1.0` archive:
 
 ```bash
 npm exec --package=@openai/codex@0.153.4 -- codex login
 npm exec --package=@openai/codex@0.153.4 -- codex login status
 node examples/stream.mjs --live
 ```
+
+For this unreleased source checkout, use `@openai/codex@0.154.0` in both login commands instead.
 
 From an installed consumer, use
 `node node_modules/@jaminzhou/codex-app-server-client/examples/stream.mjs --live`.

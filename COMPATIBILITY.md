@@ -1,8 +1,8 @@
 # Compatibility and upgrades
 
-**Use the bundled `@openai/codex@0.153.4` runtime for this client.** Its bindings and runtime
-validation schemas are generated together. This document covers client `0.1.0`, with
-`0.1.0-preview.0` as its historical published baseline. Check the registry for exact-version
+**This unreleased source checkout bundles `@openai/codex@0.154.0`.** Its bindings and runtime
+validation schemas are generated together. The immutable npm `0.1.0` and `0.1.0-preview.0`
+archives still bundle `0.153.4`; reinstalling them does not apply this upgrade. Check the registry for exact-version
 availability; this document is also included in local candidates. The client version and runtime version
 are separate; installing a newer global CLI does not update the client's bundled runtime.
 
@@ -14,16 +14,16 @@ raw method coverage nor a successful basic smoke means all workflows work on an 
 
 | Scope | Versions / environment | Evidence |
 | --- | --- | --- |
-| Basic initialization, thread and goal access | Exact runtimes `0.150.1`, `0.152.1`, `0.153.4` | Real isolated stdio compatibility smoke; no model calls |
-| Streaming, explicit command decline, interruption and process-restart resume | Bundled `0.153.4` | Shipped examples run against the real runtime with a local mock provider |
-| Official example workflows, groups 01–14 | Bundled `0.153.4`; new source/local candidates | Real-runtime local-provider suite; [mapping and boundaries](./docs/official-examples.md), not model-quality acceptance |
+| Basic initialization, thread and goal access | Exact runtimes `0.150.1`, `0.152.1`, `0.153.4`, `0.154.0` | Real isolated stdio compatibility smoke; no model calls |
+| Streaming, explicit command decline, interruption and process-restart resume | Bundled `0.154.0` | Shipped examples run against the real runtime with a local mock provider |
+| Official example workflows, groups 01–14 | Bundled `0.154.0`; new source/local candidates | Real-runtime local-provider suite; [mapping and boundaries](./docs/official-examples.md), not model-quality acceptance |
 | Official login/account example, group 15 | New source/local candidates | Strict client + scripted RPC fixture; not real OAuth or successful sign-in |
-| ExternalMessage, group 16, and independent joined-turn consumers | Bundled `0.153.4`; new source/local candidates | Real-runtime tool authority, restart/resume, active join, structured content and truncation; deterministic subscription races |
+| ExternalMessage, group 16, and independent joined-turn consumers | Bundled `0.154.0`; new source/local candidates | Real-runtime tool authority, restart/resume, active join, structured content and truncation; deterministic subscription races |
 | Packed ESM, declarations, schemas, and bundled binary | Node.js 18 on Linux, macOS, Windows | Installed-package CI; not every OS/architecture pairing |
 | Published `0.1.0-preview.0` archive without consumer build scripts | npm and pnpm 11 consumers | Historical exact-archive verification; not evidence for new candidate bytes |
 | Live account entitlement, model quality, every protocol workflow | Not established by these tests | Requires separate application-specific acceptance |
 
-For a new `0.1.0` candidate, `pnpm release:pack` must verify the exact chosen bytes. Until a
+For a new release candidate, select a new client version and use `pnpm release:pack` to verify the exact chosen bytes. Until a
 successful run records the selected source commit and integrity in `artifacts/release-evidence.json`,
 that candidate gate is pending. Check the current PR's validation report as well; this historical
 coverage table and an unchecked release checklist are not a final-candidate attestation.
@@ -54,12 +54,19 @@ Desktop functionality.
 
 | Reference | Pinned baseline | How it is used |
 | --- | --- | --- |
-| Public Codex CLI | `codex-cli 0.153.4` / `rust-v0.153.4` | Runtime binary and public app-server behavior |
+| Public Codex CLI | `codex-cli 0.154.0` / `rust-v0.154.0` | Runtime binary and public app-server behavior |
 | Generated app-server TypeScript | Generated from the pinned CLI | Request, response, notification, and server-request types |
 | Generated JSON Schema | Generated from the pinned CLI | Shipped schema artifacts and drift checks |
 | Official Python SDK | Public source at the same Codex tag | Lifecycle, routing, error, and high-level behavior reference |
 
 No private Codex Desktop code is a normative source or part of this package.
+
+The `0.154.0` upgrade adds typed raw `userVerification/status`, `/enroll`, `/delete` and `/verify`
+calls and the MCP `openai/userVerification` request variant. These are experimental protocol
+contracts, not a built-in biometric UI or an automatic approval path. Tests use scripted RPC
+responses; they do not enroll credentials, show native verification prompts or verify signatures.
+New thread, MCP, configuration and quota fields are optional when the Schema permits omission.
+In particular, absent/null `ordinaryUsageAllowed` is unknown, not proof of restored account access.
 
 ## Transport coverage
 
@@ -77,7 +84,7 @@ transport. For production local rich clients, prefer stdio or the Unix control s
 
 | Capability | Status | Evidence or boundary |
 | --- | --- | --- |
-| Typed client requests | Complete at the raw `call()` layer | All 158 generated client methods are mapped to generated parameter and response types |
+| Typed client requests | Complete at the raw `call()` layer | All 162 generated client methods are mapped to generated parameter and response types |
 | Notifications | Complete routing surface | Generic and generated method-scoped handlers |
 | Server requests | Complete routing surface | Generic and generated method-scoped handlers with typed responses |
 | Initialization lifecycle | Complete | Exactly one `initialize`, followed by `initialized`, per connection |
@@ -89,7 +96,7 @@ transport. For production local rich clients, prefer stdio or the Unix control s
 | Backpressure error classification | Complete for the documented ingress error | `-32001` `Server overloaded; retry later.` maps to `AppServerBusyError` |
 | Overload retry helper | Complete and opt-in | Exponential backoff with jitter; only overload-classified failures retry |
 | Experimental protocol | Generated and available | Enabled by the default initialize capability; it remains version-sensitive |
-| Runtime protocol validation | Complete for every generated request/notification/server-request shape and 155 of 158 client responses | Strict by default, including Rust signed/unsigned integer widths; three deprecated response types have no upstream JSON Schema |
+| Runtime protocol validation | Complete for every generated request/notification/server-request shape and 159 of 162 client responses | Strict by default, including Rust signed/unsigned integer widths; three deprecated response types have no upstream JSON Schema |
 
 Unknown method names bypass known-method Schema validation and remain available through generic
 handlers and raw requests. This is intentional forward compatibility, not a claim that an unknown
@@ -99,7 +106,7 @@ experiments.
 ## Cross-version verification
 
 The scheduled compatibility smoke covers every exact stable release in
-`compatibility-matrix.json`, currently `0.150.1`, `0.152.1`, and the pinned `0.153.4`. On the minimum
+`compatibility-matrix.json`, currently `0.150.1`, `0.152.1`, `0.153.4`, and the pinned `0.154.0`. On the minimum
 supported Node.js 18 runtime it installs each CLI in isolation, starts its real stdio app-server with plugins
 disabled, uses strict current-Schema validation, and exercises initialization, model and thread
 listing, thread creation/read, and thread-goal access without calling a model service. The matrix is an

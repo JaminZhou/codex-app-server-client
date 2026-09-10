@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
-  "codexCliVersion": "0.153.4",
+  "codexCliVersion": "0.154.0",
   "source": {
     "repository": "https://github.com/openai/codex",
-    "tag": "rust-v0.153.4",
-    "commit": "3d2ee51ca2d5db578f328aa75e20aa22c0197c9a",
+    "tag": "rust-v0.154.0",
+    "commit": "6b9826e3aa83b1a5947db50f4332cb9c65f1b340",
     "path": "codex-rs/app-server-protocol/src/protocol/common.rs"
   },
   "methods": [
@@ -23,6 +23,38 @@
         "name": "ServerDiagnosticsResponse"
       },
       "variant": "ServerDiagnostics"
+    },
+    {
+      "method": "userVerification/status",
+      "response": {
+        "module": "v2/UserVerificationStatusResponse",
+        "name": "UserVerificationStatusResponse"
+      },
+      "variant": "UserVerificationStatus"
+    },
+    {
+      "method": "userVerification/enroll",
+      "response": {
+        "module": "v2/UserVerificationEnrollResponse",
+        "name": "UserVerificationEnrollResponse"
+      },
+      "variant": "UserVerificationEnroll"
+    },
+    {
+      "method": "userVerification/delete",
+      "response": {
+        "module": "v2/UserVerificationDeleteResponse",
+        "name": "UserVerificationDeleteResponse"
+      },
+      "variant": "UserVerificationDelete"
+    },
+    {
+      "method": "userVerification/verify",
+      "response": {
+        "module": "v2/UserVerificationVerifyResponse",
+        "name": "UserVerificationVerifyResponse"
+      },
+      "variant": "UserVerificationVerify"
     },
     {
       "method": "thread/start",

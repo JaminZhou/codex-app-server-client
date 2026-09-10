@@ -1,6 +1,6 @@
 # Runnable examples
 
-The three safety examples and numbered groups 01–14 and 16 use the **real bundled Codex 0.153.4 app-server**,
+In this source checkout, the three safety examples and numbered groups 01–14 and 16 use the **real bundled Codex 0.154.0 app-server**,
 with a local scripted Responses provider by default. They need no account, send no requests to a
 model service, and do not execute the command proposed in the approval fixture. Each gets a temporary
 workspace and Codex home; both are deleted on normal exit. Group 15 instead uses a scripted login RPC

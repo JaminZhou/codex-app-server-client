@@ -4,8 +4,7 @@ This repository is an independently written client for public Codex interfaces.
 
 ## Normative public sources
 
-- [Official Codex app-server documentation](https://developers.openai.com/codex/app-server/)
-- [Codex app-server protocol documentation](https://github.com/openai/codex/blob/main/codex-rs/app-server/README.md)
+- [Official Codex app-server documentation](https://learn.chatgpt.com/docs/app-server)
 - [Open-source app-server implementation](https://github.com/openai/codex/tree/main/codex-rs/app-server)
 - [Open-source app-server protocol](https://github.com/openai/codex/tree/main/codex-rs/app-server-protocol)
 - [Official OpenAI Codex Python SDK](https://github.com/openai/codex/tree/main/sdk/python)
@@ -13,9 +12,9 @@ This repository is an independently written client for public Codex interfaces.
 
 ## Pinned protocol provenance
 
-- CLI package: `@openai/codex@0.153.4`
-- Open-source tag: `rust-v0.153.4`
-- Open-source commit: `3d2ee51ca2d5db578f328aa75e20aa22c0197c9a`
+- CLI package: `@openai/codex@0.154.0`
+- Open-source tag: `rust-v0.154.0`
+- Open-source commit: `6b9826e3aa83b1a5947db50f4332cb9c65f1b340`
 - Method-map source: `codex-rs/app-server-protocol/src/protocol/common.rs`
 
 The CLI generates `src/generated/protocol/` and `schemas/`. A deterministic post-generation
@@ -41,10 +40,11 @@ collection. Its public local Responses-provider test pattern is also a normative
 no-usage end-to-end testing. The TypeScript implementation and Node test fixture are written
 independently for Node streams, promises, and HTTP.
 
-The numbered Node examples use the 15 public Python example groups at the same pinned commit plus
+The numbered Node examples retain the 15 public Python example groups at `rust-v0.153.4` plus
 the public [ExternalMessage and independent subscription change](https://github.com/openai/codex/commit/1a4096e273e80da30947e57fdfa45be92858ca91)
-for group 16 and its high-level behavior. The existing pinned `turn/start.toolOutput` protocol
-preserves the tool-authority boundary; no generated-protocol update is required.
+for group 16 and its high-level behavior. The existing `0.153.4` `turn/start.toolOutput` protocol
+already preserved the tool-authority boundary; ExternalMessage itself did not require a
+generated-protocol upgrade. The current examples are also verified against `0.154.0`.
 See [the exact source, mapping and intentional differences](./docs/official-examples.md).
 No claim of parity with newer upstream examples or Python's blocking API is implied.
 
