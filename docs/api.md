@@ -154,7 +154,8 @@ that reader only; `interrupt()` requests a server-side interruption visible to e
 Tool-output requests require a reported CLI version of at least `0.151.0`. Unknown versions and
 prereleases at the minimum are rejected before submission, including raw `call("turn/start", ...)`
 and `protocolValidation: "off"`; disabling shape checks cannot establish this semantic capability.
-The bundled `0.153.4` is verified. This API is new source/local-candidate content, not in npm `0.1.0`.
+The source checkout's bundled `0.154.0` is verified (the original implementation was verified on `0.153.4`).
+This API is new source/local-candidate content, not in npm `0.1.0`.
 
 ### Goals
 

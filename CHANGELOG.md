@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Upgrade the exact bundled Codex runtime and generated public protocol to `0.154.0`.
+  Add four raw `userVerification/*` methods (162 typed requests, 159 validated responses),
+  optional rate-limit read capabilities, MCP user-verification elicitations and new thread metadata.
+- Preserve twelve Schema-omittable fields in changed/new types as optional TypeScript properties
+  and keep the new verification error's int64 code lossless; retain the basic
+  compatibility window at `0.150.1`, `0.152.1`, `0.153.4` and `0.154.0`.
 - Add high-level `ExternalMessage`, preserving untrusted tool authority through the already-generated
   `turn/start.toolOutput` field; reject mixed user input, user steering and unsupported/unknown runtimes.
 - Give joining turn handles independent event streams, retained result snapshots and pending-start
@@ -13,8 +19,8 @@
 - Bound retries for temporary-directory cleanup in npm/pnpm and Git installed-consumer smokes;
   retain both errors when the consumer and cleanup fail, and report success only after cleanup.
 - Add a Windows file-sharing regression fixture and the historical `0.1.0` release record.
-- No bundled CLI, generated protocol or dependency change. The new client APIs and maintenance
-  changes are not in the immutable npm `0.1.0` archive; distributing them requires a new reviewed release.
+- These runtime/protocol upgrades, new client APIs and maintenance changes are not in the immutable
+  npm `0.1.0` archive; distributing them requires a new reviewed release and a new client version.
 
 ## 0.1.0 (2026-09-09)
 

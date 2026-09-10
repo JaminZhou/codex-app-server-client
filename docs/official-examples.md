@@ -1,7 +1,8 @@
 # Official example alignment
 
 Groups 01–15 follow the public [Python app-server SDK examples at Codex 0.153.4](https://github.com/openai/codex/tree/3d2ee51ca2d5db578f328aa75e20aa22c0197c9a/sdk/python/examples),
-the exact source commit for this client's pinned runtime. Group 16 follows the newer public Python
+the original example-alignment baseline. This checkout now runs those examples on Codex `0.154.0`.
+Group 16 follows the newer public Python
 SDK [ExternalMessage change](https://github.com/openai/codex/commit/1a4096e273e80da30947e57fdfa45be92858ca91),
 using protocol fields already present in that runtime. These are independently written Node.js
 equivalents of those workflows, not a Python API port or a separate consumer application.
@@ -63,11 +64,12 @@ adding a blocking Python-style API is not required to demonstrate the same workf
 `ExternalMessage` is a high-level SDK wrapper, **not a new `UserInput` variant**. It uses
 `turn/start` with `input: []` and `toolOutput: { name, namespace, output }`, already generated in
 `0.153.4`. The previous inference that this feature required a protocol upgrade was incorrect.
-No runtime or generated-protocol upgrade is needed for this batch.
+No runtime or generated-protocol upgrade was needed to add ExternalMessage. The separate `0.154.0`
+baseline upgrade tracks other upstream protocol changes, not a new requirement for this feature.
 
 The official minimum is CLI `0.151.0`; tool-output requests reject unknown/older reported versions
 and prereleases of that minimum, even with Schema checks off. Actual external-message integration
-is verified on the bundled `0.153.4`. Text and structured function-output content retain tool
+was initially verified on `0.153.4` and is reverified on the bundled `0.154.0`. Text and structured function-output content retain tool
 authority through restart/resume and runtime truncation. External messages cannot be mixed into
 user-input lists, sent through `steer()`, or used as an approval grant. Python's `source` option is
 the existing Node `turnTrigger` option; it is metadata, not authority, and is ignored on active-turn joins.

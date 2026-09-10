@@ -21,6 +21,7 @@ const packageJson = JSON.parse(readFileSync(join(root, "package.json"), "utf8"))
 const methodMetadata = JSON.parse(readFileSync(join(root, "protocol-methods.json"), "utf8"));
 const expectedVersion = packageJson.dependencies?.["@openai/codex"];
 const wireOptionalGeneratedFields = {
+  "v2/ApplicationRequirements.ts": ["network"],
   "v2/AccountLoginCompletedNotification.ts": ["onboardingEntrypoint"],
   "v2/AppsConfig.ts": ["links"],
   "v2/AppToolSummary.ts": [
@@ -29,8 +30,9 @@ const wireOptionalGeneratedFields = {
     "disabledReason",
     "isReadOnly",
   ],
-  "v2/BrowserUseRequirements.ts": ["disableAutoReview"],
+  "v2/BrowserUseRequirements.ts": ["disableAutoReview", "allowWebmcp"],
   "v2/ConfigRequirements.ts": [
+    "application",
     "browserUse",
     "sqliteHome",
     "logDir",
@@ -55,10 +57,11 @@ const wireOptionalGeneratedFields = {
   "v2/ExternalAgentConfigImportHistoriesReadResponse.ts": ["connectors"],
   "v2/ExternalAgentConfigImportItemTypeSuccess.ts": ["title"],
   "v2/FeedbackRequirements.ts": ["enabled"],
-  "v2/GetAccountRateLimitsResponse.ts": ["accountId", "rateLimitUpsell"],
+  "v2/GetAccountRateLimitsResponse.ts": ["accountId", "rateLimitUpsell", "ordinaryUsageAllowed"],
   "v2/HookMetadata.ts": ["additionalContextLimit"],
   "v2/InstalledApp.ts": ["runtimeName"],
   "v2/ManagedHooksRequirements.ts": ["SessionEnd"],
+  "v2/McpServerStatus.ts": ["toolsError"],
   "v2/Model.ts": ["modelSpecialty"],
   "v2/PluginDetail.ts": ["scheduledTasks"],
   "v2/PluginShareContext.ts": ["canPublishToWorkspace"],
@@ -70,11 +73,14 @@ const wireOptionalGeneratedFields = {
     "eligiblePlanTypes",
   ],
   "v2/Project.ts": ["recencyAt"],
-  "v2/RateLimitSnapshot.ts": ["spendControlReached"],
+  "v2/RateLimitSnapshot.ts": ["spendControlReached", "normalModelSlug"],
   "v2/RawResponseCompletedNotification.ts": ["usage", "usageMetadata"],
   "v2/ResponseUsageMetadata.ts": ["metadata"],
   "v2/SkillInterface.ts": ["iconSmallUrl", "iconLargeUrl"],
   "v2/Thread.ts": [
+    "environments",
+    "originator",
+    "daybreakEnabled",
     "canAcceptDirectInput",
     "section",
     "sectionEnteredAt",
@@ -87,6 +93,7 @@ const wireOptionalGeneratedFields = {
   "v2/TokenUsageBreakdown.ts": ["cacheWriteInputTokens"],
   "v2/ToolRequestUserInputParams.ts": ["isBlocking"],
   "v2/TurnError.ts": ["misalignment"],
+  "v2/UserVerificationStatusResponse.ts": ["credentialId", "unavailableReason", "unavailableMessage"],
 };
 const compatibilityOptionalSchemaFields = {
   base: {
@@ -105,6 +112,9 @@ const compatibilityArrayItemDefinitions = {
   },
 };
 const compatibilityGeneratedTypeReplacements = {
+  // Its Schema declares int64 despite the upstream TypeScript number override.
+  // Let the normal lossless-integer pass below produce number | bigint.
+  "v2/UserVerificationRpcError.ts": [["code: number,", "code: bigint,"]],
   "v2/Thread.ts": [
     [
       "ephemeral: boolean,\n/**\n * The independently persisted section selected for this thread, if any.",

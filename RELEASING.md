@@ -19,8 +19,9 @@ publication; local rebuilds of this checkout are development artifacts, not the 
 
 ## Version and support policy
 
-- Client versions are independent of the Codex runtime version. This candidate pins
-  `@openai/codex@0.153.4`; see [COMPATIBILITY.md](./COMPATIBILITY.md).
+- Client versions are independent of the Codex runtime version. The current unreleased source pins
+  `@openai/codex@0.154.0`; the published `0.1.0` archive still bundles `0.153.4`.
+  See [COMPATIBILITY.md](./COMPATIBILITY.md).
 - Iterate previews as `0.1.0-preview.1`, `0.1.0-preview.2`, etc. Record changes and migration notes.
   Pre-1.0 APIs and generated experimental protocol types may change; consumers should pin exact
   versions and keep their lockfiles.
