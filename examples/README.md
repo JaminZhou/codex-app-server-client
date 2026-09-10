@@ -1,9 +1,15 @@
 # Runnable examples
 
-All three examples use the **real bundled Codex 0.153.4 app-server**, with a local scripted Responses
-provider by default. They need no account, send no requests to a model service, and do not execute
-the command proposed in the approval fixture. Each gets a temporary workspace and Codex home;
-both are deleted when the example exits normally. Installation may download npm packages.
+The three safety examples and numbered groups 01–14 use the **real bundled Codex 0.153.4 app-server**,
+with a local scripted Responses provider by default. They need no account, send no requests to a
+model service, and do not execute the command proposed in the approval fixture. Each gets a temporary
+workspace and Codex home; both are deleted on normal exit. Group 15 instead uses a scripted login RPC
+fixture, so automatic tests do not start OAuth. Installation may download npm packages.
+
+The [official-example mapping](../docs/official-examples.md) lists all 15 groups, their assertions and
+the version boundary. These numbered examples are new source/local-candidate content, **not present
+in the already-published `0.1.0` tarball**. The commands for the three safety examples below also work
+with that published release.
 
 ## Commands
 
@@ -14,9 +20,13 @@ From a source checkout, first use Node.js 22+ and `pnpm install --frozen-lockfil
 node examples/stream.mjs
 node examples/approvals.mjs
 node examples/interrupt-resume.mjs
+node examples/01_quickstart_constructor.mjs
+node examples/11_cli_mini_app.mjs --interactive
+node examples/15_login_and_account.mjs
+pnpm examples:smoke
 ```
 
-From a consumer with the published preview or a local tarball installed, Node.js 18+ can run the shipped files directly:
+From a consumer with the published package or a local tarball installed, Node.js 18+ can run the shipped files directly:
 
 ```bash
 node node_modules/@jaminzhou/codex-app-server-client/examples/stream.mjs
@@ -26,7 +36,8 @@ node node_modules/@jaminzhou/codex-app-server-client/examples/interrupt-resume.m
 
 You can copy the whole `examples/` directory into your app. Imports resolve the installed scoped
 package, not repository source. `lib/environment.mjs` contains setup/cleanup and explicit decline
-defaults; `lib/mock-provider.mjs` supplies scripted model output.
+defaults; `lib/mock-provider.mjs` supplies scripted model output. The login fixture resolves the SDK's
+declared WebSocket dependency through its public schema export; no direct consumer dependency is needed.
 
 ## 1. Stream a conversation
 
@@ -92,10 +103,17 @@ Resuming does not automatically repeat the interrupted tool or turn.
 
 ## Opt into real model output
 
-See [authentication and usage](../README.md#run-with-your-codex-account), then append `--live` to
-any command above. It uses your working directory and selected Codex home, and may consume model
+See [authentication and usage](../README.md#run-with-your-codex-account), then append `--live` to an
+individual example command, such as `node examples/stream.mjs --live`. The aggregate
+`pnpm examples:smoke` is mock-only and rejects arguments, including `--live`; it is never a live-account
+acceptance command. An individual live example uses your working directory and selected Codex home, and may consume model
 usage. Live output and whether a model requests a tool are not deterministic. No automatic test
 uses `--live`; the mock checks do not verify real account entitlement or model availability.
+
+Exception: `15_login_and_account.mjs --live` starts and immediately cancels real OAuth in an isolated
+temporary home, without opening a browser, reading your existing home, or running a model. It is not
+a sign-in helper or a successful-login test. See the [numbered example boundaries](../docs/official-examples.md#deliberate-boundaries)
+before using live lifecycle, model-selection or interactive CLI examples.
 
 ## Troubleshooting
 

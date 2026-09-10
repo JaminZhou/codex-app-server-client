@@ -41,6 +41,10 @@ collection. Its public local Responses-provider test pattern is also a normative
 no-usage end-to-end testing. The TypeScript implementation and Node test fixture are written
 independently for Node streams, promises, and HTTP.
 
+The numbered Node examples use the 15 public Python example groups at the same pinned commit as
+behavioral references. See [the exact source, mapping and intentional differences](./docs/official-examples.md).
+No claim of parity with newer upstream examples or Python's blocking API is implied.
+
 ## Explicit exclusions
 
 The private Codex Desktop `AppServerConnection` implementation, code extracted from the Desktop `app.asar` bundle, private symbols, and private service behavior are not included in or used as implementation source for this repository.

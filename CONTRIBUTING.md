@@ -55,10 +55,13 @@ and connections. RPC/router tests separately cover pending-request and waiting-c
 See [release acceptance](./docs/release-readiness.md) for the boundary between these deterministic
 checks and the separately authorized live-account acceptance.
 
-The shipped examples are also executable checks: `pnpm examples:smoke` runs streaming, explicit
-command decline, and interrupt/restart/resume against the real pinned app-server with isolated
-loopback providers. `pnpm package:smoke` copies those shipped files into a clean installed consumer
-and runs them there, in addition to checking ESM, schemas, and strict public declarations.
+The shipped examples are executable checks: `pnpm examples:smoke` runs the three safety scenarios
+and all 15 [official-example equivalents](./docs/official-examples.md), plus four mini CLI input cases.
+Seventeen examples use the real pinned app-server with isolated loopback providers; login/account
+uses a strictly validated RPC fixture without OAuth. `pnpm package:smoke` checks the shipped catalog,
+copies those files into a clean installed consumer and runs them there, in addition to checking ESM,
+schemas and strict public declarations. `node scripts/package-smoke.mjs --pnpm` checks isolated pnpm
+resolution. No automatic test may add `--live` or rely on a developer's authenticated Codex home.
 
 For a non-preview candidate archive plus verification in both npm and pnpm consumers, run `pnpm release:pack`
 on Node.js 22+. See [RELEASING.md](./RELEASING.md) for the exact artifacts, version strategy, and

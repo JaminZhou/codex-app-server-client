@@ -77,6 +77,10 @@ node node_modules/@jaminzhou/codex-app-server-client/examples/interrupt-resume.m
 They verify that a declined command never executes and that an interrupted conversation resumes
 after restarting the app-server. See [example commands, output, and recovery](./examples/README.md).
 
+Source checkouts also include [15 numbered equivalents of the official Python app-server examples](./docs/official-examples.md),
+covering lifecycle, images, structured output, model selection, a small terminal loop and login cancellation.
+They target the pinned `0.153.4` baseline and are unreleased additions, not files in the immutable npm `0.1.0` archive.
+
 ## Install into your own project
 
 Use the exact registry version above (or `pnpm add --save-exact --ignore-scripts

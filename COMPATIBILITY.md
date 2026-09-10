@@ -16,6 +16,8 @@ raw method coverage nor a successful basic smoke means all workflows work on an 
 | --- | --- | --- |
 | Basic initialization, thread and goal access | Exact runtimes `0.150.1`, `0.152.1`, `0.153.4` | Real isolated stdio compatibility smoke; no model calls |
 | Streaming, explicit command decline, interruption and process-restart resume | Bundled `0.153.4` | Shipped examples run against the real runtime with a local mock provider |
+| Official example workflows, groups 01–14 | Bundled `0.153.4`; new source/local candidates | Real-runtime local-provider suite; [mapping and boundaries](./docs/official-examples.md), not model-quality acceptance |
+| Official login/account example, group 15 | New source/local candidates | Strict client + scripted RPC fixture; not real OAuth or successful sign-in |
 | Packed ESM, declarations, schemas, and bundled binary | Node.js 18 on Linux, macOS, Windows | Installed-package CI; not every OS/architecture pairing |
 | Published `0.1.0-preview.0` archive without consumer build scripts | npm and pnpm 11 consumers | Historical exact-archive verification; not evidence for new candidate bytes |
 | Live account entitlement, model quality, every protocol workflow | Not established by these tests | Requires separate application-specific acceptance |

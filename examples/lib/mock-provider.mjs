@@ -7,6 +7,9 @@ export async function startMockProvider(scenario, workspace) {
   const requests = [];
   const sockets = new Set();
   let responseIndex = 0;
+  let holdNext = false;
+  let finishHeld;
+  const allowedModels = new Set(["mock-model"]);
   const server = createServer(async (request, response) => {
     try {
       if (request.method !== "POST" || request.url !== "/v1/responses") {
@@ -18,8 +21,8 @@ export async function startMockProvider(scenario, workspace) {
       const body = JSON.parse(Buffer.concat(chunks).toString("utf8"));
       requests.push(body);
       if (request.headers.authorization) throw new Error("Mock received an auth header");
-      if (body.model !== "mock-model" || body.stream !== true) {
-        throw new Error("Expected a streaming request for mock-model");
+      if (!allowedModels.has(body.model) || body.stream !== true) {
+        throw new Error("Unexpected model or non-streaming mock request");
       }
       const index = responseIndex++;
       const id = `mock-${scenario}-${index}`;
@@ -41,9 +44,13 @@ export async function startMockProvider(scenario, workspace) {
           },
         });
       } else {
-        const parts = scenario === "stream" ? ["Hello ", "from the local mock."]
+        const parts = body.text?.format?.type === "json_schema"
+          ? [JSON.stringify({ summary: "Scripted rollout plan", actions: ["Test", "Observe"] })]
+          : scenario === "stream" ? ["Hello ", "from the local mock."]
           : scenario === "approvals" ? ["The command was declined."]
-            : index === 0 ? ["Starting a long answer..."] : ["Continued in the same thread."];
+            : scenario === "interrupt-resume"
+              ? index === 0 ? ["Starting a long answer..."] : ["Continued in the same thread."]
+              : ["Scripted response ", String(index + 1), "."];
         const item = {
           type: "message", role: "assistant", id: `msg-${id}`,
           content: [{ type: "output_text", text: "" }],
@@ -52,10 +59,17 @@ export async function startMockProvider(scenario, workspace) {
         for (const delta of parts) send({ type: "response.output_text.delta", delta });
         // Keep this response open until turn.interrupt() cancels the actual runtime request.
         if (scenario === "interrupt-resume" && index === 0) return;
-        send({
-          type: "response.output_item.done",
-          item: { ...item, content: [{ type: "output_text", text: parts.join("") }] },
-        });
+        const finish = () => {
+          if (response.destroyed || response.writableEnded) return;
+          send({ type: "response.output_item.done",
+            item: { ...item, content: [{ type: "output_text", text: parts.join("") }] } });
+          send({ type: "response.completed",
+            response: { id, usage: { input_tokens: 1, output_tokens: 1, total_tokens: 2 } } });
+          response.end();
+        };
+        if (holdNext) { holdNext = false; finishHeld = finish; return; }
+        finish();
+        return;
       }
       send({
         type: "response.completed",
@@ -75,6 +89,12 @@ export async function startMockProvider(scenario, workspace) {
   return {
     origin: `http://127.0.0.1:${server.address().port}`,
     requests,
+    allowModel(model) { allowedModels.add(model); },
+    holdNext() { holdNext = true; },
+    finishHeld() {
+      if (!finishHeld) throw new Error("No active held response");
+      const finish = finishHeld; finishHeld = undefined; finish();
+    },
     async close() {
       if (!server.listening) return;
       const closed = new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));

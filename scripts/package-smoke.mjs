@@ -6,6 +6,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { execNpmSync } from "./npm-exec.mjs";
 import { withSmokeCleanup } from "./smoke-cleanup.mjs";
+import { runExamples } from "./run-examples.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const require = createRequire(import.meta.url);
@@ -95,11 +96,7 @@ const manifest = withSmokeCleanup(temporaryRoot, () => {
   });
   // Copy shipped examples out of the package so bare imports must resolve through the consumer.
   cpSync(join(packageRoot, "examples"), join(temporaryRoot, "examples"), { recursive: true });
-  for (const example of ["stream", "approvals", "interrupt-resume"]) {
-    execFileSync(process.execPath, [join(temporaryRoot, "examples", example + ".mjs")], {
-      cwd: temporaryRoot, stdio: "inherit", timeout: 60_000,
-    });
-  }
+  runExamples(join(temporaryRoot, "examples"), temporaryRoot);
   return manifest;
 });
 console.log("Node " + process.versions.node + " " + (usePnpm ? "pnpm" : "npm")
