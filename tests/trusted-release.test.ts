@@ -191,4 +191,12 @@ describe("release workflow security contracts", () => {
     expect(workflow).toContain("cancel-in-progress: false");
     expect(workflow).toContain('node scripts/package-smoke.mjs --registry "$RELEASE_VERSION" "$RELEASE_INTEGRITY" --pnpm');
   });
+  it("reserves publish-job headroom for bounded read-back and earlier release steps", () => {
+    const publisher = read("npm-publish").split("\n  publish:\n")[1].split("\n  registry-consumers:\n")[0];
+    // Six attempts can each read metadata and a tarball for up to 30 seconds,
+    // plus 67 seconds of backoff. The same job also performs setup and publishing.
+    const timeoutMinutes = Number(publisher.match(/timeout-minutes: (\d+)/)?.[1]);
+    expect(timeoutMinutes).toBe(20);
+    expect(timeoutMinutes * 60 - (6 * 2 * 30 + 67)).toBeGreaterThan(12 * 60);
+  });
 });

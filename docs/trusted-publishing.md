@@ -101,6 +101,9 @@ Package identity, integrity, dependencies, unrelated tags and tarball-host misma
 immediately, even if `latest` is stale. An unexpected third `latest` value, malformed metadata,
 authentication/service errors and network errors also fail without retry. Exhaustion explicitly
 warns that publication may already have succeeded and requires registry inspection.
+The publish job has a 20-minute overall timeout: the reader can consume up to 7 minutes
+7 seconds of HTTP waits and backoff, so setup, artifact checks and publication need separate
+headroom. This does not extend individual HTTP timeouts or permit publication retries.
 
 ## Evidence and recovery
 
