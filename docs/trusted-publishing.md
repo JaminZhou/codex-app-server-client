@@ -93,6 +93,18 @@ OIDC permission installs the exact registry version using fresh npm and pnpm con
 their lockfile integrities, strict declarations and exports, and runs 19 local-fixture examples
 plus four CLI input cases. These tests do not establish live-model or real-account acceptance.
 
+The post-publication reader tolerates short registry visibility delays: a missing new version,
+`latest` still equal to its exact pre-publication value, or a tarball HTTP 404. It makes at most
+six attempts, waiting 2, 5, 10, 20 and 30 seconds between attempts. All retries are fresh GETs
+requesting cache revalidation, with 30-second HTTP timeouts; they never repeat `npm publish`.
+Package identity, integrity, dependencies, unrelated tags and tarball-host mismatches fail
+immediately, even if `latest` is stale. An unexpected third `latest` value, malformed metadata,
+authentication/service errors and network errors also fail without retry. Exhaustion explicitly
+warns that publication may already have succeeded and requires registry inspection.
+The publish job has a 20-minute overall timeout: the reader can consume up to 7 minutes
+7 seconds of HTTP waits and backoff, so setup, artifact checks and publication need separate
+headroom. This does not extend individual HTTP timeouts or permit publication retries.
+
 ## Evidence and recovery
 
 - Preparation evidence remains `published: false`: it records preparation, not mutable status.
