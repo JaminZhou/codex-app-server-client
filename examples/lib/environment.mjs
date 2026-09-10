@@ -12,10 +12,13 @@ export const approvalPolicy = {
   },
 };
 
-export async function withExample(scenario, run) {
+export async function withExample(scenario, run, { allowInteractive = false } = {}) {
   const args = process.argv.slice(2);
-  if (args.some((arg) => arg !== "--live")) throw new Error("Usage: node <example.mjs> [--live]");
+  if (args.some((arg) => arg !== "--live" && !(allowInteractive && arg === "--interactive"))) {
+    throw new Error("Usage: node <example.mjs> [--live]" + (allowInteractive ? " [--interactive]" : ""));
+  }
   const live = args.includes("--live");
+  const interactive = args.includes("--interactive");
   const temporaryRoot = live ? null : mkdtempSync(join(tmpdir(), "codex-client-example-"));
   const workspace = temporaryRoot ? join(temporaryRoot, "workspace") : process.cwd();
   let provider;
@@ -57,7 +60,7 @@ shell_snapshot = false
       };
     }
     client = new CodexAppServerClient(options);
-    if (!live) {
+    if (!live && !interactive) {
       timeout = setTimeout(() => {
         timedOut = true;
         void client.close().catch(() => {});
@@ -77,7 +80,7 @@ shell_snapshot = false
       }
     }
     await run({
-      client, live, provider, workspace,
+      client, live, provider, workspace, interactive,
       threadOptions: {
         cwd: workspace, sandbox: "read-only", approvalPolicy, approvalsReviewer: "user",
       },
@@ -88,7 +91,8 @@ shell_snapshot = false
     try { await client?.close(); }
     finally {
       try { await provider?.close(); }
-      finally { if (temporaryRoot) rmSync(temporaryRoot, { recursive: true, force: true }); }
+      finally { if (temporaryRoot) rmSync(temporaryRoot, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 }); }
     }
   }
+  console.log(`[example] ${scenario} passed`);
 }
