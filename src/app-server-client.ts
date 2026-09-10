@@ -75,6 +75,7 @@ import {
   type LoginWaitOptions,
 } from "./login";
 import { KeyedOperationCoordinator } from "./operation-coordinator";
+import { ExternalMessage, assertToolOutputRuntime } from "./external-message";
 import {
   loadProtocolValidator,
   type ProtocolValidationMode,
@@ -226,6 +227,10 @@ export class CodexAppServerClient {
     options: RequestOptions = {},
   ): Promise<T> {
     const peer = this.requirePeer();
+    if (method === "turn/start" && params !== null && typeof params === "object"
+      && "toolOutput" in params && params.toolOutput != null) {
+      assertToolOutputRuntime(this.initializeResponse?.userAgent);
+    }
     const validator = this.protocolValidator;
     validator?.assertClientRequest(method, params);
     const response = peer.request<T>(method, params, this.withDefaultTimeout(options));
@@ -484,6 +489,15 @@ export class CodexAppServerClient {
     params: CodexTurnStartOptions = {},
     options: RequestOptions = {},
   ): Promise<CodexTurn> {
+    if (input instanceof ExternalMessage && params.toolOutput != null) {
+      throw new TypeError("ExternalMessage cannot be combined with a second toolOutput option.");
+    }
+    const turnInput = input instanceof ExternalMessage
+      ? { input: [], toolOutput: input.toToolOutput() }
+      : { input: normalizeTurnInput(input) };
+    if (turnInput.input.length && params.toolOutput != null) {
+      throw new TypeError("toolOutput cannot be combined with nonempty user input.");
+    }
     return this.threadOperations.run(threadId, async () => {
       if (this.goalEvents.has(threadId)) {
         throw new AppServerInvalidRequestError({
@@ -491,16 +505,13 @@ export class CodexAppServerClient {
           message: `Thread has an active goal operation: ${threadId}`,
         });
       }
-      const response = await this.turnStart(
-        { ...params, threadId, input: normalizeTurnInput(input) },
-        options,
-      );
-      return new CodexTurn(
-        this,
-        threadId,
-        response.turn.id,
-        this.turnEvents.open(response.turn.id),
-      );
+      // A joining request can complete the original handle before its RPC reply arrives.
+      const release = this.turnEvents.reserveStart(threadId);
+      try {
+        const response = await this.turnStart({ ...params, ...turnInput, threadId }, options);
+        return new CodexTurn(this, threadId, response.turn.id,
+          this.turnEvents.open(response.turn.id, threadId));
+      } finally { release(); }
     });
   }
 
@@ -826,8 +837,13 @@ export class CodexAppServerClient {
         return;
       }
       const typed = notification as ServerNotification;
-      this.loginEvents.route(typed);
-      if (!this.goalEvents.route(typed)) this.turnEvents.route(notification);
+      try {
+        this.loginEvents.route(typed);
+        if (!this.goalEvents.route(typed)) this.turnEvents.route(notification);
+      } catch (error) {
+        peer.dispose(asError(error));
+        return;
+      }
       for (const handler of [...this.notificationHandlers]) await handler(notification);
       for (const handler of this.typedNotificationHandlers.get(notification.method) ?? []) {
         await handler(notification.params, typed);

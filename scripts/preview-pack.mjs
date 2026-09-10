@@ -53,7 +53,7 @@ try {
     files: artifact.files.map((file) => file.path),
     verifiedAt: new Date().toISOString(),
     node: process.versions.node,
-    verified: ["npm --ignore-scripts install", "pnpm --ignore-scripts install", "ESM and protocol exports", "strict TypeScript consumer", "real app-server startup", "18 shipped examples (17 real-runtime provider fixtures, 1 login RPC fixture)", "4 mini CLI input cases"],
+    verified: ["npm --ignore-scripts install", "pnpm --ignore-scripts install", "ESM and protocol exports", "strict TypeScript consumer", "real app-server startup", "19 shipped examples (18 real-runtime provider fixtures, 1 login RPC fixture)", "4 mini CLI input cases"],
     published: false,
     intendedTag: manifest.publishConfig.tag,
   };

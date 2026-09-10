@@ -1,12 +1,12 @@
 # Runnable examples
 
-The three safety examples and numbered groups 01–14 use the **real bundled Codex 0.153.4 app-server**,
+The three safety examples and numbered groups 01–14 and 16 use the **real bundled Codex 0.153.4 app-server**,
 with a local scripted Responses provider by default. They need no account, send no requests to a
 model service, and do not execute the command proposed in the approval fixture. Each gets a temporary
 workspace and Codex home; both are deleted on normal exit. Group 15 instead uses a scripted login RPC
 fixture, so automatic tests do not start OAuth. Installation may download npm packages.
 
-The [official-example mapping](../docs/official-examples.md) lists all 15 groups, their assertions and
+The [official-example mapping](../docs/official-examples.md) lists all 16 groups, their assertions and
 the version boundary. These numbered examples are new source/local-candidate content, **not present
 in the already-published `0.1.0` tarball**. The commands for the three safety examples below also work
 with that published release.
@@ -23,6 +23,7 @@ node examples/interrupt-resume.mjs
 node examples/01_quickstart_constructor.mjs
 node examples/11_cli_mini_app.mjs --interactive
 node examples/15_login_and_account.mjs
+node examples/16_external_message.mjs
 pnpm examples:smoke
 ```
 
@@ -50,8 +51,10 @@ Hello from the local mock.
 [turn] completed
 ```
 
-Each turn stream has exactly one consumer. Choose `turn.events()` for streaming or `turn.result()`
+Each turn handle has exactly one consumer. Choose `turn.events()` for streaming or `turn.result()`
 / `thread.run()` for collection. Do not call `result()` after consuming `events()`.
+An external message may join an active turn; the two handles have the same turn ID but independent
+streams. See [external-message semantics](../docs/api.md#untrusted-external-messages-unreleased).
 An RPC timeout limits request acknowledgement, not the total time a model turn may take.
 
 ## 2. Handle an approval explicitly

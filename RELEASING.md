@@ -49,7 +49,7 @@ fail before packing. Neither command publishes or changes registry tags.
 Both commands invoke `npm pack` (including the `prepare` build), check the published file
 allowlist, and tests that exact archive in fresh npm and pnpm projects with install scripts
 disabled. Both consumers type-check the root/protocol declarations with `skipLibCheck: false`,
-load the ESM and schema exports, and execute the shipped example catalog: 17 real-runtime local-provider
+load the ESM and schema exports, and execute the shipped example catalog: 18 real-runtime local-provider
 scenarios, one scripted login RPC scenario and four CLI input cases. It does not authenticate with
 npm, start real OAuth or model sessions, or publish.
 

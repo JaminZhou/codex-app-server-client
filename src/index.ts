@@ -1,6 +1,8 @@
 export * from "./app-server-client";
 export * from "./codex-binary";
 export * from "./errors";
+export { ExternalMessage } from "./external-message";
+export type { ExternalMessageOptions } from "./external-message";
 export { CodexGoal, DEFAULT_GOAL_START_TIMEOUT_MS } from "./goal";
 export type { GoalStartOptions } from "./goal";
 export * from "./generated/app-server-methods";

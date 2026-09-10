@@ -41,8 +41,11 @@ collection. Its public local Responses-provider test pattern is also a normative
 no-usage end-to-end testing. The TypeScript implementation and Node test fixture are written
 independently for Node streams, promises, and HTTP.
 
-The numbered Node examples use the 15 public Python example groups at the same pinned commit as
-behavioral references. See [the exact source, mapping and intentional differences](./docs/official-examples.md).
+The numbered Node examples use the 15 public Python example groups at the same pinned commit plus
+the public [ExternalMessage and independent subscription change](https://github.com/openai/codex/commit/1a4096e273e80da30947e57fdfa45be92858ca91)
+for group 16 and its high-level behavior. The existing pinned `turn/start.toolOutput` protocol
+preserves the tool-authority boundary; no generated-protocol update is required.
+See [the exact source, mapping and intentional differences](./docs/official-examples.md).
 No claim of parity with newer upstream examples or Python's blocking API is implied.
 
 ## Explicit exclusions

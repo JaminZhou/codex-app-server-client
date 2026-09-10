@@ -39,7 +39,7 @@ describe("turn event routing and handles", () => {
 
     const methods: string[] = [];
     const timestamps: Array<number | undefined> = [];
-    for await (const event of router.open("turn-1")) {
+    for await (const event of router.open("turn-1", "thread-1")) {
       methods.push(event.method);
       timestamps.push(event.emittedAtMs);
     }
@@ -53,7 +53,7 @@ describe("turn event routing and handles", () => {
       {} as CodexAppServerClient,
       "thread-1",
       "turn-1",
-      router.open("turn-1"),
+      router.open("turn-1", "thread-1"),
     );
 
     router.route({
@@ -108,7 +108,7 @@ describe("turn event routing and handles", () => {
       {} as CodexAppServerClient,
       "thread-1",
       "turn-1",
-      router.open("turn-1"),
+      router.open("turn-1", "thread-1"),
     );
     const failed = turn("turn-1", "failed");
     failed.error = { message: "model failed", codexErrorInfo: null, additionalDetails: null };
@@ -127,14 +127,14 @@ describe("turn event routing and handles", () => {
 
   it("fails all waiting consumers on disconnect and discards buffered old-connection events", async () => {
     const router = new TurnEventRouter();
-    const first = router.open("first");
-    const second = router.open("second");
+    const first = router.open("first", "first-thread");
+    const second = router.open("second", "second-thread");
     const firstFailure = expect(first.next()).rejects.toThrow("connection lost");
     const secondFailure = expect(second.next()).rejects.toThrow("connection lost");
     router.route({ method: "turn/started", params: { threadId: "old", turn: turn("buffered", "inProgress") } });
     router.failAll(new Error("connection lost"));
     await Promise.all([firstFailure, secondFailure]);
-    const fresh = router.open("buffered");
+    const fresh = router.open("buffered", "new");
     router.route({ method: "turn/completed", params: { threadId: "new", turn: turn("buffered", "completed") } });
     expect((await fresh.next()).value?.method).toBe("turn/completed");
     expect((await fresh.next()).done).toBe(true);
@@ -142,8 +142,8 @@ describe("turn event routing and handles", () => {
 
   it("does not cancel a sibling stream when one consumer stops reading", async () => {
     const router = new TurnEventRouter();
-    const first = router.open("first");
-    const second = router.open("second");
+    const first = router.open("first", "first-thread");
+    const second = router.open("second", "second-thread");
     await first.return();
     router.route({ method: "turn/completed", params: { threadId: "second-thread", turn: turn("second", "completed") } });
     expect((await first.next()).done).toBe(true);
