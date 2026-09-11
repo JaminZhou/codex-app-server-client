@@ -1,6 +1,6 @@
 # Compatibility and upgrades
 
-**Client `0.2.0` bundles `@openai/codex@0.154.0`.** Its bindings and runtime
+**Client `0.2.1` bundles `@openai/codex@0.154.0`.** Its bindings and runtime
 validation schemas are generated together. The immutable npm `0.1.0` and `0.1.0-preview.0`
 archives still bundle `0.153.4`; reinstalling them does not apply this upgrade. Check the registry for exact-version
 availability; this document is also included in local candidates. The client version and runtime version
@@ -16,14 +16,14 @@ raw method coverage nor a successful basic smoke means all workflows work on an 
 | --- | --- | --- |
 | Basic initialization, thread and goal access | Exact runtimes `0.150.1`, `0.152.1`, `0.153.4`, `0.154.0` | Real isolated stdio compatibility smoke; no model calls |
 | Streaming, explicit command decline, interruption and process-restart resume | Bundled `0.154.0` | Shipped examples run against the real runtime with a local mock provider |
-| Official example workflows, groups 01–14 | Client `0.2.0`, bundled `0.154.0` | Real-runtime local-provider suite; [mapping and boundaries](./docs/official-examples.md), not model-quality acceptance |
-| Official login/account example, group 15 | Client `0.2.0` | Strict client + scripted RPC fixture; not real OAuth or successful sign-in |
-| ExternalMessage, group 16, and independent joined-turn consumers | Client `0.2.0`, bundled `0.154.0` | Real-runtime tool authority, restart/resume, active join, structured content and truncation; deterministic subscription races |
+| Official example workflows, groups 01–14 | Client `0.2.1`, bundled `0.154.0` | Real-runtime local-provider suite; [mapping and boundaries](./docs/official-examples.md), not model-quality acceptance |
+| Official login/account example, group 15 | Client `0.2.1` | Strict client + scripted RPC fixture; not real OAuth or successful sign-in |
+| ExternalMessage, group 16, and independent joined-turn consumers | Client `0.2.1`, bundled `0.154.0` | Real-runtime tool authority, restart/resume, active join, structured content and truncation; deterministic subscription races |
 | Packed ESM, declarations, schemas, and bundled binary | Node.js 18 on Linux, macOS, Windows | Installed-package CI; not every OS/architecture pairing |
 | Published `0.1.0-preview.0` archive without consumer build scripts | npm and pnpm 11 consumers | Historical exact-archive verification; not evidence for new candidate bytes |
 | Live account entitlement, model quality, every protocol workflow | Not established by these tests | Requires separate application-specific acceptance |
 
-For a `0.2.0` release candidate, use `pnpm release:pack` to verify the exact chosen bytes. Until a
+For a `0.2.1` release candidate, use `pnpm release:pack` to verify the exact chosen bytes. Until a
 successful run records the selected source commit and integrity in `artifacts/release-evidence.json`,
 that candidate gate is pending. Check the current PR's validation report as well; this historical
 coverage table and an unchecked release checklist are not a final-candidate attestation.
