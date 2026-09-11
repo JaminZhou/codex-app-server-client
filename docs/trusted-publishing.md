@@ -43,7 +43,7 @@ Start from a reviewed, merged, clean release revision whose `package.json` has t
 non-preview `0.x.y` version and whose current-main CI has fully passed.
 
 ```bash
-gh workflow run npm-release-candidate.yml --ref main -f version=0.2.0
+gh workflow run npm-release-candidate.yml --ref main -f version=0.2.1
 ```
 
 The candidate workflow checks current-main CI, exact version and registry availability, then
@@ -54,7 +54,7 @@ permission. No real model account, OAuth enrollment or biometric acceptance runs
 
 Inspect the successful run and retain its artifact locally. The run summary lists the exact
 version, full source SHA, SHA-512 integrity, run ID and `latest` tag. Present these and the
-[release acceptance boundary](./releases/0.2.0.md#release-gates) to Jamin for explicit approval.
+[release acceptance boundary](./releases/0.2.1.md#release-gates) to Jamin for explicit approval.
 Preparing a candidate or merging its source is not publication approval.
 
 The previously approved local `0.2.0` archive is not automatically selected by this mechanism.
@@ -70,7 +70,7 @@ summary. In the CLI, replace the uppercase placeholders; do not include them lit
 
 ```bash
 gh workflow run npm-publish.yml --ref main \
-  -f version=0.2.0 \
+  -f version=0.2.1 \
   -f source_sha=FULL_APPROVED_SOURCE_SHA \
   -f candidate_run_id=SUCCESSFUL_CANDIDATE_RUN_ID \
   -f integrity=COMPLETE_APPROVED_SHA512_INTEGRITY

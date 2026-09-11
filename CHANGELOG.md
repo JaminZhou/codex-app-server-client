@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.2.1
+
+Maintenance release scope; check exact npm availability before installing. See the
+[release guide](./docs/releases/0.2.1.md). No public API, generated protocol, runtime dependency
+or transport behavior changes from `0.2.0`; the bundled Codex runtime remains `0.154.0`.
+
+- Harden repository-only publication verification against short npm registry visibility delays:
+  bounded read-only retries for a missing new version, an unchanged previous `latest` tag or a
+  tarball HTTP 404. Identity, integrity and unrelated-tag mismatches still fail closed.
+- Reserve 20 minutes for the publishing job, including the reader's worst-case 7m7s budget.
+  This never retries `npm publish` and does not change client request retry behavior.
+- Add publication read-back regression tests and update release instructions. These release
+  scripts and GitHub workflows are repository tooling, not installed SDK features.
+- Default initialize client-info version becomes `0.2.1`, derived from package metadata.
+- A successful future full publication run is still required to verify the corrected end-to-end
+  publishing path; preparing this candidate does not establish publication.
+
 ## 0.2.0
 
 Non-preview release scope; check exact npm availability before installing. See the
