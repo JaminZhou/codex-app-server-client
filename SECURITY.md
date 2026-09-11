@@ -2,10 +2,10 @@
 
 ## Supported versions
 
-The historical preview is `0.1.0-preview.0`; `0.1.0` was published on 2026-09-09.
+The historical preview is `0.1.0-preview.0`; `0.2.0` is the newest published non-preview release.
 The newest published non-preview client release is maintained; older client versions and previews
-are superseded, with no separate backport commitment. Preparing `0.2.0` does not supersede `0.1.0`
-until the new version is actually published. Runtime compatibility does not imply security maintenance of
+are superseded, with no separate backport commitment. Preparing `0.2.1` does not supersede the
+published `0.2.0` until the new version is actually published. Runtime compatibility does not imply security maintenance of
 end-of-life Node.js releases; prefer a maintained Node.js runtime.
 Check exact registry availability and release announcements; this repository policy does not
 itself attest that a release or security fix has been published.
