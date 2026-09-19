@@ -57,6 +57,7 @@ const wireOptionalGeneratedFields = {
   "v2/ExternalAgentConfigImportHistoriesReadResponse.ts": ["connectors"],
   "v2/ExternalAgentConfigImportItemTypeSuccess.ts": ["title"],
   "v2/FeedbackRequirements.ts": ["enabled"],
+  "v2/FeedbackUploadResponse.ts": ["promptHash"],
   "v2/GetAccountRateLimitsResponse.ts": ["accountId", "rateLimitUpsell", "ordinaryUsageAllowed"],
   "v2/HookMetadata.ts": ["additionalContextLimit"],
   "v2/InstalledApp.ts": ["runtimeName"],

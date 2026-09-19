@@ -53,6 +53,7 @@ export const serverNotificationMethods = [
   "serverRequest/resolved",
   "skills/changed",
   "thread/archived",
+  "thread/attachment/updated",
   "thread/closed",
   "thread/compacted",
   "thread/deleted",
