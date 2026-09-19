@@ -331,8 +331,30 @@ function normalizeJsonTree(directory) {
   for (const [path, contents] of listFiles(directory)) {
     if (!path.endsWith(".json")) continue;
     const value = JSON.parse(contents.toString("utf8"));
+    normalizeProtocolSchemaRanges(value);
     writeFileSync(join(directory, path), `${JSON.stringify(sortJson(value), null, 2)}\n`);
   }
+}
+
+function normalizeProtocolSchemaRanges(value) {
+  if (Array.isArray(value)) {
+    for (const item of value) normalizeProtocolSchemaRanges(item);
+    return;
+  }
+  if (!isRecord(value)) return;
+
+  const field = value.properties?.minConsolidatedThreads;
+  if (isRecord(field) && field.description === "Required distinct consolidated threads. Defaults to 20; supported range is 1..=4096.") {
+    // The upstream format only captures the uint32 storage type. Preserve the documented
+    // app-server semantic range in every generated schema copy, including ClientRequest.json.
+    field.minimum = 1;
+    field.maximum = 4096;
+  }
+  for (const item of Object.values(value)) normalizeProtocolSchemaRanges(item);
+}
+
+function isRecord(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function normalizeGeneratedTypeTree(directory) {

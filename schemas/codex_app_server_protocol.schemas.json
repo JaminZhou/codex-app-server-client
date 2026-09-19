@@ -17038,7 +17038,8 @@
           "minConsolidatedThreads": {
             "description": "Required distinct consolidated threads. Defaults to 20; supported range is 1..=4096.",
             "format": "uint32",
-            "minimum": 0,
+            "maximum": 4096,
+            "minimum": 1,
             "type": [
               "integer",
               "null"

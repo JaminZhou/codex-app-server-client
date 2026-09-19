@@ -136,6 +136,14 @@ describe("Codex 0.155 public protocol upgrade", () => {
         attachmentId: "attachment-1", operation: "created",
       },
     })).not.toThrow();
+    for (const minConsolidatedThreads of [null, 1, 4096]) {
+      expect(() => validator.assertClientRequest("memory/status", { minConsolidatedThreads }))
+        .not.toThrow();
+    }
+    for (const minConsolidatedThreads of [0, 4097]) {
+      expect(() => validator.assertClientRequest("memory/status", { minConsolidatedThreads }))
+        .toThrow(AppServerProtocolValidationError);
+    }
     expect(() => validator.assertClientRequest("thread/attachment/list", { threadId: "thread-1", limit: "many" }))
       .toThrow(AppServerProtocolValidationError);
     expect(() => validator.assertResponse("memory/status", { v2ConsolidatedThreads: -1, v2Ready: true }))
