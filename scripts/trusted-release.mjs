@@ -14,7 +14,7 @@ const versionPattern = /^0\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 const shaPattern = /^[a-f0-9]{40}$/;
 const integrityPattern = /^sha512-[A-Za-z0-9+/]{86}==$/;
 const ciJobs = ["linux-check", "macos-package-smoke", "windows-package-smoke", "check"];
-const registryReadDelays = [2_000, 5_000, 10_000, 20_000, 30_000];
+const registryReadDelays = [2_000, 5_000, 10_000, 20_000, 30_000, 60_000, 120_000];
 
 class RegistryVisibilityError extends Error {}
 const otherTags = ({ latest, ...others }) => others;
@@ -170,7 +170,7 @@ export function validateRegistry(metadata, version, integrity) {
 }
 
 // Retry only publication visibility lag, never a registry write or a safety mismatch.
-// At most 67 seconds of backoff plus twelve 30-second HTTP reads.
+// At most 247 seconds of backoff plus sixteen 30-second HTTP reads.
 // Publication itself is never retried.
 export async function readPublishedRegistry(expected, manifest, before, {
   fetcher = fetch, sleep = delay, onRetry = (message) => console.warn(message),
