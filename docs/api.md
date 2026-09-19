@@ -159,6 +159,18 @@ This API is included in the published client `0.2.0` and remains available in `0
 that runtime-upgrade qualification is separate from `ExternalMessage` availability. The original
 implementation was verified on `0.153.4`.
 
+Native verification cancellation refers to the verification request's JSON-RPC id. Use
+`callWithId()` when starting a cancellable verification, then pass its `id` to
+`userVerification/cancel`; an `AbortSignal` only rejects the local promise and does not send that
+server-side cancellation request:
+
+```ts
+const verification = client.callWithId("userVerification/verify", {
+  challenge, title: "Confirm this action", description: "The app-server requested verification.",
+});
+await client.call("userVerification/cancel", { requestId: verification.id });
+```
+
 ### Goals
 
 Persisted thread goals are also available at both the raw typed layer and through `CodexThread`:

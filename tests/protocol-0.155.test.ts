@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { AppServerProtocolValidationError, AppServerRpcError, CodexAppServerClient } from "../src";
 import type { v2 } from "../src/generated/protocol";
 import { loadProtocolValidator } from "../src/protocol-validator";
@@ -189,5 +189,35 @@ describe("Codex 0.155 public protocol upgrade", () => {
       expect(requests[1].params).toBeNull();
       expect(requests[2].params).toEqual({ excludeResetCreditDetails: true });
     } finally { await client.close(); await server.close(); }
+  });
+
+  it("exposes the verification request id so a pending native verification can be cancelled", async () => {
+    let verifyRequest: { id?: number | string } | undefined;
+    const server = await FakeAppServer.listen((message, rpc) => {
+      if (message.method === "userVerification/verify") {
+        verifyRequest = message;
+        return;
+      }
+      if (message.method === "userVerification/cancel") {
+        expect(message.params?.requestId).toBe(verifyRequest?.id);
+        rpc.reply(message, {});
+        if (verifyRequest) rpc.error(verifyRequest, -32800, "verification cancelled");
+      }
+    }, "codex/0.155.1");
+    const client = new CodexAppServerClient({ transport: { type: "websocket", url: server.url } });
+    try {
+      await client.connect();
+      const verification = client.callWithId("userVerification/verify", {
+        challenge: "YQ", title: "Fixture", description: "Fixture",
+      });
+      await vi.waitFor(() => expect(verifyRequest).toBeDefined());
+      expect(verification.id).toBe(verifyRequest?.id);
+      await expect(client.call("userVerification/cancel", { requestId: verification.id }))
+        .resolves.toEqual({});
+      await expect(verification.promise).rejects.toBeInstanceOf(AppServerRpcError);
+    } finally {
+      await client.close();
+      await server.close();
+    }
   });
 });

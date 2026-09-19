@@ -15,6 +15,7 @@ import type {
   JsonRpcMessage,
   JsonRpcNotification,
   JsonRpcRequest,
+  JsonRpcRequestHandle,
   JsonRpcResponse,
   JsonValue,
   JsonlRpcPeerOptions,
@@ -66,6 +67,14 @@ export class JsonRpcPeer {
     params?: unknown,
     options: RequestOptions = {},
   ): Promise<T> {
+    return this.requestWithId<T>(method, params, options).promise;
+  }
+
+  requestWithId<T = JsonValue>(
+    method: string,
+    params?: unknown,
+    options: RequestOptions = {},
+  ): JsonRpcRequestHandle<T> {
     this.assertOpen();
     validateRequestOptions(options);
 
@@ -117,7 +126,7 @@ export class JsonRpcPeer {
       ).catch((error) => fail(asError(error)));
     });
 
-    return promise;
+    return { id, promise };
   }
 
   notify(method: string, params?: unknown): Promise<void> {
