@@ -31,8 +31,9 @@ describe("Codex 0.155 public protocol upgrade", () => {
       IsOptional<v2.UserVerificationStatusResponse, "unavailableReason">,
       IsOptional<v2.UserVerificationStatusResponse, "unavailableMessage">,
       IsOptional<v2.FeedbackUploadResponse, "promptHash">,
-    ] = [true, true, true, true, true, true, true, true, true, true, true, true, true];
-    expect(optional).toHaveLength(13);
+      IsOptional<v2.ThreadAttachmentListResponse, "nextCursor">,
+    ] = [true, true, true, true, true, true, true, true, true, true, true, true, true, true];
+    expect(optional).toHaveLength(14);
     const definitions = schema.definitions as Record<string, { properties?: Record<string, unknown>; required?: string[] }>;
     for (const [type, field] of [
       ["BrowserUseRequirements", "allowWebmcp"], ["ConfigRequirements", "application"],
@@ -42,6 +43,7 @@ describe("Codex 0.155 public protocol upgrade", () => {
       ["ApplicationRequirements", "network"], ["UserVerificationStatusResponse", "credentialId"],
       ["UserVerificationStatusResponse", "unavailableReason"], ["UserVerificationStatusResponse", "unavailableMessage"],
       ["FeedbackUploadResponse", "promptHash"],
+      ["ThreadAttachmentListResponse", "nextCursor"],
     ]) {
       expect(definitions[type].properties).toHaveProperty(field);
       expect(definitions[type].required ?? []).not.toContain(field);
@@ -144,6 +146,7 @@ describe("Codex 0.155 public protocol upgrade", () => {
       expect(() => validator.assertClientRequest("memory/status", { minConsolidatedThreads }))
         .toThrow(AppServerProtocolValidationError);
     }
+    expect(() => validator.assertResponse("thread/attachment/list", { data: [] })).not.toThrow();
     expect(() => validator.assertClientRequest("thread/attachment/list", { threadId: "thread-1", limit: "many" }))
       .toThrow(AppServerProtocolValidationError);
     expect(() => validator.assertResponse("memory/status", { v2ConsolidatedThreads: -1, v2Ready: true }))

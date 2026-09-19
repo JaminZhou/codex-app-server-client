@@ -88,6 +88,7 @@ const wireOptionalGeneratedFields = {
     "model",
     "reasoningEffort",
   ],
+  "v2/ThreadAttachmentListResponse.ts": ["nextCursor"],
   "v2/ThreadItem.ts": ["questions"],
   "v2/ThreadResumeResponse.ts": ["itemsBackwardsCursor", "turnsBackwardsCursor"],
   "v2/ThreadSearchOccurrencesResponse.ts": ["nextCursor"],

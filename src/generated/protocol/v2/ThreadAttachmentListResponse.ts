@@ -6,4 +6,4 @@ import type { ThreadAttachment } from "./ThreadAttachment";
 /**
  * One page of attachments associated with the requested thread.
  */
-export type ThreadAttachmentListResponse = { data: Array<ThreadAttachment>, nextCursor: string | null, };
+export type ThreadAttachmentListResponse = { data: Array<ThreadAttachment>, nextCursor?: string | null, };
