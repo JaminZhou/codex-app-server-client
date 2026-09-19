@@ -133,7 +133,7 @@ See [troubleshooting](./examples/README.md#troubleshooting) if the binary or bui
 
 The default examples above use no credentials. To opt into real model output, first authenticate
 the same pinned CLI, under the same user and `CODEX_HOME` you will use for your app.
-For the published client `0.2.2`:
+For client `0.2.2` once it is available from npm:
 
 ```bash
 npm exec --package=@openai/codex@0.155.1 -- codex login
