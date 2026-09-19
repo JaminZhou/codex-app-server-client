@@ -80,7 +80,7 @@ jobs:
   publish:
     needs: verify
     runs-on: ubuntu-latest
-    # Read-back alone can take 7m7s; allow headroom for setup, gates and publication.
+    # Read-back alone can take 12m7s; allow headroom for setup, gates and publication.
     timeout-minutes: 20
     # npm must bind this environment AND this exact workflow. Protect the environment to main.
     environment: npm-publish

@@ -90,17 +90,27 @@ describe("bounded, read-only post-publication verification", () => {
     expect(options.sleep.mock.calls).toEqual([[2_000]]);
   });
 
-  it.each(["version", "latest", "tarball"])("stops after six attempts when %s never becomes visible", async (kind) => {
-    const responses = Array.from({ length: 6 }, () => kind === "version" ? [json(missing())]
+  it.each(["version", "latest", "tarball"])("stops after eight attempts when %s never becomes visible", async (kind) => {
+    const responses = Array.from({ length: 8 }, () => kind === "version" ? [json(missing())]
       : kind === "latest" ? [json(visible(before.latest))]
         : [json(visible()), new Response(null, { status: 404 })]).flat();
     const options = readers(...responses);
     await expect(readPublishedRegistry(expected, manifest, before, options))
-      .rejects.toThrow("after 6 read attempts; it may already be published");
-    expect(options.fetcher).toHaveBeenCalledTimes(kind === "tarball" ? 12 : 6);
-    expect(options.sleep.mock.calls).toEqual([[2_000], [5_000], [10_000], [20_000], [30_000]]);
-    expect(options.onRetry).toHaveBeenCalledTimes(5);
+      .rejects.toThrow("after 8 read attempts; it may already be published");
+    expect(options.fetcher).toHaveBeenCalledTimes(kind === "tarball" ? 16 : 8);
+    expect(options.sleep.mock.calls).toEqual([[2_000], [5_000], [10_000], [20_000], [30_000], [60_000], [120_000]]);
+    expect(options.onRetry).toHaveBeenCalledTimes(7);
     expectOnlyReads(options);
+  });
+
+  it("covers registry propagation that outlasts the original one-minute budget", async () => {
+    const options = readers(
+      ...Array.from({ length: 6 }, () => json(missing())),
+      json(visible()), new Response(bytes),
+    );
+    await expect(readPublishedRegistry(expected, manifest, before, options)).resolves.toMatchObject({ bytes });
+    expect(options.sleep.mock.calls).toEqual([[2_000], [5_000], [10_000], [20_000], [30_000], [60_000]]);
+    expect(options.onRetry).toHaveBeenCalledTimes(6);
   });
 
   it.each([

@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Extend the bounded npm registry read-back window to cover propagation delays beyond one minute;
+  publication itself remains non-retriable and safety mismatches still fail immediately.
+
 ## 0.2.2
 
 - Upgrade the exact bundled Codex runtime and generated public protocol to `0.155.1`.
