@@ -3,7 +3,7 @@
 `0.1.0` was published on 2026-09-09; its [release record](./docs/releases/0.1.0.md) identifies the
 source, immutable archive and verification scope. Do not republish this version.
 
-The procedure below targets `0.2.1`/`latest`; it is not a claim that publication has completed.
+The procedure below targets `0.2.2`/`latest`; it is not a claim that publication has completed.
 Preparation, PR creation and merge are distinct from permission to publish. Query the exact registry
 version and retained publication evidence to establish whether publication has completed.
 
@@ -28,7 +28,7 @@ publication; local rebuilds of this checkout are development artifacts, not the 
 - Future previews use a new target version and increasing `preview.N` suffix. Record changes and migration notes.
   Pre-1.0 APIs and generated experimental protocol types may change; consumers should pin exact
   versions and keep their lockfiles.
-- `0.2.1` is a separately reviewed non-preview candidate, still a pre-1.0 API. Preview commands use `--tag next`;
+- `0.2.2` is a separately reviewed non-preview candidate, still a pre-1.0 API. Preview commands use `--tag next`;
   do not deliberately promote a preview to `latest`. Always read back all registry tags: the first
   publication demonstrated that `--tag next` is not a guarantee that `latest` will be absent.
   Never reuse a published name/version or publish a stable version merely to repair tag naming.
@@ -59,7 +59,7 @@ npm, start real OAuth or model sessions, or publish.
 
 Outputs:
 
-- `artifacts/jaminzhou-codex-app-server-client-0.2.1.tgz`
+- `artifacts/jaminzhou-codex-app-server-client-0.2.2.tgz`
 - `artifacts/release-evidence.json`: source SHA, dirty-checkout flag, SHA-512 integrity, sizes,
   exact file list, Node version, and completed consumer checks.
 
@@ -90,7 +90,7 @@ Git-install path; it does not test uncommitted files.
 Preparation can be completed without registry permissions. Publication still requires:
 
 1. Jamin's explicit approval of the candidate version, exact tarball integrity, and intended tag
-   (`latest` for `0.2.1`, `next` only for a preview).
+   (`latest` for `0.2.2`, `next` only for a preview).
 2. An npm account authorized for `@jaminzhou` and the package name; registry 404 alone does not
    prove name ownership or publish rights.
 3. npm's required authentication/2FA or an approved, main-restricted trusted-publishing setup.
@@ -107,8 +107,8 @@ The local CLI procedure below remains available and requires npm's interactive a
 Only after approval, from the checkout whose candidate has been verified:
 
 ```bash
-# Only the retained, explicitly approved 0.2.1 candidate:
-npm publish /absolute/path/to/approved-0.2.1.tgz --tag latest --access public --registry https://registry.npmjs.org/ --ignore-scripts
+# Only the retained, explicitly approved 0.2.2 candidate:
+npm publish /absolute/path/to/approved-0.2.2.tgz --tag latest --access public --registry https://registry.npmjs.org/ --ignore-scripts
 ```
 
 Publish the inspected tarball, not a freshly rebuilt directory. Then read back the registry version,
@@ -118,11 +118,11 @@ the immutable archive. The packed README uses time-neutral exact-version guidanc
 does not require replacing the already-verified bytes. If the publish response is uncertain,
 query the version before retrying.
 
-For `0.2.1`, complete its [release gates](./docs/releases/0.2.1.md#release-gates), inspect the
+For `0.2.2`, complete its [release gates](./docs/releases/0.2.2.md#release-gates), inspect the
 [API comparison and migration notes](./docs/api-diff-0.2.0.md), retain the exact reviewed candidate,
 and obtain explicit publication approval. The [0.1.0 acceptance checklist](./docs/release-readiness.md)
 and [release record](./docs/releases/0.1.0.md) remain historical evidence, not a new live-account
-acceptance for changed `0.2.1` bytes. Passing tests does not authorize publication or model usage.
+acceptance for changed `0.2.2` bytes. Passing tests does not authorize publication or model usage.
 
 See npm's [package metadata](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/) and
 [publish command](https://docs.npmjs.com/cli/v11/commands/npm-publish/) documentation.

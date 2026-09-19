@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.2
 
 - Upgrade the exact bundled Codex runtime and generated public protocol to `0.155.1`.
   Add typed `userVerification/cancel`, `memory/status` and thread attachment add/list/remove
@@ -10,8 +10,8 @@
 - Preserve Schema-omittable `FeedbackUploadResponse.promptHash` as an optional TypeScript field
   and extend the basic compatibility window through `0.155.1` (the `0.155.0` and `0.155.1`
   public protocol tags generate the same surface).
-- This runtime/protocol upgrade is unreleased source content; the immutable npm `0.2.1` archive
-  remains pinned to Codex `0.154.0` until a separately reviewed client version is prepared.
+- This release bundles the `0.155.1` runtime and generated protocol surface. The published npm
+  `0.2.1` archive remains pinned to Codex `0.154.0`.
 
 ## 0.2.1
 

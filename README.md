@@ -8,9 +8,9 @@ app-server process, typed requests, and event routing so you can focus on your a
 > endorsed by OpenAI. Codex and OpenAI are trademarks of OpenAI.
 
 **Package:** `@jaminzhou/codex-app-server-client`.
-**Version covered:** `0.2.1`, a non-preview 0.x API, not a 1.0 stability commitment.
+**Version covered:** `0.2.2`, a non-preview 0.x API, not a 1.0 stability commitment.
 Check exact registry availability; a source checkout or local rebuild is not proof of publication.
-See the [0.2.1 release guide](./docs/releases/0.2.1.md) and [migration notes from 0.1.0](./docs/api-diff-0.2.0.md).
+See the [0.2.2 release guide](./docs/releases/0.2.2.md) and [migration notes from 0.1.0](./docs/api-diff-0.2.0.md).
 The unscoped npm name belongs to a different project.
 
 ## Is this for your app?
@@ -49,12 +49,12 @@ Check availability, then install the exact version in a new consumer directory:
 
 ```bash
 npm init -y
-npm view @jaminzhou/codex-app-server-client@0.2.1 version --registry https://registry.npmjs.org/
-npm install --save-exact --ignore-scripts --include=optional @jaminzhou/codex-app-server-client@0.2.1
+npm view @jaminzhou/codex-app-server-client@0.2.2 version --registry https://registry.npmjs.org/
+npm install --save-exact --ignore-scripts --include=optional @jaminzhou/codex-app-server-client@0.2.2
 node node_modules/@jaminzhou/codex-app-server-client/examples/stream.mjs
 ```
 
-If the exact-version query reports that `0.2.1` is unavailable, it has not been made available in
+If the exact-version query reports that `0.2.2` is unavailable, it has not been made available in
 that registry: use a verified local candidate below, or explicitly choose an available historical
 release with its older feature set. Do not infer publication from a source checkout's version number.
 
@@ -80,7 +80,7 @@ node node_modules/@jaminzhou/codex-app-server-client/examples/interrupt-resume.m
 They verify that a declined command never executes and that an interrupted conversation resumes
 after restarting the app-server. See [example commands, output, and recovery](./examples/README.md).
 
-Version `0.2.1` also includes [16 numbered equivalents of the official Python app-server examples](./docs/official-examples.md),
+Version `0.2.2` also includes [16 numbered equivalents of the official Python app-server examples](./docs/official-examples.md),
 covering lifecycle, images, structured output, model selection, a small terminal loop, login cancellation
 and untrusted `ExternalMessage` input with independent joined-turn handles.
 Their public example references are unchanged, and this source checkout runs them on the pinned
@@ -90,7 +90,7 @@ These additions are not files in the immutable npm `0.1.0` archive.
 ## Install into your own project
 
 Use the exact registry version above (or `pnpm add --save-exact --ignore-scripts
-@jaminzhou/codex-app-server-client@0.2.1`). For unpublished source changes, build and
+@jaminzhou/codex-app-server-client@0.2.2`). For unpublished source changes, build and
 validate a local tarball instead:
 
 ```bash
@@ -103,7 +103,7 @@ the checkout is a sibling directory):
 
 ```bash
 npm init -y
-npm install --ignore-scripts --include=optional ../codex-app-server-client/artifacts/jaminzhou-codex-app-server-client-0.2.1.tgz
+npm install --ignore-scripts --include=optional ../codex-app-server-client/artifacts/jaminzhou-codex-app-server-client-0.2.2.tgz
 node node_modules/@jaminzhou/codex-app-server-client/examples/stream.mjs
 ```
 
@@ -114,7 +114,7 @@ verifies the same tarball in clean npm and pnpm consumers, including declaration
 The initial preview publication used `--tag next`, but the registry also assigned `latest` to it.
 At the `0.1.0` release verification, `latest` pointed to `0.1.0` and `next` retained the preview.
 Neither tag is a stability guarantee. Pin the exact version and retain your lockfile.
-See [release preparation](./RELEASING.md) and the [0.2.1 release gates](./docs/releases/0.2.1.md#release-gates).
+See [release preparation](./RELEASING.md) and the [0.2.2 release gates](./docs/releases/0.2.2.md#release-gates).
 
 If you need Git installation, pin a reviewed full SHA:
 `npm install 'github:JaminZhou/codex-app-server-client#<full-commit-sha>'`.
@@ -133,15 +133,15 @@ See [troubleshooting](./examples/README.md#troubleshooting) if the binary or bui
 
 The default examples above use no credentials. To opt into real model output, first authenticate
 the same pinned CLI, under the same user and `CODEX_HOME` you will use for your app.
-For the published client `0.2.1`:
+For client `0.2.2` once it is available from npm:
 
 ```bash
-npm exec --package=@openai/codex@0.154.0 -- codex login
-npm exec --package=@openai/codex@0.154.0 -- codex login status
+npm exec --package=@openai/codex@0.155.1 -- codex login
+npm exec --package=@openai/codex@0.155.1 -- codex login status
 node examples/stream.mjs --live
 ```
 
-For this unreleased source checkout, use `@openai/codex@0.155.1` in both login commands instead.
+For the published `0.2.1` archive, use its matching `@openai/codex@0.154.0` instead.
 
 For the historical client `0.1.0` archive, use its matching `@openai/codex@0.153.4` instead.
 
