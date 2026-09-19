@@ -168,7 +168,9 @@ server-side cancellation request:
 const verification = client.callWithId("userVerification/verify", {
   challenge, title: "Confirm this action", description: "The app-server requested verification.",
 });
+const verificationOutcome = verification.promise.catch((error) => error);
 await client.call("userVerification/cancel", { requestId: verification.id });
+console.log(await verificationOutcome); // cancellation rejects the original request
 ```
 
 ### Goals

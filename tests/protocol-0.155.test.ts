@@ -210,11 +210,12 @@ describe("Codex 0.155 public protocol upgrade", () => {
       const verification = client.callWithId("userVerification/verify", {
         challenge: "YQ", title: "Fixture", description: "Fixture",
       });
+      const verificationOutcome = verification.promise.catch((error) => error);
       await vi.waitFor(() => expect(verifyRequest).toBeDefined());
       expect(verification.id).toBe(verifyRequest?.id);
       await expect(client.call("userVerification/cancel", { requestId: verification.id }))
         .resolves.toEqual({});
-      await expect(verification.promise).rejects.toBeInstanceOf(AppServerRpcError);
+      await expect(verificationOutcome).resolves.toBeInstanceOf(AppServerRpcError);
     } finally {
       await client.close();
       await server.close();
