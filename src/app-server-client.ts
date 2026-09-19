@@ -95,6 +95,7 @@ import type {
   TypedServerRequestHandler,
 } from "./typed-handlers";
 import type {
+  JsonRpcRequestHandle,
   JsonValue,
   NotificationHandler,
   RequestOptions,
@@ -112,6 +113,7 @@ export type AppServerCallArguments<M extends AppServerMethod> = [undefined] exte
 ]
   ? [params?: AppServerParams<M>, options?: RequestOptions]
   : [params: AppServerParams<M>, options?: RequestOptions];
+export type AppServerRequestHandle<T> = JsonRpcRequestHandle<T, string | number>;
 type StoredTypedNotificationHandler = (
   params: unknown,
   notification: ServerNotification,
@@ -226,6 +228,19 @@ export class CodexAppServerClient {
     params?: unknown,
     options: RequestOptions = {},
   ): Promise<T> {
+    return this.requestWithId<T>(method, params, options).promise;
+  }
+
+  /**
+   * Sends a request and exposes its JSON-RPC id for protocols that need to
+   * refer to the in-flight request from a second call (for example
+   * `userVerification/cancel`).
+   */
+  requestWithId<T = JsonValue>(
+    method: string,
+    params?: unknown,
+    options: RequestOptions = {},
+  ): AppServerRequestHandle<T> {
     const peer = this.requirePeer();
     if (method === "turn/start" && params !== null && typeof params === "object"
       && "toolOutput" in params && params.toolOutput != null) {
@@ -233,9 +248,9 @@ export class CodexAppServerClient {
     }
     const validator = this.protocolValidator;
     validator?.assertClientRequest(method, params);
-    const response = peer.request<T>(method, params, this.withDefaultTimeout(options));
-    if (!validator) return response;
-    return response.then((result) => {
+    const response = peer.requestWithId<T>(method, params, this.withDefaultTimeout(options));
+    if (!validator) return response as AppServerRequestHandle<T>;
+    return { id: response.id as string | number, promise: response.promise.then((result) => {
       try {
         validator.assertResponse(method, result);
         return result;
@@ -243,15 +258,22 @@ export class CodexAppServerClient {
         peer.dispose(asError(error));
         throw error;
       }
-    });
+    }) };
   }
 
   call<M extends AppServerMethod>(
     method: M,
     ...args: AppServerCallArguments<M>
   ): Promise<AppServerResponseMap[M]> {
+    return this.callWithId(method, ...args).promise;
+  }
+
+  callWithId<M extends AppServerMethod>(
+    method: M,
+    ...args: AppServerCallArguments<M>
+  ): AppServerRequestHandle<AppServerResponseMap[M]> {
     const [params, options = {}] = args as [unknown, RequestOptions?];
-    return this.request<AppServerResponseMap[M]>(method, params, options);
+    return this.requestWithId<AppServerResponseMap[M]>(method, params, options);
   }
 
   accountLoginStart(

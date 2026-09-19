@@ -154,8 +154,24 @@ that reader only; `interrupt()` requests a server-side interruption visible to e
 Tool-output requests require a reported CLI version of at least `0.151.0`. Unknown versions and
 prereleases at the minimum are rejected before submission, including raw `call("turn/start", ...)`
 and `protocolValidation: "off"`; disabling shape checks cannot establish this semantic capability.
-Client `0.2.0` bundles the verified `0.154.0` runtime (the original implementation was verified on `0.153.4`).
-This API is introduced in `0.2.0`, not present in npm `0.1.0`.
+This API is included in the published client `0.2.0` and remains available in `0.2.1`. The published
+`0.2.1` archive bundles `0.154.0`, while this source checkout bundles the verified `0.155.1` runtime;
+that runtime-upgrade qualification is separate from `ExternalMessage` availability. The original
+implementation was verified on `0.153.4`.
+
+Native verification cancellation refers to the verification request's JSON-RPC id. Use
+`callWithId()` when starting a cancellable verification, then pass its `id` to
+`userVerification/cancel`; an `AbortSignal` only rejects the local promise and does not send that
+server-side cancellation request:
+
+```ts
+const verification = client.callWithId("userVerification/verify", {
+  challenge, title: "Confirm this action", description: "The app-server requested verification.",
+});
+const verificationOutcome = verification.promise.catch((error) => error);
+await client.call("userVerification/cancel", { requestId: verification.id });
+console.log(await verificationOutcome); // cancellation rejects the original request
+```
 
 ### Goals
 

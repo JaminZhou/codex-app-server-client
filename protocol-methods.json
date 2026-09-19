@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
-  "codexCliVersion": "0.154.0",
+  "codexCliVersion": "0.155.1",
   "source": {
     "repository": "https://github.com/openai/codex",
-    "tag": "rust-v0.154.0",
-    "commit": "6b9826e3aa83b1a5947db50f4332cb9c65f1b340",
+    "tag": "rust-v0.155.1",
+    "commit": "be2951ea34f0d295ed0becf97079f92fa5f6950e",
     "path": "codex-rs/app-server-protocol/src/protocol/common.rs"
   },
   "methods": [
@@ -55,6 +55,14 @@
         "name": "UserVerificationVerifyResponse"
       },
       "variant": "UserVerificationVerify"
+    },
+    {
+      "method": "userVerification/cancel",
+      "response": {
+        "module": "v2/UserVerificationCancelResponse",
+        "name": "UserVerificationCancelResponse"
+      },
+      "variant": "UserVerificationCancel"
     },
     {
       "method": "thread/start",
@@ -209,6 +217,30 @@
       "variant": "ThreadMetadataUpdate"
     },
     {
+      "method": "thread/attachment/add",
+      "response": {
+        "module": "v2/ThreadAttachmentAddResponse",
+        "name": "ThreadAttachmentAddResponse"
+      },
+      "variant": "ThreadAttachmentAdd"
+    },
+    {
+      "method": "thread/attachment/list",
+      "response": {
+        "module": "v2/ThreadAttachmentListResponse",
+        "name": "ThreadAttachmentListResponse"
+      },
+      "variant": "ThreadAttachmentList"
+    },
+    {
+      "method": "thread/attachment/remove",
+      "response": {
+        "module": "v2/ThreadAttachmentRemoveResponse",
+        "name": "ThreadAttachmentRemoveResponse"
+      },
+      "variant": "ThreadAttachmentRemove"
+    },
+    {
       "method": "thread/section/move",
       "response": {
         "module": "v2/ThreadSectionMoveResponse",
@@ -231,6 +263,14 @@
         "name": "ThreadMemoryModeSetResponse"
       },
       "variant": "ThreadMemoryModeSet"
+    },
+    {
+      "method": "memory/status",
+      "response": {
+        "module": "v2/MemoryStatusResponse",
+        "name": "MemoryStatusResponse"
+      },
+      "variant": "MemoryStatus"
     },
     {
       "method": "memory/reset",

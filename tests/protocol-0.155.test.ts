@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { AppServerProtocolValidationError, AppServerRpcError, CodexAppServerClient } from "../src";
 import type { v2 } from "../src/generated/protocol";
 import { loadProtocolValidator } from "../src/protocol-validator";
@@ -15,7 +15,7 @@ const limits: v2.GetAccountRateLimitsResponse = {
   rateLimitsByLimitId: null, rateLimitResetCredits: null,
 };
 
-describe("Codex 0.154 public protocol upgrade", () => {
+describe("Codex 0.155 public protocol upgrade", () => {
   it("keeps newly omittable fields in existing and new types optional in public declarations", () => {
     const optional: [
       IsOptional<v2.BrowserUseRequirements, "allowWebmcp">,
@@ -30,8 +30,10 @@ describe("Codex 0.154 public protocol upgrade", () => {
       IsOptional<v2.UserVerificationStatusResponse, "credentialId">,
       IsOptional<v2.UserVerificationStatusResponse, "unavailableReason">,
       IsOptional<v2.UserVerificationStatusResponse, "unavailableMessage">,
-    ] = [true, true, true, true, true, true, true, true, true, true, true, true];
-    expect(optional).toHaveLength(12);
+      IsOptional<v2.FeedbackUploadResponse, "promptHash">,
+      IsOptional<v2.ThreadAttachmentListResponse, "nextCursor">,
+    ] = [true, true, true, true, true, true, true, true, true, true, true, true, true, true];
+    expect(optional).toHaveLength(14);
     const definitions = schema.definitions as Record<string, { properties?: Record<string, unknown>; required?: string[] }>;
     for (const [type, field] of [
       ["BrowserUseRequirements", "allowWebmcp"], ["ConfigRequirements", "application"],
@@ -40,6 +42,8 @@ describe("Codex 0.154 public protocol upgrade", () => {
       ["Thread", "originator"], ["Thread", "daybreakEnabled"],
       ["ApplicationRequirements", "network"], ["UserVerificationStatusResponse", "credentialId"],
       ["UserVerificationStatusResponse", "unavailableReason"], ["UserVerificationStatusResponse", "unavailableMessage"],
+      ["FeedbackUploadResponse", "promptHash"],
+      ["ThreadAttachmentListResponse", "nextCursor"],
     ]) {
       expect(definitions[type].properties).toHaveProperty(field);
       expect(definitions[type].required ?? []).not.toContain(field);
@@ -111,6 +115,44 @@ describe("Codex 0.154 public protocol upgrade", () => {
     } })).not.toThrow();
   });
 
+  it("validates attachment, memory-status and cancellation contracts", async () => {
+    const validator = await loadProtocolValidator();
+    const attachment: v2.ThreadAttachment = {
+      id: "attachment-1", attachmentType: "fixture", identityKey: "key-1", payload: { value: 1 }, createdAt: 1,
+    };
+    for (const [method, params, response] of [
+      ["userVerification/cancel", { requestId: "verification-1" }, {}],
+      ["memory/status", {}, { v2ConsolidatedThreads: 2, v2Ready: true }],
+      ["thread/attachment/add", { threadId: "thread-1", attachmentType: "fixture", identityKey: "key-1", payload: { value: 1 } }, { outcome: "created", attachment }],
+      ["thread/attachment/list", { threadId: "thread-1" }, { data: [attachment], nextCursor: null }],
+      ["thread/attachment/remove", { threadId: "thread-1", attachmentType: "fixture", identityKey: "key-1" }, {}],
+      ["feedback/upload", { classification: "fixture", threadId: "thread-1" }, { threadId: "thread-1" }],
+    ] as const) {
+      expect(() => validator.assertClientRequest(method, params)).not.toThrow();
+      expect(() => validator.assertResponse(method, response)).not.toThrow();
+    }
+    expect(() => validator.assertServerNotification({
+      method: "thread/attachment/updated",
+      params: {
+        threadId: "thread-1", attachmentType: "fixture", identityKey: "key-1",
+        attachmentId: "attachment-1", operation: "created",
+      },
+    })).not.toThrow();
+    for (const minConsolidatedThreads of [null, 1, 4096]) {
+      expect(() => validator.assertClientRequest("memory/status", { minConsolidatedThreads }))
+        .not.toThrow();
+    }
+    for (const minConsolidatedThreads of [0, 4097]) {
+      expect(() => validator.assertClientRequest("memory/status", { minConsolidatedThreads }))
+        .toThrow(AppServerProtocolValidationError);
+    }
+    expect(() => validator.assertResponse("thread/attachment/list", { data: [] })).not.toThrow();
+    expect(() => validator.assertClientRequest("thread/attachment/list", { threadId: "thread-1", limit: "many" }))
+      .toThrow(AppServerProtocolValidationError);
+    expect(() => validator.assertResponse("memory/status", { v2ConsolidatedThreads: -1, v2Ready: true }))
+      .toThrow(AppServerProtocolValidationError);
+  });
+
   it("supports typed raw calls for new methods and preserves the omitted-params call form", async () => {
     const server = await FakeAppServer.listen((message, rpc) => {
       const responses: Record<string, unknown> = {
@@ -118,10 +160,19 @@ describe("Codex 0.154 public protocol upgrade", () => {
         "userVerification/enroll": { credentialId: "fixture" },
         "userVerification/delete": {},
         "userVerification/verify": { proof: { credentialId: "fixture", signature: "fixture-signature" } },
+        "userVerification/cancel": {},
+        "memory/status": { v2ConsolidatedThreads: 2, v2Ready: true },
+        "thread/attachment/add": {
+          outcome: "created",
+          attachment: { id: "attachment-1", attachmentType: "fixture", identityKey: "key-1", payload: { value: 1 }, createdAt: 1 },
+        },
+        "thread/attachment/list": { data: [], nextCursor: null },
+        "thread/attachment/remove": {},
+        "feedback/upload": { threadId: "thread-1" },
         "account/rateLimits/read": limits,
       };
       if (message.method && message.method in responses) rpc.reply(message, responses[message.method]);
-    }, "codex/0.154.0");
+    }, "codex/0.155.1");
     const client = new CodexAppServerClient({ transport: { type: "websocket", url: server.url } });
     try {
       await client.connect();
@@ -131,6 +182,15 @@ describe("Codex 0.154 public protocol upgrade", () => {
       expect(await client.call("userVerification/delete", {})).toEqual({});
       const proof = await client.call("userVerification/verify", { challenge: "YQ", title: "Fixture", description: "Fixture" });
       expect(proof.proof.credentialId).toBe("fixture");
+      expect(await client.call("userVerification/cancel", { requestId: "verification-1" })).toEqual({});
+      expect(await client.call("memory/status", {})).toEqual({ v2ConsolidatedThreads: 2, v2Ready: true });
+      expect((await client.call("thread/attachment/add", {
+        threadId: "thread-1", attachmentType: "fixture", identityKey: "key-1", payload: { value: 1 },
+      })).outcome).toBe("created");
+      expect(await client.call("thread/attachment/list", { threadId: "thread-1" })).toEqual({ data: [], nextCursor: null });
+      expect(await client.call("thread/attachment/remove", {
+        threadId: "thread-1", attachmentType: "fixture", identityKey: "key-1",
+      })).toEqual({});
       expect(await client.call("account/rateLimits/read")).toEqual(limits);
       // JSON Schema also permits null; upstream TypeScript exposes the omitted/object forms.
       await client.request("account/rateLimits/read", null);
@@ -140,5 +200,36 @@ describe("Codex 0.154 public protocol upgrade", () => {
       expect(requests[1].params).toBeNull();
       expect(requests[2].params).toEqual({ excludeResetCreditDetails: true });
     } finally { await client.close(); await server.close(); }
+  });
+
+  it("exposes the verification request id so a pending native verification can be cancelled", async () => {
+    let verifyRequest: { id?: number | string } | undefined;
+    const server = await FakeAppServer.listen((message, rpc) => {
+      if (message.method === "userVerification/verify") {
+        verifyRequest = message;
+        return;
+      }
+      if (message.method === "userVerification/cancel") {
+        expect(message.params?.requestId).toBe(verifyRequest?.id);
+        rpc.reply(message, {});
+        if (verifyRequest) rpc.error(verifyRequest, -32800, "verification cancelled");
+      }
+    }, "codex/0.155.1");
+    const client = new CodexAppServerClient({ transport: { type: "websocket", url: server.url } });
+    try {
+      await client.connect();
+      const verification = client.callWithId("userVerification/verify", {
+        challenge: "YQ", title: "Fixture", description: "Fixture",
+      });
+      const verificationOutcome = verification.promise.catch((error) => error);
+      await vi.waitFor(() => expect(verifyRequest).toBeDefined());
+      expect(verification.id).toBe(verifyRequest?.id);
+      await expect(client.call("userVerification/cancel", { requestId: verification.id }))
+        .resolves.toEqual({});
+      await expect(verificationOutcome).resolves.toBeInstanceOf(AppServerRpcError);
+    } finally {
+      await client.close();
+      await server.close();
+    }
   });
 });

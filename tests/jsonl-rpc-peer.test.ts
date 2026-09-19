@@ -45,6 +45,16 @@ describe("JsonlRpcPeer", () => {
     peer.dispose();
   });
 
+  it("exposes the request id alongside an in-flight promise", async () => {
+    const { outbound, peer, serverToClient } = createHarness();
+    const handle = peer.requestWithId("userVerification/verify", { challenge: "YQ" });
+    const request = await outbound.next();
+    expect(handle.id).toBe(request.id);
+    serverToClient.write(`${JSON.stringify({ id: request.id, result: { proof: "fixture" } })}\n`);
+    await expect(handle.promise).resolves.toEqual({ proof: "fixture" });
+    peer.dispose();
+  });
+
   it("maps standard and overload JSON-RPC errors", async () => {
     const { outbound, peer, serverToClient } = createHarness();
     const invalid = peer.request("thread/read", {});

@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+- Upgrade the exact bundled Codex runtime and generated public protocol to `0.155.1`.
+  Add typed `userVerification/cancel`, `memory/status` and thread attachment add/list/remove
+  methods, the attachment-updated notification, and the optional feedback prompt hash. The
+  generated surface now has 167 typed client requests, 164 validated responses, 84 notifications
+  and 11 server-request methods.
+- Preserve Schema-omittable `FeedbackUploadResponse.promptHash` as an optional TypeScript field
+  and extend the basic compatibility window through `0.155.1` (the `0.155.0` and `0.155.1`
+  public protocol tags generate the same surface).
+- This runtime/protocol upgrade is unreleased source content; the immutable npm `0.2.1` archive
+  remains pinned to Codex `0.154.0` until a separately reviewed client version is prepared.
+
 ## 0.2.1
 
 Maintenance release scope; check exact npm availability before installing. See the

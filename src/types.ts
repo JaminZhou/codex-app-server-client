@@ -17,6 +17,12 @@ export type JsonInputValue =
   | { readonly [key: string]: JsonInputValue | undefined };
 export type RequestId = bigint | number | string;
 
+/** A JSON-RPC request together with the id used to correlate its response. */
+export interface JsonRpcRequestHandle<T, I extends RequestId = RequestId> {
+  readonly id: I;
+  readonly promise: Promise<T>;
+}
+
 export interface W3cTraceContext {
   traceparent?: string | null;
   tracestate?: string | null;
