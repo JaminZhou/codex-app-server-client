@@ -13,4 +13,4 @@ export type PluginDetail = { marketplaceName: string, marketplacePath: AbsoluteP
 /**
  * The declared onboarding skill, when the plugin and visible skill are enabled.
  */
-onboardingSkill: SkillSummary | null, hooks: Array<PluginHookSummary>, apps: Array<AppSummary>, appTemplates: Array<AppTemplateSummary>, mcpServers: Array<string>, scheduledTasks?: Array<ScheduledTaskSummary> | null, };
+onboardingSkill?: SkillSummary | null, hooks: Array<PluginHookSummary>, apps: Array<AppSummary>, appTemplates: Array<AppTemplateSummary>, mcpServers: Array<string>, scheduledTasks?: Array<ScheduledTaskSummary> | null, };

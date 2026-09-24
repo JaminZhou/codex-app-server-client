@@ -17,7 +17,7 @@ export type ThreadResumeResponse = { thread: Thread, model: string, modelProvide
 /**
  * Saved list of disabled plugin IDs. Does not yet filter plugin capabilities.
  */
-disabledPluginIds: Array<string>, cwd: AbsolutePathBuf,
+disabledPluginIds?: Array<string>, cwd: AbsolutePathBuf,
 /**
  * Thread-scoped runtime workspace roots used to materialize
  * `:workspace_roots`.
@@ -44,7 +44,7 @@ activePermissionProfile: ActivePermissionProfile | null, reasoningEffort: Reason
 /**
  * Effective collaboration mode. Absent when resuming from an older server.
  */
-collaborationMode: CollaborationMode | null,
+collaborationMode?: CollaborationMode | null,
 /**
  * @deprecated Always `explicitRequestOnly`. Use `reasoningEffort` for Ultra behavior.
  */

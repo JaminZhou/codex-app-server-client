@@ -3,8 +3,9 @@
 ## Unreleased
 
 - Upgrade the bundled Codex protocol to `0.156.1`, adding the latest public request and schema
-  surface. Preserve the legacy managed `windowsSandboxPrivateDesktop` setting for older app-server
-  responses; upstream removes the deprecated `thread/rollback` method and its generated types.
+  surface. Keep Schema-omittable additions optional in TypeScript for supported older app-server
+  versions, preserve the legacy `windowsSandboxPrivateDesktop` response field, and record upstream's
+  removal of deprecated `thread/rollback` and its generated types.
 - Extend the bounded npm registry read-back window to cover propagation delays beyond one minute;
   publication itself remains non-retriable and safety mismatches still fail immediately.
 

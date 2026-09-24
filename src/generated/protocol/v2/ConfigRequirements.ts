@@ -25,16 +25,16 @@ export type ConfigRequirements = {
 /**
  * Exact provider selection required by managed policy.
  */
-modelProvider: string | null,
+modelProvider?: string | null,
 /**
  * Complete required provider definitions, using config.toml field names.
  */
-modelProviders: { [key in string]?: JsonValue } | null,
+modelProviders?: { [key in string]?: JsonValue } | null,
 /**
  * Effective login methods after managed, forced-login, and workspace restrictions.
  * An empty list permits no login method. Older servers may omit this field.
  */
-allowedLoginMethods: Array<ForcedLoginMethod> | null, cliAuthCredentialsStore: CliAuthCredentialsStoreMode | null, chatgptBaseUrl: string | null, additionalDeveloperInstructions: string | null, allowedApprovalPolicies: Array<AskForApproval> | null, allowedApprovalsReviewers: Array<ApprovalsReviewer> | null, allowedSandboxModes: Array<SandboxMode> | null, allowedWindowsSandboxImplementations: Array<WindowsSandboxImplementation> | null, allowedPermissionProfiles: { [key in string]?: boolean } | null, defaultPermissions: string | null, allowedWebSearchModes: Array<WebSearchMode> | null, allowManagedHooksOnly: boolean | null, allowBrowserAndComputerUse: boolean | null, allowAppshots: boolean | null, allowRemoteControl: boolean | null, computerUse: ComputerUseRequirements | null, browserUse?: BrowserUseRequirements | null, inAppBrowser: InAppBrowserRequirements | null, featureRequirements: { [key in string]?: boolean } | null, hooks: ManagedHooksRequirements | null, enforceResidency: ResidencyRequirement | null, network: NetworkRequirements | null, application?: ApplicationRequirements | null, autoReview: AutoReviewRequirements | null, models: ModelsRequirements | null, sqliteHome?: PathUri | null, logDir?: PathUri | null, modelCatalogJson?: PathUri | null, checkForUpdateOnStartup?: boolean | null, allowLoginShell?: boolean | null, feedback?: FeedbackRequirements | null,
+allowedLoginMethods?: Array<ForcedLoginMethod> | null, cliAuthCredentialsStore: CliAuthCredentialsStoreMode | null, chatgptBaseUrl: string | null, additionalDeveloperInstructions: string | null, allowedApprovalPolicies: Array<AskForApproval> | null, allowedApprovalsReviewers: Array<ApprovalsReviewer> | null, allowedSandboxModes: Array<SandboxMode> | null, allowedWindowsSandboxImplementations: Array<WindowsSandboxImplementation> | null, allowedPermissionProfiles: { [key in string]?: boolean } | null, defaultPermissions: string | null, allowedWebSearchModes: Array<WebSearchMode> | null, allowManagedHooksOnly: boolean | null, allowBrowserAndComputerUse: boolean | null, allowAppshots: boolean | null, allowRemoteControl: boolean | null, computerUse: ComputerUseRequirements | null, browserUse?: BrowserUseRequirements | null, inAppBrowser: InAppBrowserRequirements | null, featureRequirements: { [key in string]?: boolean } | null, hooks: ManagedHooksRequirements | null, enforceResidency: ResidencyRequirement | null, network: NetworkRequirements | null, application?: ApplicationRequirements | null, autoReview: AutoReviewRequirements | null, models: ModelsRequirements | null, sqliteHome?: PathUri | null, logDir?: PathUri | null, modelCatalogJson?: PathUri | null, checkForUpdateOnStartup?: boolean | null, allowLoginShell?: boolean | null, feedback?: FeedbackRequirements | null,
 /**
  * Legacy managed setting retained for older app-server compatibility.
  *

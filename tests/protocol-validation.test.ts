@@ -7,6 +7,8 @@ import {
 import type { v2 } from "../src/generated/protocol";
 import { loadProtocolValidator } from "../src/protocol-validator";
 import type { JsonRpcNotification } from "../src/types";
+import type { ContentItem } from "../src/generated/protocol/ContentItem";
+import type { FunctionCallOutputContentItem } from "../src/generated/protocol/FunctionCallOutputContentItem";
 import type { ExternalAgentConfigImportHistoriesReadResponse } from "../src/generated/protocol/v2/ExternalAgentConfigImportHistoriesReadResponse";
 import type { ThreadItemsListResponse } from "../src/generated/protocol/v2/ThreadItemsListResponse";
 import { FakeAppServer } from "./fake-app-server";
@@ -15,11 +17,13 @@ type IsOptional<T, Key extends keyof T> = {} extends Pick<T, Key> ? true : false
 type AgentMessageItem = Extract<v2.ThreadItem, { type: "agentMessage" }>;
 type AppConfig = NonNullable<v2.AppsConfig["example"]>;
 type CommandExecutionItem = Extract<v2.ThreadItem, { type: "commandExecution" }>;
+type McpToolCallItem = Extract<v2.ThreadItem, { type: "mcpToolCall" }>;
 
 describe("generated protocol runtime validation", () => {
   it("keeps version-skew fields optional for older wire shapes", () => {
     const optionalFields: [
       IsOptional<v2.AccountLoginCompletedNotification, "onboardingEntrypoint">,
+      IsOptional<AppConfig, "omit_tools_from">,
       IsOptional<AppConfig, "links">,
       IsOptional<v2.AppToolSummary, "isEnabled">,
       IsOptional<v2.AppToolSummary, "disabledReason">,
@@ -32,12 +36,19 @@ describe("generated protocol runtime validation", () => {
       IsOptional<v2.ConfigRequirements, "checkForUpdateOnStartup">,
       IsOptional<v2.ConfigRequirements, "allowLoginShell">,
       IsOptional<v2.ConfigRequirements, "feedback">,
+      IsOptional<v2.ConfigRequirements, "modelProvider">,
+      IsOptional<v2.ConfigRequirements, "modelProviders">,
+      IsOptional<v2.ConfigRequirements, "allowedLoginMethods">,
       IsOptional<v2.ConfigRequirements, "windowsSandboxPrivateDesktop">,
       IsOptional<v2.ExternalAgentConfigImportHistory, "providerId">,
       IsOptional<v2.ExternalAgentConfigDetectResponse, "connectors">,
       IsOptional<v2.ExternalAgentConfigImportItemTypeSuccess, "title">,
       IsOptional<v2.FeedbackRequirements, "enabled">,
       IsOptional<v2.Model, "modelSpecialty">,
+      IsOptional<v2.Model, "availableAccessPrograms">,
+      IsOptional<v2.PluginDetail, "onboardingSkill">,
+      IsOptional<v2.GetAccountResponse, "workspaceRouting">,
+      IsOptional<v2.McpServerStatus, "serverCapabilities">,
       IsOptional<v2.PluginShareContext, "canPublishToWorkspace">,
       IsOptional<v2.PluginShareSaveResponse, "canPublishToWorkspace">,
       IsOptional<v2.PluginSummary, "installedAt">,
@@ -53,9 +64,33 @@ describe("generated protocol runtime validation", () => {
       IsOptional<v2.Thread, "reasoningEffort">,
       IsOptional<v2.ToolRequestUserInputParams, "isBlocking">,
       IsOptional<AgentMessageItem, "questions">,
+      IsOptional<McpToolCallItem, "mcpAppUi">,
       IsOptional<CommandExecutionItem, "pluginId">,
       IsOptional<CommandExecutionItem, "scriptPath">,
+      IsOptional<v2.ThreadForkResponse, "disabledPluginIds">,
+      IsOptional<v2.ThreadResumeResponse, "disabledPluginIds">,
+      IsOptional<v2.ThreadResumeResponse, "collaborationMode">,
+      IsOptional<v2.ThreadSettings, "disabledPluginIds">,
+      IsOptional<v2.ThreadStartResponse, "disabledPluginIds">,
+      IsOptional<v2.UserVerificationEnrollResponse, "algorithm">,
+      IsOptional<v2.UserVerificationEnrollResponse, "publicKey">,
     ] = [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
       true,
       true,
       true,
@@ -94,7 +129,14 @@ describe("generated protocol runtime validation", () => {
       true,
     ];
 
-    expect(optionalFields).toHaveLength(36);
+    expect(optionalFields).toHaveLength(52);
+  });
+
+  it("allows image input file identifiers omitted by older protocol versions", () => {
+    const userInput: v2.UserInput = { type: "image" };
+    const contentItem: ContentItem = { type: "input_image" };
+    const functionOutputItem: FunctionCallOutputContentItem = { type: "input_image" };
+    expect([userInput, contentItem, functionOutputItem]).toHaveLength(3);
   });
 
   it("validates generated request and response schemas without losing bigint values", async () => {

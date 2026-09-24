@@ -12,7 +12,7 @@ export type AppsConfig = { _default: AppsDefaultConfig | null, } & ({ [key in st
 /**
  * Additional model-facing surfaces omitted for this connector's tools.
  */
-omit_tools_from: Array<ToolExposureSurface> | null, approvals_reviewer: ApprovalsReviewer | null, destructive_enabled: boolean | null, open_world_enabled: boolean | null, default_tools_approval_mode: AppToolApproval | null, default_tools_enabled: boolean | null, tools: AppToolsConfig | null,
+omit_tools_from?: Array<ToolExposureSurface> | null, approvals_reviewer: ApprovalsReviewer | null, destructive_enabled: boolean | null, open_world_enabled: boolean | null, default_tools_approval_mode: AppToolApproval | null, default_tools_enabled: boolean | null, tools: AppToolsConfig | null,
 /**
  * Per-account approval settings keyed by link ID.
  */

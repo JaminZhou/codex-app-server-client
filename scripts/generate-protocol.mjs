@@ -21,9 +21,11 @@ const packageJson = JSON.parse(readFileSync(join(root, "package.json"), "utf8"))
 const methodMetadata = JSON.parse(readFileSync(join(root, "protocol-methods.json"), "utf8"));
 const expectedVersion = packageJson.dependencies?.["@openai/codex"];
 const wireOptionalGeneratedFields = {
+  "ContentItem.ts": ["file_id"],
+  "FunctionCallOutputContentItem.ts": ["file_id"],
   "v2/ApplicationRequirements.ts": ["network"],
   "v2/AccountLoginCompletedNotification.ts": ["onboardingEntrypoint"],
-  "v2/AppsConfig.ts": ["links"],
+  "v2/AppsConfig.ts": ["omit_tools_from", "links"],
   "v2/AppToolSummary.ts": [
     "title",
     "isEnabled",
@@ -34,6 +36,9 @@ const wireOptionalGeneratedFields = {
   "v2/ConfigRequirements.ts": [
     "application",
     "browserUse",
+    "modelProvider",
+    "modelProviders",
+    "allowedLoginMethods",
     "sqliteHome",
     "logDir",
     "modelCatalogJson",
@@ -58,12 +63,13 @@ const wireOptionalGeneratedFields = {
   "v2/FeedbackRequirements.ts": ["enabled"],
   "v2/FeedbackUploadResponse.ts": ["promptHash"],
   "v2/GetAccountRateLimitsResponse.ts": ["accountId", "rateLimitUpsell", "ordinaryUsageAllowed"],
+  "v2/GetAccountResponse.ts": ["workspaceRouting"],
   "v2/HookMetadata.ts": ["additionalContextLimit"],
   "v2/InstalledApp.ts": ["runtimeName"],
   "v2/ManagedHooksRequirements.ts": ["SessionEnd"],
-  "v2/McpServerStatus.ts": ["toolsError"],
-  "v2/Model.ts": ["modelSpecialty"],
-  "v2/PluginDetail.ts": ["scheduledTasks"],
+  "v2/McpServerStatus.ts": ["serverCapabilities", "toolsError"],
+  "v2/Model.ts": ["availableAccessPrograms", "modelSpecialty"],
+  "v2/PluginDetail.ts": ["onboardingSkill", "scheduledTasks"],
   "v2/PluginShareContext.ts": ["canPublishToWorkspace"],
   "v2/PluginShareSaveResponse.ts": ["canPublishToWorkspace"],
   "v2/PluginSummary.ts": [
@@ -88,12 +94,22 @@ const wireOptionalGeneratedFields = {
     "reasoningEffort",
   ],
   "v2/ThreadAttachmentListResponse.ts": ["nextCursor"],
-  "v2/ThreadItem.ts": ["questions"],
-  "v2/ThreadResumeResponse.ts": ["itemsBackwardsCursor", "turnsBackwardsCursor"],
+  "v2/ThreadForkResponse.ts": ["disabledPluginIds"],
+  "v2/ThreadItem.ts": ["mcpAppUi", "questions"],
+  "v2/ThreadResumeResponse.ts": [
+    "disabledPluginIds",
+    "collaborationMode",
+    "itemsBackwardsCursor",
+    "turnsBackwardsCursor",
+  ],
+  "v2/ThreadSettings.ts": ["disabledPluginIds"],
+  "v2/ThreadStartResponse.ts": ["disabledPluginIds"],
   "v2/ThreadSearchOccurrencesResponse.ts": ["nextCursor"],
   "v2/TokenUsageBreakdown.ts": ["cacheWriteInputTokens"],
   "v2/ToolRequestUserInputParams.ts": ["isBlocking"],
   "v2/TurnError.ts": ["misalignment"],
+  "v2/UserInput.ts": ["fileId"],
+  "v2/UserVerificationEnrollResponse.ts": ["algorithm", "publicKey"],
   "v2/UserVerificationStatusResponse.ts": ["credentialId", "unavailableReason", "unavailableMessage"],
 };
 const compatibilityOptionalSchemaFields = {

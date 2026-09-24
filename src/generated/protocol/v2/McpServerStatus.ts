@@ -17,7 +17,7 @@ runtimeStatus: McpServerConnectionStatus | null, pluginId: string | null, server
 /**
  * Capabilities advertised by the initialized MCP server; null when unavailable.
  */
-serverCapabilities: JsonValue | null, tools: { [key in string]?: Tool },
+serverCapabilities?: JsonValue | null, tools: { [key in string]?: Tool },
 /**
  * Tool discovery failed and no catalog was returned.
  * Null when a catalog is returned, including cached or empty catalogs.

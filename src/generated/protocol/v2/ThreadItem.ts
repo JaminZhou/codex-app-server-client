@@ -77,7 +77,7 @@ mcpAppResourceUri?: string,
 /**
  * Presentation captured from the invoked descriptor; absent in older history.
  */
-mcpAppUi: McpAppUi | null, pluginId: string | null, readOnlyHint: boolean | null, result: McpToolCallResult | null, error: McpToolCallError | null,
+mcpAppUi?: McpAppUi | null, pluginId: string | null, readOnlyHint: boolean | null, result: McpToolCallResult | null, error: McpToolCallError | null,
 /**
  * The duration of the MCP tool call in milliseconds.
  */

@@ -15,7 +15,7 @@ export type ThreadStartResponse = { thread: Thread, model: string, modelProvider
 /**
  * Saved list of disabled plugin IDs. Does not yet filter plugin capabilities.
  */
-disabledPluginIds: Array<string>, cwd: AbsolutePathBuf,
+disabledPluginIds?: Array<string>, cwd: AbsolutePathBuf,
 /**
  * Thread-scoped runtime workspace roots used to materialize
  * `:workspace_roots`.

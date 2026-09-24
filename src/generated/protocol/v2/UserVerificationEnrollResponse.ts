@@ -7,8 +7,8 @@
  * backend registration; this response does not establish server enrollment.
  * Older app-servers omit the metadata fields; callers must check both before registration.
  */
-export type UserVerificationEnrollResponse = { credentialId: string, algorithm: string | null,
+export type UserVerificationEnrollResponse = { credentialId: string, algorithm?: string | null,
 /**
  * Unpadded base64url of the SubjectPublicKeyInfo DER encoding.
  */
-publicKey: string | null, };
+publicKey?: string | null, };
