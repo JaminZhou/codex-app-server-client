@@ -26,7 +26,9 @@ export async function withExample(scenario, run, { allowInteractive = false } = 
   let timeout;
   let timedOut = false;
   try {
-    const options = { requestTimeoutMs: 15_000, cwd: workspace };
+    // Interactive smoke cases run after many packaged examples on Windows, where
+    // starting a fresh app-server can exceed the shorter ordinary-example budget.
+    const options = { requestTimeoutMs: interactive ? 30_000 : 15_000, cwd: workspace };
     if (temporaryRoot) {
       mkdirSync(workspace);
       const codexHome = join(temporaryRoot, "codex-home");
