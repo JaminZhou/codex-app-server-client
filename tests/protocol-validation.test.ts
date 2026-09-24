@@ -9,6 +9,9 @@ import { loadProtocolValidator } from "../src/protocol-validator";
 import type { JsonRpcNotification } from "../src/types";
 import type { ExternalAgentConfigImportHistoriesReadResponse } from "../src/generated/protocol/v2/ExternalAgentConfigImportHistoriesReadResponse";
 import type { ThreadItemsListResponse } from "../src/generated/protocol/v2/ThreadItemsListResponse";
+import combinedProtocolSchema from "../schemas/codex_app_server_protocol.schemas.json" with {
+  type: "json",
+};
 import { FakeAppServer } from "./fake-app-server";
 
 type IsOptional<T, Key extends keyof T> = {} extends Pick<T, Key> ? true : false;
@@ -18,6 +21,13 @@ type CommandExecutionItem = Extract<v2.ThreadItem, { type: "commandExecution" }>
 type McpToolCallItem = Extract<v2.ThreadItem, { type: "mcpToolCall" }>;
 
 describe("generated protocol runtime validation", () => {
+  it("includes the legacy Windows sandbox field in the combined protocol schema", () => {
+    expect(
+      combinedProtocolSchema.definitions.v2.ConfigRequirements.properties
+        .windowsSandboxPrivateDesktop,
+    ).toMatchObject({ type: ["boolean", "null"] });
+  });
+
   it("keeps version-skew fields optional for older wire shapes", () => {
     const optionalFields: [
       IsOptional<v2.AccountLoginCompletedNotification, "onboardingEntrypoint">,

@@ -392,20 +392,23 @@ function normalizeProtocolSchemaRanges(value) {
   }
   if (!isRecord(value)) return;
 
-  const configRequirements = value.definitions?.ConfigRequirements;
-  const configRequirementProperties = isRecord(configRequirements)
-    ? configRequirements.properties
-    : undefined;
-  if (
-    isRecord(configRequirementProperties) &&
-    !Object.hasOwn(configRequirementProperties, "windowsSandboxPrivateDesktop")
-  ) {
-    // Preserve the legacy configRequirements/read response shape from older runtimes, while
-    // retaining strict validation for the field instead of accepting arbitrary additional data.
-    configRequirementProperties.windowsSandboxPrivateDesktop = {
-      description: "Legacy managed setting retained for older app-server compatibility.",
-      type: ["boolean", "null"],
-    };
+  for (const definitions of [value.definitions, value.definitions?.v2]) {
+    if (!isRecord(definitions)) continue;
+    const configRequirements = definitions.ConfigRequirements;
+    const configRequirementProperties = isRecord(configRequirements)
+      ? configRequirements.properties
+      : undefined;
+    if (
+      isRecord(configRequirementProperties) &&
+      !Object.hasOwn(configRequirementProperties, "windowsSandboxPrivateDesktop")
+    ) {
+      // Preserve the legacy configRequirements/read response shape from older runtimes, while
+      // retaining strict validation for the field instead of accepting arbitrary additional data.
+      configRequirementProperties.windowsSandboxPrivateDesktop = {
+        description: "Legacy managed setting retained for older app-server compatibility.",
+        type: ["boolean", "null"],
+      };
+    }
   }
 
   const field = value.properties?.minConsolidatedThreads;
