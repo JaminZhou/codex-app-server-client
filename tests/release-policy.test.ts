@@ -19,8 +19,8 @@ describe("candidate packaging policy", () => {
     expect(releasing).toContain(`codex-app-server-client-${pkg.version}.tgz`);
     expect(releasing).toContain(`./docs/releases/${pkg.version}.md`);
     const security = readFileSync(new URL("../SECURITY.md", import.meta.url), "utf8");
-    expect(security).toContain(`Preparing \`${pkg.version}\` does not supersede the`);
-    expect(security).toContain("published `0.2.1` until the new version is actually published");
+    expect(security).toContain(`\`${pkg.version}\` is the newest published non-preview release`);
+    expect(security).toContain("older client versions and previews");
   });
   it("keeps previews and non-preview candidates explicit", () => {
     expect(candidateMode(manifest("0.1.0-preview.1", "next"), [])).toBe("preview");
