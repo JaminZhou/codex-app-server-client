@@ -18,9 +18,9 @@ This repository has no push-, tag-, or schedule-triggered publishing workflow. T
 from publication of an explicitly approved archive. Adding these workflow files alone does not
 configure npm permissions or establish that any package has been published.
 
-The published `.0` archive is immutable. The commands below describe preparation/publication gates,
-not permission to republish `.0`. Choose a new, explicitly approved version before any future
-publication; local rebuilds of this checkout are development artifacts, not the published bytes.
+Published versions are immutable. The procedures below apply only to a newly selected, unpublished
+version; they do not authorize or describe republishing an existing version. Local rebuilds of this
+checkout are development artifacts, not previously published bytes.
 
 ## Version and support policy
 
@@ -37,9 +37,23 @@ publication; local rebuilds of this checkout are development artifacts, not the 
 - A runtime update is a separate compatibility change, not an automatic consequence of a newer
   npm dist-tag. Update provenance, generated artifacts, and tests together.
 
-## Historical 0.2.2 candidate preparation (already published)
+## Historical 0.2.2 preparation record
 
-Use a reviewed checkout, Node.js 22+, and pnpm 11.7.0:
+The `0.2.2` package is already published as `latest`. This section records the checks and archive
+layout used for that release; it is not an active candidate procedure. Do not rerun candidate or
+publish steps for `0.2.2`. Future releases must first select a new, unpublished exact version and
+update `package.json`, metadata and artifact paths.
+
+The historical `0.2.2` archive was `artifacts/jaminzhou-codex-app-server-client-0.2.2.tgz`,
+paired with `artifacts/release-evidence.json` containing source SHA, dirty-checkout flag, SHA-512
+integrity, sizes, exact file list, Node version and completed consumer checks. Those artifacts and
+the package version are immutable historical outputs, not a candidate to regenerate.
+
+## Preparing a future candidate
+
+Start from a reviewed, merged, clean release revision whose `package.json` has a newly selected,
+unpublished exact version. Confirm the version is not present in the registry before preparing it.
+Use Node.js 22+ and pnpm 11.7.0:
 
 ```bash
 pnpm install --frozen-lockfile
@@ -48,51 +62,40 @@ pnpm compatibility:smoke
 pnpm release:pack
 ```
 
+The packed archive must pass both npm and pnpm consumer checks. Retain the exact archive and its
+matching evidence; for approval, regenerate only from the final clean committed source and review
+the archive contents, integrity, current-head CI, and provenance.
+
 `release:pack` requires a non-preview `0.x.y` version with public npm `latest` metadata.
-The separate `preview:pack` command requires `0.x.y-preview.N` with `next`; mismatched commands
-fail before packing. Neither command publishes or changes registry tags.
+`preview:pack` requires `0.x.y-preview.N` with `next`; mismatched commands fail before packing.
+Neither command publishes or changes registry tags. Both invoke `npm pack` (including the
+`prepare` build), check the published-file allowlist, and test the exact archive in fresh npm and
+pnpm projects with install scripts disabled. Consumers type-check root/protocol declarations with
+`skipLibCheck: false`, load ESM/schema exports, and run the shipped examples and CLI input cases;
+they do not authenticate with npm or start real OAuth or model sessions.
 
-Both commands invoke `npm pack` (including the `prepare` build), check the published file
-allowlist, and tests that exact archive in fresh npm and pnpm projects with install scripts
-disabled. Both consumers type-check the root/protocol declarations with `skipLibCheck: false`,
-load the ESM and schema exports, and execute the shipped example catalog: 18 real-runtime local-provider
-scenarios, one scripted login RPC scenario and four CLI input cases. It does not authenticate with
-npm, start real OAuth or model sessions, or publish.
+Stable outputs are `artifacts/jaminzhou-codex-app-server-client-VERSION.tgz` and
+`artifacts/release-evidence.json`; previews produce a versioned preview tarball and
+`preview-evidence.json`. Retain previous approved evidence and archives before preparing a new
+candidate. Artifacts are git-ignored. Both consumers and staged evidence writes must succeed before
+promotion; failures leave the previous verified pair untouched. During promotion, old evidence is
+removed before replacing the archive and new evidence is installed last. An interruption can leave
+no evidence file; then no candidate is selected, even if a tarball exists. Never pair a tarball with
+older evidence. This is process-failure protection, not a claim of power-loss durability or support
+for concurrent preparation in one checkout. Inspect the command's exit status and evidence
+source/hash before selecting a candidate.
 
-Outputs:
+The normal CI runs installed npm consumers on Node.js 18 across Linux, macOS and Windows, plus a
+pnpm 11 consumer on Linux with Node.js 22. Package checks cover mechanics and simulated model
+workflows, not real account access, output quality or every architecture. Run `pnpm git:smoke` after
+committing to verify the committed Git-install path; it does not test uncommitted files.
 
-- `artifacts/jaminzhou-codex-app-server-client-0.2.2.tgz`
-- `artifacts/release-evidence.json`: source SHA, dirty-checkout flag, SHA-512 integrity, sizes,
-  exact file list, Node version, and completed consumer checks.
+## Future publication gates
 
-Preview-version checkouts instead produce a versioned preview tarball and `preview-evidence.json`.
-Retain previous approved evidence and archives before preparing a different candidate. In particular,
-copy the `0.1.0` evidence into a version-specific archive before replacing `release-evidence.json`.
-
-Artifacts are git-ignored. Both consumers and the staged evidence write must succeed before
-promotion begins. Failures before promotion leave the previous verified pair untouched. During
-promotion, old evidence is removed before replacing the archive, and new evidence is installed
-last. An interruption or rename failure can therefore leave no evidence file: that means no
-candidate is selected, even if a tarball exists. Regenerate before release; never pair a tarball
-with a separately retained older evidence file. This is process-failure protection, not a claim
-of power-loss durability or support for concurrent preparation in the same checkout. Inspect the
-command's exit status and evidence source/hash before selecting a candidate.
-For release approval, regenerate from a clean committed checkout so `sourceDirty` is `false`,
-review the archive's contents/integrity and PR CI, and retain those exact bytes. Package consumers
-get built ESM/declarations, schemas, examples, docs, and licenses, not source build tooling.
-
-The normal CI runs installed npm consumers on Node.js 18 across Linux, macOS, and Windows, plus a
-pnpm 11 consumer on Linux with Node.js 22. `release:pack` verifies both installers locally. These checks verify
-package mechanics and simulated model workflows, not real account access, model output quality,
-or all architecture combinations. Run `pnpm git:smoke` after committing to verify the committed
-Git-install path; it does not test uncommitted files.
-
-## Publication gates
-
-Preparation can be completed without registry permissions. Publication still requires:
+Preparation can be completed without registry permissions. Publishing a future candidate requires:
 
 1. Jamin's explicit approval of the candidate version, exact tarball integrity, and intended tag
-   (`latest` for `0.2.2`, `next` only for a preview).
+   (`latest` for a stable release, `next` only for a preview).
 2. An npm account authorized for `@jaminzhou` and the package name; registry 404 alone does not
    prove name ownership or publish rights.
 3. npm's required authentication/2FA or an approved, main-restricted trusted-publishing setup.
@@ -120,10 +123,10 @@ the immutable archive. The packed README uses time-neutral exact-version guidanc
 does not require replacing the already-verified bytes. If the publish response is uncertain,
 query the version before retrying.
 
-The [0.2.2 release gates](./docs/releases/0.2.2.md#release-gates), [API comparison and migration
-notes](./docs/api-diff-0.2.0.md), and [0.1.0 acceptance checklist](./docs/release-readiness.md) are
-historical records. For a future version, prepare a new exact candidate, retain its reviewed bytes,
-and obtain explicit publication approval. Passing tests does not authorize publication or model usage.
+The [0.2.2 release record](./docs/releases/0.2.2.md), [API comparison and migration notes](./docs/api-diff-0.2.0.md),
+and [0.1.0 acceptance checklist](./docs/release-readiness.md) are historical records. For a future
+version, prepare a new exact candidate, retain its reviewed bytes, and obtain explicit publication
+approval. Passing tests does not authorize publication or model usage.
 
 See npm's [package metadata](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/) and
 [publish command](https://docs.npmjs.com/cli/v11/commands/npm-publish/) documentation.

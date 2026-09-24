@@ -43,7 +43,8 @@ Start from a reviewed, merged, clean release revision whose `package.json` has t
 non-preview `0.x.y` version and whose current-main CI has fully passed.
 
 ```bash
-gh workflow run npm-release-candidate.yml --ref main -f version=0.2.2
+# Replace NEW_UNPUBLISHED_VERSION with the exact unpublished 0.x.y version selected for this release.
+gh workflow run npm-release-candidate.yml --ref main -f version=NEW_UNPUBLISHED_VERSION
 ```
 
 The candidate workflow checks current-main CI, exact version and registry availability, then
@@ -54,10 +55,10 @@ permission. No real model account, OAuth enrollment or biometric acceptance runs
 
 Inspect the successful run and retain its artifact locally. The run summary lists the exact
 version, full source SHA, SHA-512 integrity, run ID and `latest` tag. Present these and the
-[release acceptance boundary](./releases/0.2.2.md#release-gates) to Jamin for explicit approval.
+[future publication gates](../RELEASING.md#future-publication-gates) to Jamin for explicit approval.
 Preparing a candidate or merging its source is not publication approval.
 
-The previously published `0.2.1` archive is not automatically selected by this mechanism.
+Previously published archives are never selected as candidates by this mechanism.
 The workflow accepts only its own successful, canonical-main candidate runs. Changing source,
 rebuilding or preparing another candidate requires a new identity review; never reuse approval
 for a different hash. Do not overwrite or repack a locally retained approved artifact merely
@@ -70,7 +71,7 @@ summary. In the CLI, replace the uppercase placeholders; do not include them lit
 
 ```bash
 gh workflow run npm-publish.yml --ref main \
-  -f version=0.2.2 \
+  -f version=NEW_UNPUBLISHED_VERSION \
   -f source_sha=FULL_APPROVED_SOURCE_SHA \
   -f candidate_run_id=SUCCESSFUL_CANDIDATE_RUN_ID \
   -f integrity=COMPLETE_APPROVED_SHA512_INTEGRITY
