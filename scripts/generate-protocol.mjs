@@ -40,7 +40,6 @@ const wireOptionalGeneratedFields = {
     "checkForUpdateOnStartup",
     "allowLoginShell",
     "feedback",
-    "windowsSandboxPrivateDesktop",
   ],
   "v2/ConnectorMetadata.ts": [
     "description",
@@ -154,6 +153,20 @@ const compatibilityGeneratedTypeReplacements = {
     [
       "data: Array<ThreadItemEntry>",
       "data: Array<ThreadItemEntry> | Array<ThreadItem>",
+    ],
+  ],
+  "v2/ConfigRequirements.ts": [
+    [
+      "feedback?: FeedbackRequirements | null,",
+      [
+        "feedback?: FeedbackRequirements | null,",
+        "/**",
+        " * Legacy managed setting retained for older app-server compatibility.",
+        " *",
+        " * @deprecated Codex 0.156.1 replaced this with allowedWindowsSandboxImplementations.",
+        " */",
+        "windowsSandboxPrivateDesktop?: boolean | null,",
+      ].join("\n"),
     ],
   ],
 };

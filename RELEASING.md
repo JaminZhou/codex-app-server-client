@@ -3,9 +3,11 @@
 `0.1.0` was published on 2026-09-09; its [release record](./docs/releases/0.1.0.md) identifies the
 source, immutable archive and verification scope. Do not republish this version.
 
-The procedure below targets `0.2.2`/`latest`; it is not a claim that publication has completed.
-Preparation, PR creation and merge are distinct from permission to publish. Query the exact registry
-version and retained publication evidence to establish whether publication has completed.
+The `0.2.2` package has been published as `latest`; its version-specific instructions below are
+historical and must not be repeated. For a future candidate, first choose an unpublished exact
+version and update its metadata and artifact paths. Preparation, PR creation and merge are distinct
+from permission to publish. Query the exact registry version and retained publication evidence
+before starting a candidate.
 
 The first preview, `@jaminzhou/codex-app-server-client@0.1.0-preview.0`, was published on
 2026-09-08 using `--tag next`. The registry also assigned `latest` to that preview; attempting to
@@ -23,19 +25,19 @@ publication; local rebuilds of this checkout are development artifacts, not the 
 ## Version and support policy
 
 - Client versions are independent of the Codex runtime version. This unreleased source checkout
-  pins `@openai/codex@0.155.1`; the published `0.2.1` archive remains on `0.154.0`, and the
-  published `0.1.0` archive still bundles `0.153.4`. See [COMPATIBILITY.md](./COMPATIBILITY.md).
+  pins `@openai/codex@0.156.1`; published client `0.2.2` bundles `0.155.1`, `0.2.1` bundles
+  `0.154.0`, and `0.1.0` bundles `0.153.4`. See [COMPATIBILITY.md](./COMPATIBILITY.md).
 - Future previews use a new target version and increasing `preview.N` suffix. Record changes and migration notes.
   Pre-1.0 APIs and generated experimental protocol types may change; consumers should pin exact
   versions and keep their lockfiles.
-- `0.2.2` is a separately reviewed non-preview candidate, still a pre-1.0 API. Preview commands use `--tag next`;
+- `0.2.2` is a published non-preview release, still a pre-1.0 API. Preview commands use `--tag next`;
   do not deliberately promote a preview to `latest`. Always read back all registry tags: the first
   publication demonstrated that `--tag next` is not a guarantee that `latest` will be absent.
   Never reuse a published name/version or publish a stable version merely to repair tag naming.
 - A runtime update is a separate compatibility change, not an automatic consequence of a newer
   npm dist-tag. Update provenance, generated artifacts, and tests together.
 
-## Build a concrete candidate (no publication)
+## Historical 0.2.2 candidate preparation (already published)
 
 Use a reviewed checkout, Node.js 22+, and pnpm 11.7.0:
 
@@ -107,8 +109,8 @@ The local CLI procedure below remains available and requires npm's interactive a
 Only after approval, from the checkout whose candidate has been verified:
 
 ```bash
-# Only the retained, explicitly approved 0.2.2 candidate:
-npm publish /absolute/path/to/approved-0.2.2.tgz --tag latest --access public --registry https://registry.npmjs.org/ --ignore-scripts
+# Historical example only; never reuse a published package version:
+npm publish /absolute/path/to/approved-candidate.tgz --tag latest --access public --registry https://registry.npmjs.org/ --ignore-scripts
 ```
 
 Publish the inspected tarball, not a freshly rebuilt directory. Then read back the registry version,
@@ -118,11 +120,10 @@ the immutable archive. The packed README uses time-neutral exact-version guidanc
 does not require replacing the already-verified bytes. If the publish response is uncertain,
 query the version before retrying.
 
-For `0.2.2`, complete its [release gates](./docs/releases/0.2.2.md#release-gates), inspect the
-[API comparison and migration notes](./docs/api-diff-0.2.0.md), retain the exact reviewed candidate,
-and obtain explicit publication approval. The [0.1.0 acceptance checklist](./docs/release-readiness.md)
-and [release record](./docs/releases/0.1.0.md) remain historical evidence, not a new live-account
-acceptance for changed `0.2.2` bytes. Passing tests does not authorize publication or model usage.
+The [0.2.2 release gates](./docs/releases/0.2.2.md#release-gates), [API comparison and migration
+notes](./docs/api-diff-0.2.0.md), and [0.1.0 acceptance checklist](./docs/release-readiness.md) are
+historical records. For a future version, prepare a new exact candidate, retain its reviewed bytes,
+and obtain explicit publication approval. Passing tests does not authorize publication or model usage.
 
 See npm's [package metadata](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/) and
 [publish command](https://docs.npmjs.com/cli/v11/commands/npm-publish/) documentation.

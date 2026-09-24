@@ -329,6 +329,19 @@ describe("generated protocol runtime validation", () => {
     });
   });
 
+  it("accepts the legacy Windows sandbox setting from older app-server responses", async () => {
+    const validator = await loadProtocolValidator();
+    expect(() => validator.assertResponse("configRequirements/read", {
+      requirements: { windowsSandboxPrivateDesktop: true },
+    })).not.toThrow();
+  });
+
+  it("validates the Codex 0.156 rollout compression method", async () => {
+    const validator = await loadProtocolValidator();
+    expect(() => validator.assertClientRequest("rollout/compress", undefined)).not.toThrow();
+    expect(() => validator.assertResponse("rollout/compress", {})).not.toThrow();
+  });
+
   it("rejects malformed known requests before writing them", async () => {
     const server = await FakeAppServer.listen(() => undefined);
     const client = new CodexAppServerClient({

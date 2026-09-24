@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
-  "codexCliVersion": "0.155.1",
+  "codexCliVersion": "0.156.1",
   "source": {
     "repository": "https://github.com/openai/codex",
-    "tag": "rust-v0.155.1",
-    "commit": "be2951ea34f0d295ed0becf97079f92fa5f6950e",
+    "tag": "rust-v0.156.1",
+    "commit": "b412ff32c417f855c2b2d1581b77058eed87c84b",
     "path": "codex-rs/app-server-protocol/src/protocol/common.rs"
   },
   "methods": [
@@ -281,6 +281,14 @@
       "variant": "MemoryReset"
     },
     {
+      "method": "rollout/compress",
+      "response": {
+        "module": "v2/RolloutCompressResponse",
+        "name": "RolloutCompressResponse"
+      },
+      "variant": "RolloutCompress"
+    },
+    {
       "method": "thread/unarchive",
       "response": {
         "module": "v2/ThreadUnarchiveResponse",
@@ -335,14 +343,6 @@
         "name": "ThreadBackgroundTerminalsTerminateResponse"
       },
       "variant": "ThreadBackgroundTerminalsTerminate"
-    },
-    {
-      "method": "thread/rollback",
-      "response": {
-        "module": "v2/ThreadRollbackResponse",
-        "name": "ThreadRollbackResponse"
-      },
-      "variant": "ThreadRollback"
     },
     {
       "method": "thread/revert",

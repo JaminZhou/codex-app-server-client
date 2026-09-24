@@ -29,8 +29,9 @@ This package is independently maintained and has its own pre-1.0 API.
   Use a currently maintained Node.js release for a new app.
 - **Build from source / Git:** Node.js 22+ and pnpm 11.7.0. A Git install runs a build; a tarball
   already contains JavaScript, declarations, schemas, and examples.
-- **Runtime:** this unreleased source checkout pins `@openai/codex@0.155.1`; the immutable npm
-  `0.2.1` archive remains on `0.154.0`, and the historical `0.1.0` archive remains on `0.153.4`.
+- **Runtime:** this unreleased source checkout pins `@openai/codex@0.156.1`; the published npm
+  `0.2.2` archive remains on `0.155.1`, `0.2.1` remains on `0.154.0`, and the historical `0.1.0`
+  archive remains on `0.153.4`.
   No global CLI installation is needed.
   Keep optional dependencies enabled because they carry the platform binary.
 - **Platforms:** installed-package CI covers Linux, macOS, and Windows. Binary resolution supports
@@ -38,8 +39,8 @@ This package is independently maintained and has its own pre-1.0 API.
 - **Transports:** managed local stdio by default; Unix socket attachment is also available.
   TCP WebSocket remains experimental for this pinned baseline.
 - **Source version boundary:** basic runtime smoke covers `0.150.1`, `0.152.1`, `0.153.4`, `0.154.0`,
-  `0.155.0` and `0.155.1`. Current rich turn/approval examples use `0.155.1`. Other releases are not implied
-  compatible.
+  `0.155.0`, `0.155.1` and `0.156.1`. Current rich turn/approval examples use `0.156.1`; the published
+  `0.2.2` archive runs them on `0.155.1`. Other releases are not implied compatible.
 
 See [compatibility and upgrade guidance](./COMPATIBILITY.md) before changing the runtime.
 
@@ -84,7 +85,7 @@ Version `0.2.2` also includes [16 numbered equivalents of the official Python ap
 covering lifecycle, images, structured output, model selection, a small terminal loop, login cancellation
 and untrusted `ExternalMessage` input with independent joined-turn handles.
 Their public example references are unchanged, and this source checkout runs them on the pinned
-`0.155.1` baseline. The published `0.2.1` archive runs them on its pinned `0.154.0` baseline.
+`0.156.1` baseline. The published `0.2.2` archive runs them on `0.155.1`, and `0.2.1` on `0.154.0`.
 These additions are not files in the immutable npm `0.1.0` archive.
 
 ## Install into your own project
@@ -132,16 +133,17 @@ See [troubleshooting](./examples/README.md#troubleshooting) if the binary or bui
 ## Run with your Codex account
 
 The default examples above use no credentials. To opt into real model output, first authenticate
-the same pinned CLI, under the same user and `CODEX_HOME` you will use for your app.
-For client `0.2.2` once it is available from npm:
+the same CLI runtime bundled by the client, under the same user and `CODEX_HOME` you will use for
+your app. For this source checkout:
 
 ```bash
-npm exec --package=@openai/codex@0.155.1 -- codex login
-npm exec --package=@openai/codex@0.155.1 -- codex login status
+npm exec --package=@openai/codex@0.156.1 -- codex login
+npm exec --package=@openai/codex@0.156.1 -- codex login status
 node examples/stream.mjs --live
 ```
 
-For the published `0.2.1` archive, use its matching `@openai/codex@0.154.0` instead.
+For published client `0.2.2`, use its bundled runtime `@openai/codex@0.155.1`; for `0.2.1`, use
+`0.154.0` instead.
 
 For the historical client `0.1.0` archive, use its matching `@openai/codex@0.153.4` instead.
 

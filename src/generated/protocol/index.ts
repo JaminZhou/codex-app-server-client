@@ -91,6 +91,7 @@ export type { SubAgentSource } from "./SubAgentSource";
 export type { ThreadId } from "./ThreadId";
 export type { ThreadMemoryMode } from "./ThreadMemoryMode";
 export type { Tool } from "./Tool";
+export type { ToolExposureSurface } from "./ToolExposureSurface";
 export type { Verbosity } from "./Verbosity";
 export type { WebSearchAction } from "./WebSearchAction";
 export type { WebSearchContextSize } from "./WebSearchContextSize";
@@ -101,6 +102,7 @@ export type { WebSearchToolConfig } from "./WebSearchToolConfig";
 type CodexV2AccountType = import("./v2/Account").Account;
 type CodexV2AccountLoginCompletedNotificationType = import("./v2/AccountLoginCompletedNotification").AccountLoginCompletedNotification;
 type CodexV2AccountRateLimitsUpdatedNotificationType = import("./v2/AccountRateLimitsUpdatedNotification").AccountRateLimitsUpdatedNotification;
+type CodexV2AccountRoutingOverrideType = import("./v2/AccountRoutingOverride").AccountRoutingOverride;
 type CodexV2AccountTokenUsageDailyBucketType = import("./v2/AccountTokenUsageDailyBucket").AccountTokenUsageDailyBucket;
 type CodexV2AccountTokenUsageSummaryType = import("./v2/AccountTokenUsageSummary").AccountTokenUsageSummary;
 type CodexV2AccountUpdatedNotificationType = import("./v2/AccountUpdatedNotification").AccountUpdatedNotification;
@@ -367,6 +369,8 @@ type CodexV2MarketplaceRemoveResponseType = import("./v2/MarketplaceRemoveRespon
 type CodexV2MarketplaceUpgradeErrorInfoType = import("./v2/MarketplaceUpgradeErrorInfo").MarketplaceUpgradeErrorInfo;
 type CodexV2MarketplaceUpgradeParamsType = import("./v2/MarketplaceUpgradeParams").MarketplaceUpgradeParams;
 type CodexV2MarketplaceUpgradeResponseType = import("./v2/MarketplaceUpgradeResponse").MarketplaceUpgradeResponse;
+type CodexV2McpAppDisplayModeType = import("./v2/McpAppDisplayMode").McpAppDisplayMode;
+type CodexV2McpAppUiType = import("./v2/McpAppUi").McpAppUi;
 type CodexV2McpAuthStatusType = import("./v2/McpAuthStatus").McpAuthStatus;
 type CodexV2McpElicitationArrayTypeType = import("./v2/McpElicitationArrayType").McpElicitationArrayType;
 type CodexV2McpElicitationBooleanSchemaType = import("./v2/McpElicitationBooleanSchema").McpElicitationBooleanSchema;
@@ -432,6 +436,7 @@ type CodexV2MisalignmentSteerType = import("./v2/MisalignmentSteer").Misalignmen
 type CodexV2MockExperimentalMethodParamsType = import("./v2/MockExperimentalMethodParams").MockExperimentalMethodParams;
 type CodexV2MockExperimentalMethodResponseType = import("./v2/MockExperimentalMethodResponse").MockExperimentalMethodResponse;
 type CodexV2ModelType = import("./v2/Model").Model;
+type CodexV2ModelAccessProgramsType = import("./v2/ModelAccessPrograms").ModelAccessPrograms;
 type CodexV2ModelAvailabilityNuxType = import("./v2/ModelAvailabilityNux").ModelAvailabilityNux;
 type CodexV2ModelListParamsType = import("./v2/ModelListParams").ModelListParams;
 type CodexV2ModelListResponseType = import("./v2/ModelListResponse").ModelListResponse;
@@ -586,6 +591,7 @@ type CodexV2ReviewDeliveryType = import("./v2/ReviewDelivery").ReviewDelivery;
 type CodexV2ReviewStartParamsType = import("./v2/ReviewStartParams").ReviewStartParams;
 type CodexV2ReviewStartResponseType = import("./v2/ReviewStartResponse").ReviewStartResponse;
 type CodexV2ReviewTargetType = import("./v2/ReviewTarget").ReviewTarget;
+type CodexV2RolloutCompressResponseType = import("./v2/RolloutCompressResponse").RolloutCompressResponse;
 type CodexV2SandboxModeType = import("./v2/SandboxMode").SandboxMode;
 type CodexV2SandboxPolicyType = import("./v2/SandboxPolicy").SandboxPolicy;
 type CodexV2SandboxWorkspaceWriteType = import("./v2/SandboxWorkspaceWrite").SandboxWorkspaceWrite;
@@ -744,8 +750,6 @@ type CodexV2ThreadResumeResponseType = import("./v2/ThreadResumeResponse").Threa
 type CodexV2ThreadRevertParamsType = import("./v2/ThreadRevertParams").ThreadRevertParams;
 type CodexV2ThreadRevertResponseType = import("./v2/ThreadRevertResponse").ThreadRevertResponse;
 type CodexV2ThreadRevertedNotificationType = import("./v2/ThreadRevertedNotification").ThreadRevertedNotification;
-type CodexV2ThreadRollbackParamsType = import("./v2/ThreadRollbackParams").ThreadRollbackParams;
-type CodexV2ThreadRollbackResponseType = import("./v2/ThreadRollbackResponse").ThreadRollbackResponse;
 type CodexV2ThreadSearchOccurrenceType = import("./v2/ThreadSearchOccurrence").ThreadSearchOccurrence;
 type CodexV2ThreadSearchOccurrencesParamsType = import("./v2/ThreadSearchOccurrencesParams").ThreadSearchOccurrencesParams;
 type CodexV2ThreadSearchOccurrencesResponseType = import("./v2/ThreadSearchOccurrencesResponse").ThreadSearchOccurrencesResponse;
@@ -848,6 +852,7 @@ type CodexV2UserVerificationVerifyParamsType = import("./v2/UserVerificationVeri
 type CodexV2UserVerificationVerifyResponseType = import("./v2/UserVerificationVerifyResponse").UserVerificationVerifyResponse;
 type CodexV2WarningNotificationType = import("./v2/WarningNotification").WarningNotification;
 type CodexV2WebSearchActionType = import("./v2/WebSearchAction").WebSearchAction;
+type CodexV2WindowsSandboxImplementationType = import("./v2/WindowsSandboxImplementation").WindowsSandboxImplementation;
 type CodexV2WindowsSandboxReadinessType = import("./v2/WindowsSandboxReadiness").WindowsSandboxReadiness;
 type CodexV2WindowsSandboxReadinessResponseType = import("./v2/WindowsSandboxReadinessResponse").WindowsSandboxReadinessResponse;
 type CodexV2WindowsSandboxSetupCompletedNotificationType = import("./v2/WindowsSandboxSetupCompletedNotification").WindowsSandboxSetupCompletedNotification;
@@ -857,12 +862,14 @@ type CodexV2WindowsSandboxSetupStartResponseType = import("./v2/WindowsSandboxSe
 type CodexV2WindowsWorldWritableWarningNotificationType = import("./v2/WindowsWorldWritableWarningNotification").WindowsWorldWritableWarningNotification;
 type CodexV2WorkspaceMessageType = import("./v2/WorkspaceMessage").WorkspaceMessage;
 type CodexV2WorkspaceMessageTypeType = import("./v2/WorkspaceMessageType").WorkspaceMessageType;
+type CodexV2WorkspaceRoutingType = import("./v2/WorkspaceRouting").WorkspaceRouting;
 type CodexV2WriteStatusType = import("./v2/WriteStatus").WriteStatus;
 
 declare namespace v2 {
   export type Account = CodexV2AccountType;
   export type AccountLoginCompletedNotification = CodexV2AccountLoginCompletedNotificationType;
   export type AccountRateLimitsUpdatedNotification = CodexV2AccountRateLimitsUpdatedNotificationType;
+  export type AccountRoutingOverride = CodexV2AccountRoutingOverrideType;
   export type AccountTokenUsageDailyBucket = CodexV2AccountTokenUsageDailyBucketType;
   export type AccountTokenUsageSummary = CodexV2AccountTokenUsageSummaryType;
   export type AccountUpdatedNotification = CodexV2AccountUpdatedNotificationType;
@@ -1129,6 +1136,8 @@ declare namespace v2 {
   export type MarketplaceUpgradeErrorInfo = CodexV2MarketplaceUpgradeErrorInfoType;
   export type MarketplaceUpgradeParams = CodexV2MarketplaceUpgradeParamsType;
   export type MarketplaceUpgradeResponse = CodexV2MarketplaceUpgradeResponseType;
+  export type McpAppDisplayMode = CodexV2McpAppDisplayModeType;
+  export type McpAppUi = CodexV2McpAppUiType;
   export type McpAuthStatus = CodexV2McpAuthStatusType;
   export type McpElicitationArrayType = CodexV2McpElicitationArrayTypeType;
   export type McpElicitationBooleanSchema = CodexV2McpElicitationBooleanSchemaType;
@@ -1194,6 +1203,7 @@ declare namespace v2 {
   export type MockExperimentalMethodParams = CodexV2MockExperimentalMethodParamsType;
   export type MockExperimentalMethodResponse = CodexV2MockExperimentalMethodResponseType;
   export type Model = CodexV2ModelType;
+  export type ModelAccessPrograms = CodexV2ModelAccessProgramsType;
   export type ModelAvailabilityNux = CodexV2ModelAvailabilityNuxType;
   export type ModelListParams = CodexV2ModelListParamsType;
   export type ModelListResponse = CodexV2ModelListResponseType;
@@ -1348,6 +1358,7 @@ declare namespace v2 {
   export type ReviewStartParams = CodexV2ReviewStartParamsType;
   export type ReviewStartResponse = CodexV2ReviewStartResponseType;
   export type ReviewTarget = CodexV2ReviewTargetType;
+  export type RolloutCompressResponse = CodexV2RolloutCompressResponseType;
   export type SandboxMode = CodexV2SandboxModeType;
   export type SandboxPolicy = CodexV2SandboxPolicyType;
   export type SandboxWorkspaceWrite = CodexV2SandboxWorkspaceWriteType;
@@ -1506,8 +1517,6 @@ declare namespace v2 {
   export type ThreadRevertParams = CodexV2ThreadRevertParamsType;
   export type ThreadRevertResponse = CodexV2ThreadRevertResponseType;
   export type ThreadRevertedNotification = CodexV2ThreadRevertedNotificationType;
-  export type ThreadRollbackParams = CodexV2ThreadRollbackParamsType;
-  export type ThreadRollbackResponse = CodexV2ThreadRollbackResponseType;
   export type ThreadSearchOccurrence = CodexV2ThreadSearchOccurrenceType;
   export type ThreadSearchOccurrencesParams = CodexV2ThreadSearchOccurrencesParamsType;
   export type ThreadSearchOccurrencesResponse = CodexV2ThreadSearchOccurrencesResponseType;
@@ -1610,6 +1619,7 @@ declare namespace v2 {
   export type UserVerificationVerifyResponse = CodexV2UserVerificationVerifyResponseType;
   export type WarningNotification = CodexV2WarningNotificationType;
   export type WebSearchAction = CodexV2WebSearchActionType;
+  export type WindowsSandboxImplementation = CodexV2WindowsSandboxImplementationType;
   export type WindowsSandboxReadiness = CodexV2WindowsSandboxReadinessType;
   export type WindowsSandboxReadinessResponse = CodexV2WindowsSandboxReadinessResponseType;
   export type WindowsSandboxSetupCompletedNotification = CodexV2WindowsSandboxSetupCompletedNotificationType;
@@ -1619,6 +1629,7 @@ declare namespace v2 {
   export type WindowsWorldWritableWarningNotification = CodexV2WindowsWorldWritableWarningNotificationType;
   export type WorkspaceMessage = CodexV2WorkspaceMessageType;
   export type WorkspaceMessageType = CodexV2WorkspaceMessageTypeType;
+  export type WorkspaceRouting = CodexV2WorkspaceRoutingType;
   export type WriteStatus = CodexV2WriteStatusType;
 }
 
