@@ -1,7 +1,7 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { CodexAppServerClient } from "@jaminzhou/codex-app-server-client";
+import { CodexAppServerClient, protocolMetadata } from "@jaminzhou/codex-app-server-client";
 import { startMockProvider } from "./mock-provider.mjs";
 
 /** @type {import('@jaminzhou/codex-app-server-client/protocol').v2.AskForApproval} */
@@ -26,7 +26,9 @@ export async function withExample(scenario, run, { allowInteractive = false } = 
   let timeout;
   let timedOut = false;
   try {
-    const options = { requestTimeoutMs: 15_000, cwd: workspace };
+    // Interactive smoke cases run after many packaged examples on Windows, where
+    // starting a fresh app-server can exceed the shorter ordinary-example budget.
+    const options = { requestTimeoutMs: interactive ? 30_000 : 15_000, cwd: workspace };
     if (temporaryRoot) {
       mkdirSync(workspace);
       const codexHome = join(temporaryRoot, "codex-home");
@@ -76,7 +78,7 @@ shell_snapshot = false
     if (live) {
       const account = await client.account(false);
       if (account.requiresOpenaiAuth && !account.account) {
-        throw new Error("Sign in first: npm exec --package=@openai/codex@0.155.1 -- codex login");
+        throw new Error(`Sign in first: npm exec --package=@openai/codex@${protocolMetadata.codexCliVersion} -- codex login`);
       }
     }
     await run({

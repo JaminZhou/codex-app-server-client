@@ -1,7 +1,7 @@
 # Official example alignment
 
 Groups 01–15 follow the public [Python app-server SDK examples at Codex 0.153.4](https://github.com/openai/codex/tree/3d2ee51ca2d5db578f328aa75e20aa22c0197c9a/sdk/python/examples),
-the original example-alignment baseline. This checkout now runs those examples on Codex `0.155.1`.
+the original example-alignment baseline. This checkout now runs those examples on Codex `0.156.1`.
 Group 16 follows the newer public Python
 SDK [ExternalMessage change](https://github.com/openai/codex/commit/1a4096e273e80da30947e57fdfa45be92858ca91),
 using protocol fields already present in that runtime. These are independently written Node.js
@@ -70,7 +70,7 @@ baseline upgrades track other upstream protocol changes, not a new requirement f
 
 The official minimum is CLI `0.151.0`; tool-output requests reject unknown/older reported versions
 and prereleases of that minimum, even with Schema checks off. Actual external-message integration
-was initially verified on `0.153.4` and is reverified on the bundled `0.155.1`. Text and structured function-output content retain tool
+was initially verified on `0.153.4` and is reverified on the bundled `0.156.1`. Text and structured function-output content retain tool
 authority through restart/resume and runtime truncation. External messages cannot be mixed into
 user-input lists, sent through `steer()`, or used as an approval grant. Python's `source` option is
 the existing Node `turnTrigger` option; it is metadata, not authority, and is ignored on active-turn joins.

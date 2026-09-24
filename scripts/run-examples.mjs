@@ -23,7 +23,7 @@ export function runExamples(directory, cwd) {
     ["empty", "\n/exit\n", 0],
   ]) {
     const output = execFileSync(process.execPath, [join(directory, "11_cli_mini_app.mjs"), "--interactive"], {
-      cwd, input, encoding: "utf8", timeout: 60_000,
+      cwd, input, encoding: "utf8", timeout: 90_000,
     });
     assert.match(output, new RegExp(`cli\\.turns: ${turns}(?:\\r?\\n)`));
     assert.match(output, /\[example\] mini-cli passed/);

@@ -9,17 +9,29 @@ import { loadProtocolValidator } from "../src/protocol-validator";
 import type { JsonRpcNotification } from "../src/types";
 import type { ExternalAgentConfigImportHistoriesReadResponse } from "../src/generated/protocol/v2/ExternalAgentConfigImportHistoriesReadResponse";
 import type { ThreadItemsListResponse } from "../src/generated/protocol/v2/ThreadItemsListResponse";
+import combinedProtocolSchema from "../schemas/codex_app_server_protocol.schemas.json" with {
+  type: "json",
+};
 import { FakeAppServer } from "./fake-app-server";
 
 type IsOptional<T, Key extends keyof T> = {} extends Pick<T, Key> ? true : false;
 type AgentMessageItem = Extract<v2.ThreadItem, { type: "agentMessage" }>;
 type AppConfig = NonNullable<v2.AppsConfig["example"]>;
 type CommandExecutionItem = Extract<v2.ThreadItem, { type: "commandExecution" }>;
+type McpToolCallItem = Extract<v2.ThreadItem, { type: "mcpToolCall" }>;
 
 describe("generated protocol runtime validation", () => {
+  it("includes the legacy Windows sandbox field in the combined protocol schema", () => {
+    expect(
+      combinedProtocolSchema.definitions.v2.ConfigRequirements.properties
+        .windowsSandboxPrivateDesktop,
+    ).toMatchObject({ type: ["boolean", "null"] });
+  });
+
   it("keeps version-skew fields optional for older wire shapes", () => {
     const optionalFields: [
       IsOptional<v2.AccountLoginCompletedNotification, "onboardingEntrypoint">,
+      IsOptional<AppConfig, "omit_tools_from">,
       IsOptional<AppConfig, "links">,
       IsOptional<v2.AppToolSummary, "isEnabled">,
       IsOptional<v2.AppToolSummary, "disabledReason">,
@@ -32,12 +44,19 @@ describe("generated protocol runtime validation", () => {
       IsOptional<v2.ConfigRequirements, "checkForUpdateOnStartup">,
       IsOptional<v2.ConfigRequirements, "allowLoginShell">,
       IsOptional<v2.ConfigRequirements, "feedback">,
+      IsOptional<v2.ConfigRequirements, "modelProvider">,
+      IsOptional<v2.ConfigRequirements, "modelProviders">,
+      IsOptional<v2.ConfigRequirements, "allowedLoginMethods">,
       IsOptional<v2.ConfigRequirements, "windowsSandboxPrivateDesktop">,
       IsOptional<v2.ExternalAgentConfigImportHistory, "providerId">,
       IsOptional<v2.ExternalAgentConfigDetectResponse, "connectors">,
       IsOptional<v2.ExternalAgentConfigImportItemTypeSuccess, "title">,
       IsOptional<v2.FeedbackRequirements, "enabled">,
       IsOptional<v2.Model, "modelSpecialty">,
+      IsOptional<v2.Model, "availableAccessPrograms">,
+      IsOptional<v2.PluginDetail, "onboardingSkill">,
+      IsOptional<v2.GetAccountResponse, "workspaceRouting">,
+      IsOptional<v2.McpServerStatus, "serverCapabilities">,
       IsOptional<v2.PluginShareContext, "canPublishToWorkspace">,
       IsOptional<v2.PluginShareSaveResponse, "canPublishToWorkspace">,
       IsOptional<v2.PluginSummary, "installedAt">,
@@ -53,9 +72,35 @@ describe("generated protocol runtime validation", () => {
       IsOptional<v2.Thread, "reasoningEffort">,
       IsOptional<v2.ToolRequestUserInputParams, "isBlocking">,
       IsOptional<AgentMessageItem, "questions">,
+      IsOptional<McpToolCallItem, "mcpAppUi">,
       IsOptional<CommandExecutionItem, "pluginId">,
       IsOptional<CommandExecutionItem, "scriptPath">,
+      IsOptional<v2.ThreadForkResponse, "disabledPluginIds">,
+      IsOptional<v2.ThreadResumeResponse, "disabledPluginIds">,
+      IsOptional<v2.ThreadResumeResponse, "collaborationMode">,
+      IsOptional<v2.ThreadSettings, "disabledPluginIds">,
+      IsOptional<v2.ThreadStartResponse, "disabledPluginIds">,
+      IsOptional<v2.UserVerificationEnrollResponse, "algorithm">,
+      IsOptional<v2.UserVerificationEnrollResponse, "publicKey">,
+      IsOptional<v2.McpServerElicitationRequestParams, "_meta">,
     ] = [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
       true,
       true,
       true,
@@ -94,7 +139,20 @@ describe("generated protocol runtime validation", () => {
       true,
     ];
 
-    expect(optionalFields).toHaveLength(36);
+    expect(optionalFields).toHaveLength(53);
+  });
+
+  it("accepts verification elicitation requests without optional metadata", () => {
+    const params: v2.McpServerElicitationRequestParams = {
+      threadId: "thread-1",
+      turnId: null,
+      serverName: "fixture",
+      mode: "openai/userVerification",
+      challenge: "YQ",
+      title: "Fixture",
+      description: "Fixture",
+    };
+    expect(params).not.toHaveProperty("_meta");
   });
 
   it("validates generated request and response schemas without losing bigint values", async () => {
@@ -327,6 +385,26 @@ describe("generated protocol runtime validation", () => {
         "gitDiffToRemote",
       ],
     });
+  });
+
+  it("preserves and strictly validates the legacy Windows sandbox setting", async () => {
+    const validator = await loadProtocolValidator();
+    for (const value of [true, false, null]) {
+      expect(() => validator.assertResponse("configRequirements/read", {
+        requirements: { windowsSandboxPrivateDesktop: value },
+      })).not.toThrow();
+    }
+    for (const value of ["true", 1, {}]) {
+      expect(() => validator.assertResponse("configRequirements/read", {
+        requirements: { windowsSandboxPrivateDesktop: value },
+      })).toThrow(AppServerProtocolValidationError);
+    }
+  });
+
+  it("validates the Codex 0.156 rollout compression method", async () => {
+    const validator = await loadProtocolValidator();
+    expect(() => validator.assertClientRequest("rollout/compress", undefined)).not.toThrow();
+    expect(() => validator.assertResponse("rollout/compress", {})).not.toThrow();
   });
 
   it("rejects malformed known requests before writing them", async () => {

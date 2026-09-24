@@ -35,14 +35,14 @@ import type { ThreadSettingsUpdateResponse as Response30 } from "./protocol/v2/T
 import type { ThreadMemoryModeSetResponse as Response31 } from "./protocol/v2/ThreadMemoryModeSetResponse";
 import type { MemoryStatusResponse as Response32 } from "./protocol/v2/MemoryStatusResponse";
 import type { MemoryResetResponse as Response33 } from "./protocol/v2/MemoryResetResponse";
-import type { ThreadUnarchiveResponse as Response34 } from "./protocol/v2/ThreadUnarchiveResponse";
-import type { ThreadCompactStartResponse as Response35 } from "./protocol/v2/ThreadCompactStartResponse";
-import type { ThreadShellCommandResponse as Response36 } from "./protocol/v2/ThreadShellCommandResponse";
-import type { ThreadApproveGuardianDeniedActionResponse as Response37 } from "./protocol/v2/ThreadApproveGuardianDeniedActionResponse";
-import type { ThreadBackgroundTerminalsCleanResponse as Response38 } from "./protocol/v2/ThreadBackgroundTerminalsCleanResponse";
-import type { ThreadBackgroundTerminalsListResponse as Response39 } from "./protocol/v2/ThreadBackgroundTerminalsListResponse";
-import type { ThreadBackgroundTerminalsTerminateResponse as Response40 } from "./protocol/v2/ThreadBackgroundTerminalsTerminateResponse";
-import type { ThreadRollbackResponse as Response41 } from "./protocol/v2/ThreadRollbackResponse";
+import type { RolloutCompressResponse as Response34 } from "./protocol/v2/RolloutCompressResponse";
+import type { ThreadUnarchiveResponse as Response35 } from "./protocol/v2/ThreadUnarchiveResponse";
+import type { ThreadCompactStartResponse as Response36 } from "./protocol/v2/ThreadCompactStartResponse";
+import type { ThreadShellCommandResponse as Response37 } from "./protocol/v2/ThreadShellCommandResponse";
+import type { ThreadApproveGuardianDeniedActionResponse as Response38 } from "./protocol/v2/ThreadApproveGuardianDeniedActionResponse";
+import type { ThreadBackgroundTerminalsCleanResponse as Response39 } from "./protocol/v2/ThreadBackgroundTerminalsCleanResponse";
+import type { ThreadBackgroundTerminalsListResponse as Response40 } from "./protocol/v2/ThreadBackgroundTerminalsListResponse";
+import type { ThreadBackgroundTerminalsTerminateResponse as Response41 } from "./protocol/v2/ThreadBackgroundTerminalsTerminateResponse";
 import type { ThreadRevertResponse as Response42 } from "./protocol/v2/ThreadRevertResponse";
 import type { ThreadListResponse as Response43 } from "./protocol/v2/ThreadListResponse";
 import type { ProjectListResponse as Response44 } from "./protocol/v2/ProjectListResponse";
@@ -203,14 +203,14 @@ export interface AppServerResponseMap {
   "thread/memoryMode/set": Response31;
   "memory/status": Response32;
   "memory/reset": Response33;
-  "thread/unarchive": Response34;
-  "thread/compact/start": Response35;
-  "thread/shellCommand": Response36;
-  "thread/approveGuardianDeniedAction": Response37;
-  "thread/backgroundTerminals/clean": Response38;
-  "thread/backgroundTerminals/list": Response39;
-  "thread/backgroundTerminals/terminate": Response40;
-  "thread/rollback": Response41;
+  "rollout/compress": Response34;
+  "thread/unarchive": Response35;
+  "thread/compact/start": Response36;
+  "thread/shellCommand": Response37;
+  "thread/approveGuardianDeniedAction": Response38;
+  "thread/backgroundTerminals/clean": Response39;
+  "thread/backgroundTerminals/list": Response40;
+  "thread/backgroundTerminals/terminate": Response41;
   "thread/revert": Response42;
   "thread/list": Response43;
   "project/list": Response44;
@@ -377,6 +377,7 @@ export const appServerResponseSchemaRefs = {
   "thread/memoryMode/set": { bundle: "v2", definition: "ThreadMemoryModeSetResponse" },
   "memory/status": { bundle: "v2", definition: "MemoryStatusResponse" },
   "memory/reset": { bundle: "v2", definition: "MemoryResetResponse" },
+  "rollout/compress": { bundle: "v2", definition: "RolloutCompressResponse" },
   "thread/unarchive": { bundle: "v2", definition: "ThreadUnarchiveResponse" },
   "thread/compact/start": { bundle: "v2", definition: "ThreadCompactStartResponse" },
   "thread/shellCommand": { bundle: "v2", definition: "ThreadShellCommandResponse" },
@@ -384,7 +385,6 @@ export const appServerResponseSchemaRefs = {
   "thread/backgroundTerminals/clean": { bundle: "v2", definition: "ThreadBackgroundTerminalsCleanResponse" },
   "thread/backgroundTerminals/list": { bundle: "v2", definition: "ThreadBackgroundTerminalsListResponse" },
   "thread/backgroundTerminals/terminate": { bundle: "v2", definition: "ThreadBackgroundTerminalsTerminateResponse" },
-  "thread/rollback": { bundle: "v2", definition: "ThreadRollbackResponse" },
   "thread/revert": { bundle: "v2", definition: "ThreadRevertResponse" },
   "thread/list": { bundle: "v2", definition: "ThreadListResponse" },
   "project/list": { bundle: "v2", definition: "ProjectListResponse" },

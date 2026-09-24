@@ -1,8 +1,8 @@
 # Compatibility and upgrades
 
-**This unreleased source checkout bundles `@openai/codex@0.155.1`.** Its bindings and runtime
-validation schemas are generated together. The immutable npm `0.2.1` archive remains on `0.154.0`,
-while the older `0.1.0` and `0.1.0-preview.0` archives remain on `0.153.4`; reinstalling them does
+**This unreleased source checkout bundles `@openai/codex@0.156.1`.** Its bindings and runtime
+validation schemas are generated together. The published npm `0.2.2` archive remains on `0.155.1`,
+`0.2.1` on `0.154.0`, and the older `0.1.0` and `0.1.0-preview.0` archives on `0.153.4`; reinstalling them does
 not apply this source upgrade. Check the registry for exact-version availability; this document is
 also included in local candidates. The client version and runtime version are separate; installing a
 newer global CLI does not update the client's bundled runtime.
@@ -15,20 +15,20 @@ raw method coverage nor a successful basic smoke means all workflows work on an 
 
 | Scope | Versions / environment | Evidence |
 | --- | --- | --- |
-| Basic initialization, thread and goal access | Exact runtimes `0.150.1`, `0.152.1`, `0.153.4`, `0.154.0`, `0.155.0`, `0.155.1` | Real isolated stdio compatibility smoke; no model calls |
-| Streaming, explicit command decline, interruption and process-restart resume | Bundled `0.155.1` | Shipped examples run against the real runtime with a local mock provider |
-| Official example workflows, groups 01–14 | Source checkout, bundled `0.155.1` | Real-runtime local-provider suite; [mapping and boundaries](./docs/official-examples.md), not model-quality acceptance |
+| Basic initialization, thread and goal access | Exact runtimes `0.150.1`, `0.152.1`, `0.153.4`, `0.154.0`, `0.155.0`, `0.155.1`, `0.156.1` | Real isolated stdio compatibility smoke; no model calls |
+| Streaming, explicit command decline, interruption and process-restart resume | Bundled `0.156.1` | Shipped examples run against the real runtime with a local mock provider |
+| Official example workflows, groups 01–14 | Source checkout, bundled `0.156.1` | Real-runtime local-provider suite; [mapping and boundaries](./docs/official-examples.md), not model-quality acceptance |
 | Official login/account example, group 15 | Client `0.2.2` | Strict client + scripted RPC fixture; not real OAuth or successful sign-in |
-| ExternalMessage, group 16, and independent joined-turn consumers | Source checkout, bundled `0.155.1` | Real-runtime tool authority, restart/resume, active join, structured content and truncation; deterministic subscription races |
+| ExternalMessage, group 16, and independent joined-turn consumers | Source checkout, bundled `0.156.1` | Real-runtime tool authority, restart/resume, active join, structured content and truncation; deterministic subscription races |
 | Packed ESM, declarations, schemas, and bundled binary | Node.js 18 on Linux, macOS, Windows | Installed-package CI; not every OS/architecture pairing |
 | Published `0.1.0-preview.0` archive without consumer build scripts | npm and pnpm 11 consumers | Historical exact-archive verification; not evidence for new candidate bytes |
 | Live account entitlement, model quality, every protocol workflow | Not established by these tests | Requires separate application-specific acceptance |
 
-For a `0.2.2` release candidate, use `pnpm release:pack` to verify the exact chosen bytes. Until a
-successful run records the selected source commit and integrity in `artifacts/release-evidence.json`,
-that candidate gate is pending. Check the current PR's validation report as well; this historical
-coverage table and an unchecked release checklist are not a final-candidate attestation.
-Preview-version checkouts use `pnpm preview:pack` and separate preview evidence.
+The `0.2.2` release candidate has been published; its preparation gate is historical, not pending.
+Do not regenerate a same-version candidate from this checkout. For a future release, first select a
+new unpublished version and update `package.json`; then prepare and verify its exact bytes with the
+version-neutral workflow in [RELEASING.md](./RELEASING.md). Preview candidates use
+`pnpm preview:pack` and separate preview evidence.
 
 External messages use `turn/start.toolOutput`, already present in the pinned generated protocol.
 They are not `UserInput` variants and do not require a protocol upgrade from `0.153.4`. Like the
@@ -57,18 +57,21 @@ Desktop functionality.
 
 | Reference | Pinned baseline | How it is used |
 | --- | --- | --- |
-| Public Codex CLI | `codex-cli 0.155.1` / `rust-v0.155.1` | Runtime binary and public app-server behavior |
+| Public Codex CLI | `codex-cli 0.156.1` / `rust-v0.156.1` | Runtime binary and public app-server behavior |
 | Generated app-server TypeScript | Generated from the pinned CLI | Request, response, notification, and server-request types |
 | Generated JSON Schema | Generated from the pinned CLI | Shipped schema artifacts and drift checks |
 | Official Python SDK | Public source at the same Codex tag | Lifecycle, routing, error, and high-level behavior reference |
 
 No private Codex Desktop code is a normative source or part of this package.
 
-The `0.155.1` upgrade adds typed raw `userVerification/cancel`, `memory/status` and thread
-attachment add/list/remove calls, plus the attachment-updated notification and the optional
-feedback prompt hash. These are experimental protocol contracts, not a built-in attachment store,
-native biometric UI or an automatic approval path. Tests use scripted RPC responses; they do not
-enroll credentials, show native verification prompts or verify signatures. New fields remain
+The `0.156.1` upgrade adds typed `rollout/compress` and new account-routing, MCP app UI/display,
+model-access-program, workspace-routing, and Windows sandbox protocol shapes. It removes the
+deprecated `thread/rollback` request and response types; `thread/revert` remains, but callers should
+not assume the two methods are interchangeable without checking their semantics. Earlier `0.155.1`
+additions such as `userVerification/cancel`, `memory/status`, thread attachments, and the optional
+feedback prompt hash remain in the generated surface. These experimental contracts do not imply
+built-in storage, native biometric UI, or automatic approval. Tests use scripted RPC responses; they
+do not enroll credentials, show native verification prompts, or verify signatures. New fields remain
 optional when the Schema permits omission; absent/null account fields are unknown, not proof of
 restored account access.
 
@@ -110,7 +113,7 @@ experiments.
 ## Cross-version verification
 
 The scheduled compatibility smoke covers every exact stable release in
-`compatibility-matrix.json`, currently `0.150.1`, `0.152.1`, `0.153.4`, `0.154.0`, `0.155.0`, and the pinned `0.155.1`. On the minimum
+`compatibility-matrix.json`, currently `0.150.1`, `0.152.1`, `0.153.4`, `0.154.0`, `0.155.0`, `0.155.1`, and the pinned `0.156.1`. On the minimum
 supported Node.js 18 runtime it installs each CLI in isolation, starts its real stdio app-server with plugins
 disabled, uses strict current-Schema validation, and exercises initialization, model and thread
 listing, thread creation/read, and thread-goal access without calling a model service. The matrix is an

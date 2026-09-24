@@ -23,7 +23,7 @@ const expectedVersion = packageJson.dependencies?.["@openai/codex"];
 const wireOptionalGeneratedFields = {
   "v2/ApplicationRequirements.ts": ["network"],
   "v2/AccountLoginCompletedNotification.ts": ["onboardingEntrypoint"],
-  "v2/AppsConfig.ts": ["links"],
+  "v2/AppsConfig.ts": ["omit_tools_from", "links"],
   "v2/AppToolSummary.ts": [
     "title",
     "isEnabled",
@@ -34,13 +34,15 @@ const wireOptionalGeneratedFields = {
   "v2/ConfigRequirements.ts": [
     "application",
     "browserUse",
+    "modelProvider",
+    "modelProviders",
+    "allowedLoginMethods",
     "sqliteHome",
     "logDir",
     "modelCatalogJson",
     "checkForUpdateOnStartup",
     "allowLoginShell",
     "feedback",
-    "windowsSandboxPrivateDesktop",
   ],
   "v2/ConnectorMetadata.ts": [
     "description",
@@ -59,12 +61,13 @@ const wireOptionalGeneratedFields = {
   "v2/FeedbackRequirements.ts": ["enabled"],
   "v2/FeedbackUploadResponse.ts": ["promptHash"],
   "v2/GetAccountRateLimitsResponse.ts": ["accountId", "rateLimitUpsell", "ordinaryUsageAllowed"],
+  "v2/GetAccountResponse.ts": ["workspaceRouting"],
   "v2/HookMetadata.ts": ["additionalContextLimit"],
   "v2/InstalledApp.ts": ["runtimeName"],
   "v2/ManagedHooksRequirements.ts": ["SessionEnd"],
-  "v2/McpServerStatus.ts": ["toolsError"],
-  "v2/Model.ts": ["modelSpecialty"],
-  "v2/PluginDetail.ts": ["scheduledTasks"],
+  "v2/McpServerStatus.ts": ["serverCapabilities", "toolsError"],
+  "v2/Model.ts": ["availableAccessPrograms", "modelSpecialty"],
+  "v2/PluginDetail.ts": ["onboardingSkill", "scheduledTasks"],
   "v2/PluginShareContext.ts": ["canPublishToWorkspace"],
   "v2/PluginShareSaveResponse.ts": ["canPublishToWorkspace"],
   "v2/PluginSummary.ts": [
@@ -89,12 +92,21 @@ const wireOptionalGeneratedFields = {
     "reasoningEffort",
   ],
   "v2/ThreadAttachmentListResponse.ts": ["nextCursor"],
-  "v2/ThreadItem.ts": ["questions"],
-  "v2/ThreadResumeResponse.ts": ["itemsBackwardsCursor", "turnsBackwardsCursor"],
+  "v2/ThreadForkResponse.ts": ["disabledPluginIds"],
+  "v2/ThreadItem.ts": ["mcpAppUi", "questions"],
+  "v2/ThreadResumeResponse.ts": [
+    "disabledPluginIds",
+    "collaborationMode",
+    "itemsBackwardsCursor",
+    "turnsBackwardsCursor",
+  ],
+  "v2/ThreadSettings.ts": ["disabledPluginIds"],
+  "v2/ThreadStartResponse.ts": ["disabledPluginIds"],
   "v2/ThreadSearchOccurrencesResponse.ts": ["nextCursor"],
   "v2/TokenUsageBreakdown.ts": ["cacheWriteInputTokens"],
   "v2/ToolRequestUserInputParams.ts": ["isBlocking"],
   "v2/TurnError.ts": ["misalignment"],
+  "v2/UserVerificationEnrollResponse.ts": ["algorithm", "publicKey"],
   "v2/UserVerificationStatusResponse.ts": ["credentialId", "unavailableReason", "unavailableMessage"],
 };
 const compatibilityOptionalSchemaFields = {
@@ -154,6 +166,42 @@ const compatibilityGeneratedTypeReplacements = {
     [
       "data: Array<ThreadItemEntry>",
       "data: Array<ThreadItemEntry> | Array<ThreadItem>",
+    ],
+  ],
+  "v2/McpServerElicitationRequestParams.ts": [
+    [
+      '"mode": "openai/userVerification", _meta: JsonValue | null,',
+      '"mode": "openai/userVerification", _meta?: JsonValue | null,',
+    ],
+    [
+      '"mode": "form", _meta: JsonValue | null,',
+      '"mode": "form", _meta?: JsonValue | null,',
+    ],
+    [
+      '"mode": "openai/form", _meta: JsonValue | null,',
+      '"mode": "openai/form", _meta?: JsonValue | null,',
+    ],
+    [
+      '"mode": "openaiForm", _meta: JsonValue | null,',
+      '"mode": "openaiForm", _meta?: JsonValue | null,',
+    ],
+    [
+      '"mode": "url", _meta: JsonValue | null,',
+      '"mode": "url", _meta?: JsonValue | null,',
+    ],
+  ],
+  "v2/ConfigRequirements.ts": [
+    [
+      "feedback?: FeedbackRequirements | null,",
+      [
+        "feedback?: FeedbackRequirements | null,",
+        "/**",
+        " * Legacy managed setting retained for older app-server compatibility.",
+        " *",
+        " * @deprecated Codex 0.156.1 replaced this with allowedWindowsSandboxImplementations.",
+        " */",
+        "windowsSandboxPrivateDesktop?: boolean | null,",
+      ].join("\n"),
     ],
   ],
 };
@@ -343,6 +391,25 @@ function normalizeProtocolSchemaRanges(value) {
     return;
   }
   if (!isRecord(value)) return;
+
+  for (const definitions of [value.definitions, value.definitions?.v2]) {
+    if (!isRecord(definitions)) continue;
+    const configRequirements = definitions.ConfigRequirements;
+    const configRequirementProperties = isRecord(configRequirements)
+      ? configRequirements.properties
+      : undefined;
+    if (
+      isRecord(configRequirementProperties) &&
+      !Object.hasOwn(configRequirementProperties, "windowsSandboxPrivateDesktop")
+    ) {
+      // Preserve the legacy configRequirements/read response shape from older runtimes, while
+      // retaining strict validation for the field instead of accepting arbitrary additional data.
+      configRequirementProperties.windowsSandboxPrivateDesktop = {
+        description: "Legacy managed setting retained for older app-server compatibility.",
+        type: ["boolean", "null"],
+      };
+    }
+  }
 
   const field = value.properties?.minConsolidatedThreads;
   if (isRecord(field) && field.description === "Required distinct consolidated threads. Defaults to 20; supported range is 1..=4096.") {
