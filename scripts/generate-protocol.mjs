@@ -21,8 +21,6 @@ const packageJson = JSON.parse(readFileSync(join(root, "package.json"), "utf8"))
 const methodMetadata = JSON.parse(readFileSync(join(root, "protocol-methods.json"), "utf8"));
 const expectedVersion = packageJson.dependencies?.["@openai/codex"];
 const wireOptionalGeneratedFields = {
-  "ContentItem.ts": ["file_id"],
-  "FunctionCallOutputContentItem.ts": ["file_id"],
   "v2/ApplicationRequirements.ts": ["network"],
   "v2/AccountLoginCompletedNotification.ts": ["onboardingEntrypoint"],
   "v2/AppsConfig.ts": ["omit_tools_from", "links"],
@@ -108,7 +106,6 @@ const wireOptionalGeneratedFields = {
   "v2/TokenUsageBreakdown.ts": ["cacheWriteInputTokens"],
   "v2/ToolRequestUserInputParams.ts": ["isBlocking"],
   "v2/TurnError.ts": ["misalignment"],
-  "v2/UserInput.ts": ["fileId"],
   "v2/UserVerificationEnrollResponse.ts": ["algorithm", "publicKey"],
   "v2/UserVerificationStatusResponse.ts": ["credentialId", "unavailableReason", "unavailableMessage"],
 };
@@ -169,6 +166,28 @@ const compatibilityGeneratedTypeReplacements = {
     [
       "data: Array<ThreadItemEntry>",
       "data: Array<ThreadItemEntry> | Array<ThreadItem>",
+    ],
+  ],
+  "v2/McpServerElicitationRequestParams.ts": [
+    [
+      '"mode": "openai/userVerification", _meta: JsonValue | null,',
+      '"mode": "openai/userVerification", _meta?: JsonValue | null,',
+    ],
+    [
+      '"mode": "form", _meta: JsonValue | null,',
+      '"mode": "form", _meta?: JsonValue | null,',
+    ],
+    [
+      '"mode": "openai/form", _meta: JsonValue | null,',
+      '"mode": "openai/form", _meta?: JsonValue | null,',
+    ],
+    [
+      '"mode": "openaiForm", _meta: JsonValue | null,',
+      '"mode": "openaiForm", _meta?: JsonValue | null,',
+    ],
+    [
+      '"mode": "url", _meta: JsonValue | null,',
+      '"mode": "url", _meta?: JsonValue | null,',
     ],
   ],
   "v2/ConfigRequirements.ts": [

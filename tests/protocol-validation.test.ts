@@ -7,8 +7,6 @@ import {
 import type { v2 } from "../src/generated/protocol";
 import { loadProtocolValidator } from "../src/protocol-validator";
 import type { JsonRpcNotification } from "../src/types";
-import type { ContentItem } from "../src/generated/protocol/ContentItem";
-import type { FunctionCallOutputContentItem } from "../src/generated/protocol/FunctionCallOutputContentItem";
 import type { ExternalAgentConfigImportHistoriesReadResponse } from "../src/generated/protocol/v2/ExternalAgentConfigImportHistoriesReadResponse";
 import type { ThreadItemsListResponse } from "../src/generated/protocol/v2/ThreadItemsListResponse";
 import { FakeAppServer } from "./fake-app-server";
@@ -74,7 +72,9 @@ describe("generated protocol runtime validation", () => {
       IsOptional<v2.ThreadStartResponse, "disabledPluginIds">,
       IsOptional<v2.UserVerificationEnrollResponse, "algorithm">,
       IsOptional<v2.UserVerificationEnrollResponse, "publicKey">,
+      IsOptional<v2.McpServerElicitationRequestParams, "_meta">,
     ] = [
+      true,
       true,
       true,
       true,
@@ -129,14 +129,20 @@ describe("generated protocol runtime validation", () => {
       true,
     ];
 
-    expect(optionalFields).toHaveLength(52);
+    expect(optionalFields).toHaveLength(53);
   });
 
-  it("allows image input file identifiers omitted by older protocol versions", () => {
-    const userInput: v2.UserInput = { type: "image" };
-    const contentItem: ContentItem = { type: "input_image" };
-    const functionOutputItem: FunctionCallOutputContentItem = { type: "input_image" };
-    expect([userInput, contentItem, functionOutputItem]).toHaveLength(3);
+  it("accepts verification elicitation requests without optional metadata", () => {
+    const params: v2.McpServerElicitationRequestParams = {
+      threadId: "thread-1",
+      turnId: null,
+      serverName: "fixture",
+      mode: "openai/userVerification",
+      challenge: "YQ",
+      title: "Fixture",
+      description: "Fixture",
+    };
+    expect(params).not.toHaveProperty("_meta");
   });
 
   it("validates generated request and response schemas without losing bigint values", async () => {
