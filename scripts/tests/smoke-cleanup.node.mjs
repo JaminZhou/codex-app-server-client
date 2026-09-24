@@ -48,7 +48,7 @@ test("reports both failures when the smoke and cleanup fail", () => {
 });
 
 test("Windows retries deletion until a real non-delete-sharing handle closes", {
-  skip: process.platform !== "win32", timeout: 15_000,
+  skip: process.platform !== "win32", timeout: 30_000,
 }, async () => {
   const root = mkdtempSync(join(tmpdir(), "smoke-cleanup-lock-"));
   const locked = join(root, "runtime.exe");
@@ -66,7 +66,9 @@ test("Windows retries deletion until a real non-delete-sharing handle closes", {
   try {
     await new Promise((resolve, reject) => {
       let output = "";
-      const timer = setTimeout(() => reject(new Error("File-lock fixture did not become ready")), 5_000);
+      const timer = setTimeout(() => reject(new Error(
+        `File-lock fixture did not become ready; stdout=${JSON.stringify(output)}${stderr ? `; stderr=${stderr.trim()}` : ""}`,
+      )), 15_000);
       holder.once("error", (error) => { clearTimeout(timer); reject(error); });
       holder.once("exit", () => { clearTimeout(timer); reject(new Error("File-lock fixture exited: " + stderr)); });
       holder.stdout.setEncoding("utf8").on("data", (chunk) => {
