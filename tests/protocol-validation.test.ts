@@ -377,11 +377,18 @@ describe("generated protocol runtime validation", () => {
     });
   });
 
-  it("accepts the legacy Windows sandbox setting from older app-server responses", async () => {
+  it("preserves and strictly validates the legacy Windows sandbox setting", async () => {
     const validator = await loadProtocolValidator();
-    expect(() => validator.assertResponse("configRequirements/read", {
-      requirements: { windowsSandboxPrivateDesktop: true },
-    })).not.toThrow();
+    for (const value of [true, false, null]) {
+      expect(() => validator.assertResponse("configRequirements/read", {
+        requirements: { windowsSandboxPrivateDesktop: value },
+      })).not.toThrow();
+    }
+    for (const value of ["true", 1, {}]) {
+      expect(() => validator.assertResponse("configRequirements/read", {
+        requirements: { windowsSandboxPrivateDesktop: value },
+      })).toThrow(AppServerProtocolValidationError);
+    }
   });
 
   it("validates the Codex 0.156 rollout compression method", async () => {

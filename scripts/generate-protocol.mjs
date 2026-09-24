@@ -392,6 +392,22 @@ function normalizeProtocolSchemaRanges(value) {
   }
   if (!isRecord(value)) return;
 
+  const configRequirements = value.definitions?.ConfigRequirements;
+  const configRequirementProperties = isRecord(configRequirements)
+    ? configRequirements.properties
+    : undefined;
+  if (
+    isRecord(configRequirementProperties) &&
+    !Object.hasOwn(configRequirementProperties, "windowsSandboxPrivateDesktop")
+  ) {
+    // Preserve the legacy configRequirements/read response shape from older runtimes, while
+    // retaining strict validation for the field instead of accepting arbitrary additional data.
+    configRequirementProperties.windowsSandboxPrivateDesktop = {
+      description: "Legacy managed setting retained for older app-server compatibility.",
+      type: ["boolean", "null"],
+    };
+  }
+
   const field = value.properties?.minConsolidatedThreads;
   if (isRecord(field) && field.description === "Required distinct consolidated threads. Defaults to 20; supported range is 1..=4096.") {
     // The upstream format only captures the uint32 storage type. Preserve the documented

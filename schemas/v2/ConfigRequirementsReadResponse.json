@@ -638,6 +638,13 @@
             "string",
             "null"
           ]
+        },
+        "windowsSandboxPrivateDesktop": {
+          "description": "Legacy managed setting retained for older app-server compatibility.",
+          "type": [
+            "boolean",
+            "null"
+          ]
         }
       },
       "type": "object"
