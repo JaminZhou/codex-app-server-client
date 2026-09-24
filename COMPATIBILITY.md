@@ -24,11 +24,11 @@ raw method coverage nor a successful basic smoke means all workflows work on an 
 | Published `0.1.0-preview.0` archive without consumer build scripts | npm and pnpm 11 consumers | Historical exact-archive verification; not evidence for new candidate bytes |
 | Live account entitlement, model quality, every protocol workflow | Not established by these tests | Requires separate application-specific acceptance |
 
-For a `0.2.2` release candidate, use `pnpm release:pack` to verify the exact chosen bytes. Until a
-successful run records the selected source commit and integrity in `artifacts/release-evidence.json`,
-that candidate gate is pending. Check the current PR's validation report as well; this historical
-coverage table and an unchecked release checklist are not a final-candidate attestation.
-Preview-version checkouts use `pnpm preview:pack` and separate preview evidence.
+The `0.2.2` release candidate has been published; its preparation gate is historical, not pending.
+Do not regenerate a same-version candidate from this checkout. For a future release, first select a
+new unpublished version and update `package.json`; then prepare and verify its exact bytes with the
+version-neutral workflow in [RELEASING.md](./RELEASING.md). Preview candidates use
+`pnpm preview:pack` and separate preview evidence.
 
 External messages use `turn/start.toolOutput`, already present in the pinned generated protocol.
 They are not `UserInput` variants and do not require a protocol upgrade from `0.153.4`. Like the

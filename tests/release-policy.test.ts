@@ -14,7 +14,13 @@ describe("candidate packaging policy", () => {
     expect(row).toContain(`npm view ${pkg.name}@${pkg.version} version`);
     const readme = readFileSync(new URL("../README.md", import.meta.url), "utf8");
     expect(readme).toContain(`npm view ${pkg.name}@${pkg.version} version`);
-    expect(readme).toContain(`codex-app-server-client-${pkg.version}.tgz`);
+    expect(readme).toContain("pnpm package:smoke");
+    expect(readme).not.toContain("pnpm release:pack");
+    expect(readme).not.toContain(`codex-app-server-client-${pkg.version}.tgz`);
+    const compatibility = readFileSync(new URL("../COMPATIBILITY.md", import.meta.url), "utf8");
+    expect(compatibility).toContain("release candidate has been published");
+    expect(compatibility).toContain("new unpublished version");
+    expect(compatibility).not.toContain("For a `0.2.2` release candidate");
     const releasing = readFileSync(new URL("../RELEASING.md", import.meta.url), "utf8");
     expect(releasing).toContain(`codex-app-server-client-${pkg.version}.tgz`);
     expect(releasing).toContain(`./docs/releases/${pkg.version}.md`);

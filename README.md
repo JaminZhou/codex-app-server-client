@@ -91,31 +91,24 @@ These additions are not files in the immutable npm `0.1.0` archive.
 ## Install into your own project
 
 Use the exact registry version above (or `pnpm add --save-exact --ignore-scripts
-@jaminzhou/codex-app-server-client@0.2.2`). For unpublished source changes, build and
-validate a local tarball instead:
+@jaminzhou/codex-app-server-client@0.2.2`). To validate unpublished changes in this source checkout,
+run the development checks below. Do not create another `0.2.2` release archive: that published
+version is immutable.
 
 ```bash
-# In the source checkout, using Node.js 22+:
-pnpm release:pack
+pnpm check
+pnpm compatibility:smoke
+pnpm package:smoke
 ```
 
-In a separate consumer directory, install the printed artifact path (the example below assumes
-the checkout is a sibling directory):
-
-```bash
-npm init -y
-npm install --ignore-scripts --include=optional ../codex-app-server-client/artifacts/jaminzhou-codex-app-server-client-0.2.2.tgz
-node node_modules/@jaminzhou/codex-app-server-client/examples/stream.mjs
-```
-
-For pnpm, use `pnpm add --ignore-scripts <absolute-path-to-tarball>` instead. Tarball consumers do
-not need to allow this package's build scripts or install a compiler. The preparation command
-verifies the same tarball in clean npm and pnpm consumers, including declarations and all examples.
+`package:smoke` builds and checks a temporary package in clean npm and pnpm consumers; it does not
+select or publish a release candidate. For a future release archive, first select a new unpublished
+version and update `package.json`, then follow [release preparation](./RELEASING.md).
 
 The initial preview publication used `--tag next`, but the registry also assigned `latest` to it.
 At the `0.1.0` release verification, `latest` pointed to `0.1.0` and `next` retained the preview.
 Neither tag is a stability guarantee. Pin the exact version and retain your lockfile.
-See [release preparation](./RELEASING.md) and the [0.2.2 release gates](./docs/releases/0.2.2.md#release-gates).
+See [release preparation](./RELEASING.md) and the [historical 0.2.2 release record](./docs/releases/0.2.2.md).
 
 If you need Git installation, pin a reviewed full SHA:
 `npm install 'github:JaminZhou/codex-app-server-client#<full-commit-sha>'`.
