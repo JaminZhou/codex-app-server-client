@@ -8,9 +8,12 @@ app-server process, typed requests, and event routing so you can focus on your a
 > endorsed by OpenAI. Codex and OpenAI are trademarks of OpenAI.
 
 **Package:** `@jaminzhou/codex-app-server-client`.
-**Version covered:** `0.2.2`, a non-preview 0.x API, not a 1.0 stability commitment.
+**Version covered:** `0.3.0`, a non-preview 0.x API, not a 1.0 stability commitment.
 Check exact registry availability; a source checkout or local rebuild is not proof of publication.
-See the [0.2.2 release guide](./docs/releases/0.2.2.md) and [migration notes from 0.1.0](./docs/api-diff-0.2.0.md).
+Version `0.3.0` removes the upstream-retired `thread/rollback` method from public types; callers
+using it must migrate. See the [0.3.0 release guide](./docs/releases/0.3.0.md), the
+[historical 0.2.2 release record](./docs/releases/0.2.2.md), and
+[migration notes from 0.1.0](./docs/api-diff-0.2.0.md).
 The unscoped npm name belongs to a different project.
 
 ## Is this for your app?
@@ -29,8 +32,8 @@ This package is independently maintained and has its own pre-1.0 API.
   Use a currently maintained Node.js release for a new app.
 - **Build from source / Git:** Node.js 22+ and pnpm 11.7.0. A Git install runs a build; a tarball
   already contains JavaScript, declarations, schemas, and examples.
-- **Runtime:** this unreleased source checkout pins `@openai/codex@0.156.1`; the published npm
-  `0.2.2` archive remains on `0.155.1`, `0.2.1` remains on `0.154.0`, and the historical `0.1.0`
+- **Runtime:** this source checkout and the `0.3.0` release target pin `@openai/codex@0.156.1`; the
+  published npm `0.2.2` archive remains on `0.155.1`, `0.2.1` remains on `0.154.0`, and the historical `0.1.0`
   archive remains on `0.153.4`.
   No global CLI installation is needed.
   Keep optional dependencies enabled because they carry the platform binary.
@@ -50,12 +53,12 @@ Check availability, then install the exact version in a new consumer directory:
 
 ```bash
 npm init -y
-npm view @jaminzhou/codex-app-server-client@0.2.2 version --registry https://registry.npmjs.org/
-npm install --save-exact --ignore-scripts --include=optional @jaminzhou/codex-app-server-client@0.2.2
+npm view @jaminzhou/codex-app-server-client@0.3.0 version --registry https://registry.npmjs.org/
+npm install --save-exact --ignore-scripts --include=optional @jaminzhou/codex-app-server-client@0.3.0
 node node_modules/@jaminzhou/codex-app-server-client/examples/stream.mjs
 ```
 
-If the exact-version query reports that `0.2.2` is unavailable, it has not been made available in
+If the exact-version query reports that `0.3.0` is unavailable, it has not been made available in
 that registry: use a verified local candidate below, or explicitly choose an available historical
 release with its older feature set. Do not infer publication from a source checkout's version number.
 
@@ -81,7 +84,8 @@ node node_modules/@jaminzhou/codex-app-server-client/examples/interrupt-resume.m
 They verify that a declined command never executes and that an interrupted conversation resumes
 after restarting the app-server. See [example commands, output, and recovery](./examples/README.md).
 
-Version `0.2.2` also includes [16 numbered equivalents of the official Python app-server examples](./docs/official-examples.md),
+Version `0.3.0` also includes [16 numbered equivalents of the official Python app-server
+examples](./docs/official-examples.md),
 covering lifecycle, images, structured output, model selection, a small terminal loop, login cancellation
 and untrusted `ExternalMessage` input with independent joined-turn handles.
 Their public example references are unchanged, and this source checkout runs them on the pinned
@@ -91,9 +95,9 @@ These additions are not files in the immutable npm `0.1.0` archive.
 ## Install into your own project
 
 Use the exact registry version above (or `pnpm add --save-exact --ignore-scripts
-@jaminzhou/codex-app-server-client@0.2.2`). To validate unpublished changes in this source checkout,
-run the development checks below. Do not create another `0.2.2` release archive: that published
-version is immutable.
+@jaminzhou/codex-app-server-client@0.3.0`). To validate unpublished changes in this source checkout,
+run the development checks below. npm versions are immutable; never create a different archive for
+an already-published version.
 
 ```bash
 pnpm check
@@ -108,7 +112,8 @@ version and update `package.json`, then follow [release preparation](./RELEASING
 The initial preview publication used `--tag next`, but the registry also assigned `latest` to it.
 At the `0.1.0` release verification, `latest` pointed to `0.1.0` and `next` retained the preview.
 Neither tag is a stability guarantee. Pin the exact version and retain your lockfile.
-See [release preparation](./RELEASING.md) and the [historical 0.2.2 release record](./docs/releases/0.2.2.md).
+See [release preparation](./RELEASING.md), the [0.3.0 release guide](./docs/releases/0.3.0.md),
+and the [historical 0.2.2 release record](./docs/releases/0.2.2.md).
 
 If you need Git installation, pin a reviewed full SHA:
 `npm install 'github:JaminZhou/codex-app-server-client#<full-commit-sha>'`.
@@ -135,8 +140,8 @@ npm exec --package=@openai/codex@0.156.1 -- codex login status
 node examples/stream.mjs --live
 ```
 
-For published client `0.2.2`, use its bundled runtime `@openai/codex@0.155.1`; for `0.2.1`, use
-`0.154.0` instead.
+For client `0.3.0`, use its bundled runtime `@openai/codex@0.156.1`; for published client `0.2.2`,
+use `0.155.1`, and for `0.2.1`, use `0.154.0` instead.
 
 For the historical client `0.1.0` archive, use its matching `@openai/codex@0.153.4` instead.
 

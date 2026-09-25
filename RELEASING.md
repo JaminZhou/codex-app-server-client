@@ -3,11 +3,11 @@
 `0.1.0` was published on 2026-09-09; its [release record](./docs/releases/0.1.0.md) identifies the
 source, immutable archive and verification scope. Do not republish this version.
 
-The `0.2.2` package has been published as `latest`; its version-specific instructions below are
-historical and must not be repeated. For a future candidate, first choose an unpublished exact
-version and update its metadata and artifact paths. Preparation, PR creation and merge are distinct
-from permission to publish. Query the exact registry version and retained publication evidence
-before starting a candidate.
+The `0.2.2` package was published as `latest` at the time; dist-tags can move. Its version-specific
+instructions below are historical and must not be repeated. For a new candidate, first choose an
+unpublished exact version and update its metadata and artifact paths. Preparation, PR creation and
+merge alone do not authorize a new release scope. Query the exact registry version and retained
+publication evidence before starting a candidate.
 
 The first preview, `@jaminzhou/codex-app-server-client@0.1.0-preview.0`, was published on
 2026-09-08 using `--tag next`. The registry also assigned `latest` to that preview; attempting to
@@ -15,7 +15,8 @@ remove `latest` returned HTTP 400. Neither alias makes this a stable release. Ex
 registry installation and downloaded-archive integrity were verified with npm and pnpm.
 This repository has no push-, tag-, or schedule-triggered publishing workflow. The optional
 [manual trusted-publishing workflow](./docs/trusted-publishing.md) separates candidate preparation
-from publication of an explicitly approved archive. Adding these workflow files alone does not
+from publication of the exact archive under the repository's authorization and release gates.
+Adding these workflow files alone does not
 configure npm permissions or establish that any package has been published.
 
 Published versions are immutable. The procedures below apply only to a newly selected, unpublished
@@ -24,25 +25,27 @@ checkout are development artifacts, not previously published bytes.
 
 ## Version and support policy
 
-- Client versions are independent of the Codex runtime version. This unreleased source checkout
-  pins `@openai/codex@0.156.1`; published client `0.2.2` bundles `0.155.1`, `0.2.1` bundles
-  `0.154.0`, and `0.1.0` bundles `0.153.4`. See [COMPATIBILITY.md](./COMPATIBILITY.md).
+- Client versions are independent of the Codex runtime version. This checkout targets client
+  `0.3.0` and pins `@openai/codex@0.156.1`; published client `0.2.2` bundles `0.155.1`, `0.2.1`
+  bundles `0.154.0`, and `0.1.0` bundles `0.153.4`. See [COMPATIBILITY.md](./COMPATIBILITY.md).
 - Future previews use a new target version and increasing `preview.N` suffix. Record changes and migration notes.
   Pre-1.0 APIs and generated experimental protocol types may change; consumers should pin exact
   versions and keep their lockfiles.
-- `0.2.2` is a published non-preview release, still a pre-1.0 API. Preview commands use `--tag next`;
-  do not deliberately promote a preview to `latest`. Always read back all registry tags: the first
-  publication demonstrated that `--tag next` is not a guarantee that `latest` will be absent.
+- Stable releases are non-preview `0.x.y` versions and remain pre-1.0 APIs; see the
+  [0.3.0 release guide](./docs/releases/0.3.0.md) for its public method removal and migration note.
+  Preview commands use `--tag next`; do not deliberately promote a preview to `latest`. Always read
+  back all registry tags: the first publication demonstrated that `--tag next` is not a guarantee
+  that `latest` will be absent.
   Never reuse a published name/version or publish a stable version merely to repair tag naming.
 - A runtime update is a separate compatibility change, not an automatic consequence of a newer
   npm dist-tag. Update provenance, generated artifacts, and tests together.
 
 ## Historical 0.2.2 preparation record
 
-The `0.2.2` package is already published as `latest`. This section records the checks and archive
-layout used for that release; it is not an active candidate procedure. Do not rerun candidate or
-publish steps for `0.2.2`. Future releases must first select a new, unpublished exact version and
-update `package.json`, metadata and artifact paths.
+The `0.2.2` package was published as `latest` at the time; registry tags may since have moved. This
+section records the checks and archive layout used for that release; it is not an active candidate
+procedure. Do not rerun candidate or publish steps for `0.2.2`. Future releases must first select a
+new, unpublished exact version and update `package.json`, metadata and artifact paths.
 
 The historical `0.2.2` archive was `artifacts/jaminzhou-codex-app-server-client-0.2.2.tgz`,
 paired with `artifacts/release-evidence.json` containing source SHA, dirty-checkout flag, SHA-512
@@ -92,10 +95,16 @@ committing to verify the committed Git-install path; it does not test uncommitte
 
 ## Future publication gates
 
-Preparation can be completed without registry permissions. Publishing a future candidate requires:
+Preparation can be completed without registry permissions. Publishing a candidate requires:
 
-1. Jamin's explicit approval of the candidate version, exact tarball integrity, and intended tag
-   (`latest` for a stable release, `next` only for a preview).
+1. Jamin explicitly authorizes the release scope, version and channel before candidate generation.
+   That authorization may cover the exact candidate produced by the unchanged process; after all
+   established gates pass, do not ask again solely to restate its run ID or integrity. Always report
+   the exact identity. Before relying on this delegation, verify live repository write access is
+   limited to Jamin and the `npm-publish` environment is restricted to `main`. If either boundary
+   changes, require exact-candidate approval or an enforced reviewer gate. Pause for any
+   scope/version/channel mismatch, changed publishing workflow permissions or identity, failed or
+   uncertain gate, or recovery action.
 2. An npm account authorized for `@jaminzhou` and the package name; registry 404 alone does not
    prove name ownership or publish rights.
 3. npm's required authentication/2FA or an approved, main-restricted trusted-publishing setup.
@@ -104,12 +113,13 @@ Preparation can be completed without registry permissions. Publishing a future c
 No account setup, token creation, login, registry write, or GitHub release is implied by running
 the preparation commands.
 
-For recurring releases, prefer [GitHub Actions with npm OIDC](./docs/trusted-publishing.md):
-manually prepare a candidate, approve its version/source/integrity, then manually dispatch the
-separate publish workflow. The publisher downloads those retained bytes; it never rebuilds.
+For releases, prefer [GitHub Actions with npm OIDC](./docs/trusted-publishing.md): prepare the
+authorized version, inspect the successful candidate identity, then dispatch the separate publish
+workflow when its gates pass. The publisher downloads those retained bytes; it never rebuilds.
 The local CLI procedure below remains available and requires npm's interactive authentication.
 
-Only after approval, from the checkout whose candidate has been verified:
+Only after the release scope is authorized and every publication gate passes, from the checkout
+whose candidate has been verified:
 
 ```bash
 # Historical example only; never reuse a published package version:
@@ -123,10 +133,11 @@ the immutable archive. The packed README uses time-neutral exact-version guidanc
 does not require replacing the already-verified bytes. If the publish response is uncertain,
 query the version before retrying.
 
-The [0.2.2 release record](./docs/releases/0.2.2.md), [API comparison and migration notes](./docs/api-diff-0.2.0.md),
-and [0.1.0 acceptance checklist](./docs/release-readiness.md) are historical records. For a future
-version, prepare a new exact candidate, retain its reviewed bytes, and obtain explicit publication
-approval. Passing tests does not authorize publication or model usage.
+The [0.3.0 release guide](./docs/releases/0.3.0.md), [0.2.2 release record](./docs/releases/0.2.2.md),
+[API comparison and migration notes](./docs/api-diff-0.2.0.md), and
+[0.1.0 acceptance checklist](./docs/release-readiness.md) are version-specific records. For a
+newly authorized release scope, prepare a new exact candidate and retain its reviewed bytes. Passing
+tests alone does not authorize a different version, scope, publication channel or model usage.
 
 See npm's [package metadata](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/) and
 [publish command](https://docs.npmjs.com/cli/v11/commands/npm-publish/) documentation.

@@ -2,11 +2,11 @@
 
 ## Supported versions
 
-The historical preview is `0.1.0-preview.0`; `0.2.2` is the newest published non-preview release.
-The newest published non-preview client release is maintained; older client versions and previews
-are superseded, with no separate backport commitment. Runtime compatibility does not imply security
-maintenance of end-of-life Node.js releases; prefer a maintained Node.js runtime.
-Check exact registry availability and release announcements; this repository policy does not
+The historical preview is `0.1.0-preview.0`. The newest published non-preview client release is
+maintained; older client versions and previews are superseded, with no separate backport commitment.
+Check the registry's current `latest` metadata and release announcements for the maintained version.
+Runtime compatibility does not imply security maintenance of end-of-life Node.js releases; prefer a
+maintained Node.js runtime. This repository policy does not
 itself attest that a release or security fix has been published.
 Security fixes are developed on `main` and require a separately reviewed and authorized release;
 updating `main` alone does not fix an already installed package. Consumers should pin a reviewed
