@@ -49,12 +49,12 @@ jobs:
       - run: pnpm protocol:latest-check
       - name: Prepare and verify one immutable candidate
         run: pnpm release:pack
-      - name: Recheck main and display approval identity
+      - name: Recheck main and display candidate identity
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           node scripts/trusted-release.mjs gate
-          node --input-type=module -e 'import { readFileSync, appendFileSync } from "node:fs"; const e = JSON.parse(readFileSync("artifacts/release-evidence.json", "utf8")); appendFileSync(process.env.GITHUB_STEP_SUMMARY, "## Candidate only — not published\n\n```json\n" + JSON.stringify({version:e.version, sourceCommit:e.sourceCommit, integrity:e.integrity, candidateRunId:process.env.GITHUB_RUN_ID, intendedTag:e.intendedTag}, null, 2) + "\n```\n\nApprove this exact identity before manually running npm publish. Preparation never grants publication approval.\n");'
+          node --input-type=module -e 'import { readFileSync, appendFileSync } from "node:fs"; const e = JSON.parse(readFileSync("artifacts/release-evidence.json", "utf8")); appendFileSync(process.env.GITHUB_STEP_SUMMARY, "## Candidate only — not published\n\n```json\n" + JSON.stringify({version:e.version, sourceCommit:e.sourceCommit, integrity:e.integrity, candidateRunId:process.env.GITHUB_RUN_ID, intendedTag:e.intendedTag}, null, 2) + "\n```\n\nBefore dispatching npm publish, verify this identity is covered by a release scope/version/channel Jamin explicitly authorized and all gates passed. Report the exact identity to Jamin. Do not ask solely to repeat it when that authorization covers this candidate and the verified write/environment boundaries are unchanged. Otherwise obtain explicit approval. Preparation alone never grants authorization.\n");'
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: npm-candidate-${{ inputs.version }}

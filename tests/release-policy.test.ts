@@ -42,6 +42,14 @@ describe("candidate packaging policy", () => {
     expect(trusted).toContain("version=NEW_UNPUBLISHED_VERSION");
     expect(trusted).not.toContain("version=0.2.2");
     expect(trusted).toContain("RELEASING.md#future-publication-gates");
+    expect(trusted).toContain("verify live repository write access");
+    expect(trusted).toMatch(/another write-capable\s+actor is added/);
+    const candidateWorkflow = readFileSync(
+      new URL("../.github/workflows/npm-release-candidate.yml", import.meta.url),
+      "utf8",
+    );
+    expect(candidateWorkflow).toContain("Report the exact identity to Jamin.");
+    expect(candidateWorkflow).toContain("verified write/environment boundaries are unchanged");
     const archivedRelease = readFileSync(new URL("../docs/releases/0.2.2.md", import.meta.url), "utf8");
     expect(archivedRelease).toContain("0.2.2 historical release record");
     expect(archivedRelease).toContain("not an active candidate or publication procedure");

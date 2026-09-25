@@ -97,11 +97,14 @@ committing to verify the committed Git-install path; it does not test uncommitte
 
 Preparation can be completed without registry permissions. Publishing a candidate requires:
 
-1. Jamin's explicit authorization of the release scope, version and channel. For this repository,
-   that authorization covers publishing the resulting exact candidate only after all established
-   gates pass, using the unchanged main-restricted OIDC workflow and tag policy. Do not ask again
-   solely to restate its run ID or integrity. Pause for any scope/version/channel mismatch, changed
-   publishing identity, workflow or tag/security policy, failed or uncertain gate, or recovery action.
+1. Jamin explicitly authorizes the release scope, version and channel before candidate generation.
+   That authorization may cover the exact candidate produced by the unchanged process; after all
+   established gates pass, do not ask again solely to restate its run ID or integrity. Always report
+   the exact identity. Before relying on this delegation, verify live repository write access is
+   limited to Jamin and the `npm-publish` environment is restricted to `main`. If either boundary
+   changes, require exact-candidate approval or an enforced reviewer gate. Pause for any
+   scope/version/channel mismatch, changed publishing workflow permissions or identity, failed or
+   uncertain gate, or recovery action.
 2. An npm account authorized for `@jaminzhou` and the package name; registry 404 alone does not
    prove name ownership or publish rights.
 3. npm's required authentication/2FA or an approved, main-restricted trusted-publishing setup.

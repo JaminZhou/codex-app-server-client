@@ -3,9 +3,13 @@
 Both workflows use `workflow_dispatch` only. Ordinary pushes, tags, PRs, CI completion and scheduled
 checks cannot publish. Neither workflow creates Git tags or GitHub Releases. Jamin's repository-
 specific authorization applies only to an explicitly authorized release scope/version/channel,
-after all established gates pass, through the unchanged main-restricted OIDC workflow. It does not
-authorize scope or version selection on Jamin's behalf, changed registry/tag policy, identity or
-workflow changes, security-configuration changes, or recovery from an uncertain publication.
+after all established gates pass, through the unchanged main-restricted OIDC workflow. Before
+relying on that delegation, verify live repository write access is limited to Jamin and the
+`npm-publish` environment allows only `main`. If either boundary changes or another write-capable
+actor is added, require exact-candidate approval or an enforced reviewer gate. This authorization
+does not allow scope or version selection on Jamin's behalf, changed registry/tag policy, or changes
+to publishing-workflow permissions, OIDC identity, environment policy, or security configuration;
+it also excludes recovery from an uncertain publication.
 
 ## One-time account setup
 
@@ -60,9 +64,11 @@ Inspect the successful run and retain its artifact locally. The run summary list
 version, full source SHA, SHA-512 integrity, run ID and `latest` tag. Confirm that all four values
 match the authorized release scope and the passing gates in
 [RELEASING.md](../RELEASING.md#future-publication-gates). Do not ask Jamin to reconfirm solely to
-repeat this exact identity. Stop for any mismatch or changed scope, version, channel, publishing
-identity, workflow/security configuration, failed gate or uncertain state. Preparing a candidate
-or merging its source alone does not authorize a different release scope.
+repeat this exact identity when that authorization covers the candidate and the write/environment
+boundaries above remain unchanged. Always report the exact identity to Jamin. Stop for any mismatch
+or changed scope, version, channel, publishing identity, workflow/security configuration, failed
+gate, additional write-capable actor or uncertain state. Preparing a candidate or merging its
+source alone does not authorize a different release scope.
 
 Previously published archives are never selected as candidates by this mechanism.
 The workflow accepts only its own successful, canonical-main candidate runs. Changing source,
