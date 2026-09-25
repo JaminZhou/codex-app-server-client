@@ -1,7 +1,7 @@
 # Compatibility and upgrades
 
-**This unreleased source checkout bundles `@openai/codex@0.156.1`.** Its bindings and runtime
-validation schemas are generated together. The published npm `0.2.2` archive remains on `0.155.1`,
+**This source checkout targets client `0.3.0` and bundles `@openai/codex@0.156.1`.** Its bindings
+and runtime validation schemas are generated together. The published npm `0.2.2` archive remains on `0.155.1`,
 `0.2.1` on `0.154.0`, and the older `0.1.0` and `0.1.0-preview.0` archives on `0.153.4`; reinstalling them does
 not apply this source upgrade. Check the registry for exact-version availability; this document is
 also included in local candidates. The client version and runtime version are separate; installing a
@@ -18,16 +18,17 @@ raw method coverage nor a successful basic smoke means all workflows work on an 
 | Basic initialization, thread and goal access | Exact runtimes `0.150.1`, `0.152.1`, `0.153.4`, `0.154.0`, `0.155.0`, `0.155.1`, `0.156.1` | Real isolated stdio compatibility smoke; no model calls |
 | Streaming, explicit command decline, interruption and process-restart resume | Bundled `0.156.1` | Shipped examples run against the real runtime with a local mock provider |
 | Official example workflows, groups 01–14 | Source checkout, bundled `0.156.1` | Real-runtime local-provider suite; [mapping and boundaries](./docs/official-examples.md), not model-quality acceptance |
-| Official login/account example, group 15 | Client `0.2.2` | Strict client + scripted RPC fixture; not real OAuth or successful sign-in |
+| Official login/account example, group 15 | Client `0.3.0` source target | Strict client + scripted RPC fixture; not real OAuth or successful sign-in |
 | ExternalMessage, group 16, and independent joined-turn consumers | Source checkout, bundled `0.156.1` | Real-runtime tool authority, restart/resume, active join, structured content and truncation; deterministic subscription races |
 | Packed ESM, declarations, schemas, and bundled binary | Node.js 18 on Linux, macOS, Windows | Installed-package CI; not every OS/architecture pairing |
 | Published `0.1.0-preview.0` archive without consumer build scripts | npm and pnpm 11 consumers | Historical exact-archive verification; not evidence for new candidate bytes |
 | Live account entitlement, model quality, every protocol workflow | Not established by these tests | Requires separate application-specific acceptance |
 
 The `0.2.2` release candidate has been published; its preparation gate is historical, not pending.
-Do not regenerate a same-version candidate from this checkout. For a future release, first select a
-new unpublished version and update `package.json`; then prepare and verify its exact bytes with the
-version-neutral workflow in [RELEASING.md](./RELEASING.md). Preview candidates use
+Registry metadata, not this source record, determines whether a target version is currently
+available. Do not regenerate a same-version candidate from this checkout. For a future release,
+first select a new unpublished version and update `package.json`; then prepare and verify its exact
+bytes with the version-neutral workflow in [RELEASING.md](./RELEASING.md). Preview candidates use
 `pnpm preview:pack` and separate preview evidence.
 
 External messages use `turn/start.toolOutput`, already present in the pinned generated protocol.

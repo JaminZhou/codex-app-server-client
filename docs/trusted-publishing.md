@@ -1,8 +1,11 @@
 # Manual npm trusted publishing
 
-This is a release mechanism, not a standing authorization to publish future versions. Both
-workflows use `workflow_dispatch` only. Ordinary pushes, tags, PRs, CI completion and scheduled
-checks cannot publish. Neither workflow creates Git tags or GitHub Releases.
+Both workflows use `workflow_dispatch` only. Ordinary pushes, tags, PRs, CI completion and scheduled
+checks cannot publish. Neither workflow creates Git tags or GitHub Releases. Jamin's repository-
+specific authorization applies only to an explicitly authorized release scope/version/channel,
+after all established gates pass, through the unchanged main-restricted OIDC workflow. It does not
+authorize scope or version selection on Jamin's behalf, changed registry/tag policy, identity or
+workflow changes, security-configuration changes, or recovery from an uncertain publication.
 
 ## One-time account setup
 
@@ -37,7 +40,7 @@ it is a separate security-sensitive account action, not just a local configurati
 See [npm's trusted-publishing documentation](https://docs.npmjs.com/trusted-publishers/) and
 [GitHub environment deployment restrictions](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments).
 
-## Prepare, inspect, then approve
+## Prepare, inspect, then publish within the authorized scope
 
 Start from a reviewed, merged, clean release revision whose `package.json` has the intended
 non-preview `0.x.y` version and whose current-main CI has fully passed.
@@ -54,9 +57,12 @@ once and tests that archive with npm and pnpm. The workflow uploads exactly the 
 permission. No real model account, OAuth enrollment or biometric acceptance runs in CI.
 
 Inspect the successful run and retain its artifact locally. The run summary lists the exact
-version, full source SHA, SHA-512 integrity, run ID and `latest` tag. Present these and the
-[future publication gates](../RELEASING.md#future-publication-gates) to Jamin for explicit approval.
-Preparing a candidate or merging its source is not publication approval.
+version, full source SHA, SHA-512 integrity, run ID and `latest` tag. Confirm that all four values
+match the authorized release scope and the passing gates in
+[RELEASING.md](../RELEASING.md#future-publication-gates). Do not ask Jamin to reconfirm solely to
+repeat this exact identity. Stop for any mismatch or changed scope, version, channel, publishing
+identity, workflow/security configuration, failed gate or uncertain state. Preparing a candidate
+or merging its source alone does not authorize a different release scope.
 
 Previously published archives are never selected as candidates by this mechanism.
 The workflow accepts only its own successful, canonical-main candidate runs. Changing source,
@@ -66,8 +72,9 @@ to enable OIDC. The local CLI path can still publish that exact artifact after a
 
 ## Publish only the selected bytes
 
-After approval, dispatch **npm publish** on `main` with the four exact values from the candidate
-summary. In the CLI, replace the uppercase placeholders; do not include them literally:
+Once the authorized exact candidate and all gates are confirmed, dispatch **npm publish** on `main`
+with the four exact values from the candidate summary. In the CLI, replace the uppercase
+placeholders; do not include them literally:
 
 ```bash
 gh workflow run npm-publish.yml --ref main \

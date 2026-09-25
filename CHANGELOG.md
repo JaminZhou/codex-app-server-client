@@ -2,10 +2,14 @@
 
 ## Unreleased
 
+## 0.3.0
+
 - Upgrade the bundled Codex protocol to `0.156.1`, adding the latest public request and schema
   surface. Keep Schema-omittable additions optional in TypeScript for supported older app-server
   versions, preserve the legacy `windowsSandboxPrivateDesktop` response field, and record upstream's
   removal of deprecated `thread/rollback` and its generated types.
+- This removes `thread/rollback` from the public generated method types. Consumers that call it
+  through the typed client must migrate; `thread/revert` is not an automatic semantic substitute.
 - Extend the bounded npm registry read-back window to cover propagation delays beyond one minute;
   publication itself remains non-retriable and safety mismatches still fail immediately.
 
