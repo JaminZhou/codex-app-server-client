@@ -111,7 +111,7 @@ withSmokeCleanup(temporaryRoot, () => {
       "--eval",
       [
         'import { protocolValidationMetadata, resolveCodexBinary } from "@jaminzhou/codex-app-server-client";',
-        "if (protocolValidationMetadata.validatedClientRequests !== 167) throw new Error(\"Git dependency protocol metadata is incomplete.\");",
+        "if (protocolValidationMetadata.validatedClientRequests !== 170) throw new Error(\"Git dependency protocol metadata is incomplete.\");",
         "const binary = resolveCodexBinary();",
         "if (!binary.executablePath) throw new Error(\"Git dependency Codex binary is missing.\");",
       ].join("\n"),

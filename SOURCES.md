@@ -12,9 +12,9 @@ This repository is an independently written client for public Codex interfaces.
 
 ## Pinned protocol provenance
 
-- CLI package: `@openai/codex@0.156.1`
-- Open-source tag: `rust-v0.156.1`
-- Open-source commit: `b412ff32c417f855c2b2d1581b77058eed87c84b`
+- CLI package: `@openai/codex@0.157.1`
+- Open-source tag: `rust-v0.157.1`
+- Open-source commit: `36650394c5b38c2990ccf2a3457165ca3e9d9726`
 - Method-map source: `codex-rs/app-server-protocol/src/protocol/common.rs`
 
 The CLI generates `src/generated/protocol/` and `schemas/`. A deterministic post-generation
@@ -44,7 +44,7 @@ The numbered Node examples retain the 15 public Python example groups at `rust-v
 the public [ExternalMessage and independent subscription change](https://github.com/openai/codex/commit/1a4096e273e80da30947e57fdfa45be92858ca91)
 for group 16 and its high-level behavior. The existing `0.153.4` `turn/start.toolOutput` protocol
 already preserved the tool-authority boundary; ExternalMessage itself did not require a
-generated-protocol upgrade. The current examples are also verified against `0.156.1`.
+generated-protocol upgrade. The current examples are also verified against `0.157.1`.
 See [the exact source, mapping and intentional differences](./docs/official-examples.md).
 No claim of parity with newer upstream examples or Python's blocking API is implied.
 

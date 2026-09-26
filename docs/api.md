@@ -154,9 +154,9 @@ that reader only; `interrupt()` requests a server-side interruption visible to e
 Tool-output requests require a reported CLI version of at least `0.151.0`. Unknown versions and
 prereleases at the minimum are rejected before submission, including raw `call("turn/start", ...)`
 and `protocolValidation: "off"`; disabling shape checks cannot establish this semantic capability.
-This API is included in the published client `0.2.0` and remains available in the `0.3.0` source
-target. The published `0.2.1` archive bundles `0.154.0`, published `0.2.2` bundles `0.155.1`, while
-this checkout targets `0.3.0` with the verified `0.156.1` runtime;
+This API is included in the published client `0.2.0` and remains available in the current source
+checkout. The published `0.2.1` archive bundles `0.154.0`, `0.2.2` bundles `0.155.1`, and `0.3.0`
+bundles `0.156.1`; this unpublished source protocol update targets `0.157.1`;
 that runtime-upgrade qualification is separate from `ExternalMessage` availability. The original
 implementation was verified on `0.153.4`.
 

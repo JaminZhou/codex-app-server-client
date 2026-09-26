@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
-  "codexCliVersion": "0.156.1",
+  "codexCliVersion": "0.157.1",
   "source": {
     "repository": "https://github.com/openai/codex",
-    "tag": "rust-v0.156.1",
-    "commit": "b412ff32c417f855c2b2d1581b77058eed87c84b",
+    "tag": "rust-v0.157.1",
+    "commit": "36650394c5b38c2990ccf2a3457165ca3e9d9726",
     "path": "codex-rs/app-server-protocol/src/protocol/common.rs"
   },
   "methods": [
@@ -863,6 +863,30 @@
         "name": "ModelListResponse"
       },
       "variant": "ModelList"
+    },
+    {
+      "method": "account/gatewayOAuth/read",
+      "response": {
+        "module": "v2/GatewayOAuthReadResponse",
+        "name": "GatewayOAuthReadResponse"
+      },
+      "variant": "GatewayOAuthRead"
+    },
+    {
+      "method": "account/gatewayOAuth/login",
+      "response": {
+        "module": "v2/GatewayOAuthLoginResponse",
+        "name": "GatewayOAuthLoginResponse"
+      },
+      "variant": "GatewayOAuthLogin"
+    },
+    {
+      "method": "account/gatewayOAuth/cancel",
+      "response": {
+        "module": "v2/GatewayOAuthCancelResponse",
+        "name": "GatewayOAuthCancelResponse"
+      },
+      "variant": "GatewayOAuthCancel"
     },
     {
       "method": "modelProvider/capabilities/read",
