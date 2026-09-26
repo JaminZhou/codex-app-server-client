@@ -13,9 +13,9 @@ export function withSmokeCleanup(directory, run, remove = rmSync) {
     throw error;
   } finally {
     try {
-      // Windows may briefly retain handles to the installed runtime. Delegate transient
-      // error classification/backoff to Node; persistent failures must still fail CI.
-      remove(directory, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+      // Windows may briefly retain handles to the installed runtime. Six linear-backoff retries
+      // at 250ms yield a bounded 5.25-second wait; persistent failures must still fail CI.
+      remove(directory, { recursive: true, force: true, maxRetries: 6, retryDelay: 250 });
     } catch (cleanupError) {
       if (failed) throw new AggregateError([failure, cleanupError], "Smoke and temporary-directory cleanup both failed");
       throw cleanupError;
