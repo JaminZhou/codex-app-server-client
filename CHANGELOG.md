@@ -2,7 +2,10 @@
 
 ## Unreleased
 
-- Align the source checkout with Codex `0.157.1`: add typed mappings for the three
+## 0.3.1
+
+- Upgrade the bundled Codex runtime and public app-server protocol to `0.157.1`, adding typed
+  mappings for the three
   `account/gatewayOAuth/{read,login,cancel}` requests, the `account/gatewayOAuth/changed`
   notification, and updated plugin, hosted MCP resource, realtime V3, and thread-item timestamp
   shapes. No existing client method was removed; Schema-omittable additions remain optional in

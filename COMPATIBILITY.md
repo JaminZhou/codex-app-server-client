@@ -1,11 +1,10 @@
 # Compatibility and upgrades
 
-**This source checkout declares client version `0.3.0` and bundles `@openai/codex@0.157.1`; this
-protocol update is not yet published.** The published npm `0.3.0` archive remains on `0.156.1`,
-`0.2.2` on `0.155.1`, `0.2.1` on `0.154.0`, and the older `0.1.0` and `0.1.0-preview.0` archives
-on `0.153.4`; reinstalling them does not apply this source update. Its bindings and runtime validation
-schemas are generated together. Check the registry for exact-version availability; this document is
-also included in local candidates. The client version and runtime version are separate; installing a
+**This checkout declares client version `0.3.1` and bundles `@openai/codex@0.157.1`.** The published
+npm `0.3.0` archive remains on `0.156.1`, `0.2.2` on `0.155.1`, `0.2.1` on `0.154.0`, and the older
+`0.1.0` and `0.1.0-preview.0` archives on `0.153.4`; reinstalling them does not apply this update.
+The npm registry is authoritative for exact-version availability. Bindings and runtime validation
+schemas are generated together. The client version and runtime version are separate; installing a
 newer global CLI does not update the client's bundled runtime.
 
 The public [app-server protocol](https://learn.chatgpt.com/docs/app-server) evolves, and its generated
@@ -19,7 +18,7 @@ raw method coverage nor a successful basic smoke means all workflows work on an 
 | Basic initialization, thread and goal access | Exact runtimes `0.150.1`, `0.152.1`, `0.153.4`, `0.154.0`, `0.155.0`, `0.155.1`, `0.156.1`, `0.157.1` | Real isolated stdio compatibility smoke; no model calls |
 | Streaming, explicit command decline, interruption and process-restart resume | Source checkout, bundled `0.157.1` | Shipped examples run against the real runtime with a local mock provider |
 | Official example workflows, groups 01–14 | Source checkout, bundled `0.157.1` | Real-runtime local-provider suite; [mapping and boundaries](./docs/official-examples.md), not model-quality acceptance |
-| Official login/account example, group 15 | Source checkout | Strict client + scripted RPC fixture; not real OAuth or successful sign-in |
+| Official login/account example, group 15 | Client `0.3.1` source target | Strict client + scripted RPC fixture; not real OAuth or successful sign-in |
 | ExternalMessage, group 16, and independent joined-turn consumers | Source checkout, bundled `0.157.1` | Real-runtime tool authority, restart/resume, active join, structured content and truncation; deterministic subscription races |
 | Packed ESM, declarations, schemas, and bundled binary | Node.js 18 on Linux, macOS, Windows | Installed-package CI; not every OS/architecture pairing |
 | Published `0.1.0-preview.0` archive without consumer build scripts | npm and pnpm 11 consumers | Historical exact-archive verification; not evidence for new candidate bytes |
