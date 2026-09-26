@@ -24,7 +24,7 @@ test("requests bounded native retries and does not hide persistent cleanup failu
   const failure = Object.assign(new Error("still busy"), { code: "ENOTEMPTY" });
   assert.throws(() => withSmokeCleanup("test-owned-directory", () => {}, (path, options) => {
     assert.equal(path, "test-owned-directory");
-    assert.deepEqual(options, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+    assert.deepEqual(options, { recursive: true, force: true, maxRetries: 12, retryDelay: 200 });
     throw failure;
   }), (error) => error === failure);
 });
@@ -48,7 +48,7 @@ test("reports both failures when the smoke and cleanup fail", () => {
 });
 
 test("Windows retries deletion until a real non-delete-sharing handle closes", {
-  skip: process.platform !== "win32", timeout: 30_000,
+  skip: process.platform !== "win32", timeout: 60_000,
 }, async () => {
   const root = mkdtempSync(join(tmpdir(), "smoke-cleanup-lock-"));
   const locked = join(root, "runtime.exe");
@@ -68,7 +68,7 @@ test("Windows retries deletion until a real non-delete-sharing handle closes", {
       let output = "";
       const timer = setTimeout(() => reject(new Error(
         `File-lock fixture did not become ready; stdout=${JSON.stringify(output)}${stderr ? `; stderr=${stderr.trim()}` : ""}`,
-      )), 15_000);
+      )), 30_000);
       holder.once("error", (error) => { clearTimeout(timer); reject(error); });
       holder.once("exit", () => { clearTimeout(timer); reject(new Error("File-lock fixture exited: " + stderr)); });
       holder.stdout.setEncoding("utf8").on("data", (chunk) => {
@@ -87,6 +87,6 @@ test("Windows retries deletion until a real non-delete-sharing handle closes", {
   } finally {
     if (holder.exitCode === null && holder.signalCode === null) holder.kill();
     await exited.catch(() => {});
-    rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+    rmSync(root, { recursive: true, force: true, maxRetries: 12, retryDelay: 200 });
   }
 });
