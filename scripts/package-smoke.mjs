@@ -117,7 +117,7 @@ const manifest = withSmokeCleanup(temporaryRoot, () => {
     'import { protocolMetadata as protocol } from "@jaminzhou/codex-app-server-client/protocol";',
     'const require = createRequire(import.meta.url);',
     'if (protocol.codexCliVersion !== protocolMetadata.codexCliVersion) throw new Error("Protocol export mismatch");',
-    'if (protocolValidationMetadata.validatedClientRequests !== 167) throw new Error("Incomplete validation metadata");',
+    'if (protocolValidationMetadata.validatedClientRequests !== 170) throw new Error("Incomplete validation metadata");',
     'const schema = require.resolve("@jaminzhou/codex-app-server-client/schemas/runtime-validation.schemas.json");',
     'if (!existsSync(schema) || !existsSync(resolveCodexBinary().executablePath)) throw new Error("Missing installed Schema or CLI");',
   ].join("\n"));

@@ -5,6 +5,7 @@ export const clientNotificationMethods = [
 ] as const;
 
 export const serverNotificationMethods = [
+  "account/gatewayOAuth/changed",
   "account/login/completed",
   "account/rateLimits/updated",
   "account/updated",
