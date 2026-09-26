@@ -24,7 +24,7 @@ test("requests bounded native retries and does not hide persistent cleanup failu
   const failure = Object.assign(new Error("still busy"), { code: "ENOTEMPTY" });
   assert.throws(() => withSmokeCleanup("test-owned-directory", () => {}, (path, options) => {
     assert.equal(path, "test-owned-directory");
-    assert.deepEqual(options, { recursive: true, force: true, maxRetries: 12, retryDelay: 200 });
+    assert.deepEqual(options, { recursive: true, force: true, maxRetries: 6, retryDelay: 250 });
     throw failure;
   }), (error) => error === failure);
 });
@@ -87,6 +87,6 @@ test("Windows retries deletion until a real non-delete-sharing handle closes", {
   } finally {
     if (holder.exitCode === null && holder.signalCode === null) holder.kill();
     await exited.catch(() => {});
-    rmSync(root, { recursive: true, force: true, maxRetries: 12, retryDelay: 200 });
+    rmSync(root, { recursive: true, force: true, maxRetries: 6, retryDelay: 250 });
   }
 });
