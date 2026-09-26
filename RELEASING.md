@@ -26,13 +26,15 @@ checkout are development artifacts, not previously published bytes.
 ## Version and support policy
 
 - Client versions are independent of the Codex runtime version. This checkout targets client
-  `0.3.0` and pins `@openai/codex@0.156.1`; published client `0.2.2` bundles `0.155.1`, `0.2.1`
-  bundles `0.154.0`, and `0.1.0` bundles `0.153.4`. See [COMPATIBILITY.md](./COMPATIBILITY.md).
+  `0.3.1` and pins `@openai/codex@0.157.1`; published client `0.3.0` bundles `0.156.1`, `0.2.2`
+  bundles `0.155.1`, `0.2.1` bundles `0.154.0`, and `0.1.0` bundles `0.153.4`. See
+  [COMPATIBILITY.md](./COMPATIBILITY.md).
 - Future previews use a new target version and increasing `preview.N` suffix. Record changes and migration notes.
   Pre-1.0 APIs and generated experimental protocol types may change; consumers should pin exact
   versions and keep their lockfiles.
 - Stable releases are non-preview `0.x.y` versions and remain pre-1.0 APIs; see the
-  [0.3.0 release guide](./docs/releases/0.3.0.md) for its public method removal and migration note.
+  [0.3.1 release guide](./docs/releases/0.3.1.md) for this additive protocol sync and the
+  [0.3.0 release guide](./docs/releases/0.3.0.md) for the prior public-method removal.
   Preview commands use `--tag next`; do not deliberately promote a preview to `latest`. Always read
   back all registry tags: the first publication demonstrated that `--tag next` is not a guarantee
   that `latest` will be absent.
