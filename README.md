@@ -8,11 +8,12 @@ app-server process, typed requests, and event routing so you can focus on your a
 > endorsed by OpenAI. Codex and OpenAI are trademarks of OpenAI.
 
 **Package:** `@jaminzhou/codex-app-server-client`.
-**Latest published client:** `0.3.1`, a non-preview 0.x API, not a 1.0 stability commitment.
-The protocol update in this unreleased source checkout does not change that published archive.
+**Version target:** `0.4.0`, a non-preview 0.x API, not a 1.0 stability commitment.
 Check exact registry availability; a source checkout or local rebuild is not proof of publication.
 Version `0.3.0` removed the upstream-retired `thread/rollback` method from public types; callers
-using it must migrate. See the [0.3.1 release guide](./docs/releases/0.3.1.md), the
+using it must migrate. Version `0.4.0` removes upstream-retired plugin-extension types and
+`PluginSummary.extensions` from the generated public TypeScript surface. See the
+[0.4.0 release guide](./docs/releases/0.4.0.md), the [0.3.1 release guide](./docs/releases/0.3.1.md), the
 [0.3.0 migration guide](./docs/releases/0.3.0.md), the
 [historical 0.2.2 release record](./docs/releases/0.2.2.md), and
 [migration notes from 0.1.0](./docs/api-diff-0.2.0.md).
@@ -34,8 +35,8 @@ This package is independently maintained and has its own pre-1.0 API.
   Use a currently maintained Node.js release for a new app.
 - **Build from source / Git:** Node.js 22+ and pnpm 11.7.0. A Git install runs a build; a tarball
   already contains JavaScript, declarations, schemas, and examples.
-- **Runtime:** this unreleased source checkout targets `@openai/codex@0.158.0`; the published
-  client `0.3.1` archive remains on `0.157.1`, `0.3.0` on `0.156.1`, `0.2.2` on `0.155.1`,
+- **Runtime:** client `0.4.0` targets `@openai/codex@0.158.0`; client `0.3.1` uses `0.157.1`,
+  `0.3.0` uses `0.156.1`, `0.2.2` uses `0.155.1`,
   `0.2.1` on `0.154.0`, and the historical `0.1.0` archive on `0.153.4`. Check the registry for
   exact-version availability.
   No global CLI installation is needed.
@@ -46,7 +47,7 @@ This package is independently maintained and has its own pre-1.0 API.
   TCP WebSocket remains experimental for this pinned baseline.
 - **Source version boundary:** basic runtime smoke covers `0.150.1`, `0.152.1`, `0.153.4`, `0.154.0`,
   `0.155.0`, `0.155.1`, `0.156.1`, `0.157.1`, and `0.158.0`. Current rich turn/approval examples
-  use `0.158.0`; the published clients `0.3.1`, `0.3.0` and `0.2.2` use `0.157.1`, `0.156.1` and
+  target `0.4.0` uses `0.158.0`; clients `0.3.1`, `0.3.0` and `0.2.2` use `0.157.1`, `0.156.1` and
   `0.155.1`, respectively. Other releases are not implied compatible.
 
 See [compatibility and upgrade guidance](./COMPATIBILITY.md) before changing the runtime.
@@ -57,12 +58,12 @@ Check availability, then install the exact version in a new consumer directory:
 
 ```bash
 npm init -y
-npm view @jaminzhou/codex-app-server-client@0.3.1 version --registry https://registry.npmjs.org/
-npm install --save-exact --ignore-scripts --include=optional @jaminzhou/codex-app-server-client@0.3.1
+npm view @jaminzhou/codex-app-server-client@0.4.0 version --registry https://registry.npmjs.org/
+npm install --save-exact --ignore-scripts --include=optional @jaminzhou/codex-app-server-client@0.4.0
 node node_modules/@jaminzhou/codex-app-server-client/examples/stream.mjs
 ```
 
-If the exact-version query reports that `0.3.1` is unavailable, it has not been made available in
+If the exact-version query reports that `0.4.0` is unavailable, it has not been made available in
 that registry: use a verified local candidate below, or explicitly choose an available historical
 release with its older feature set. Do not infer publication from a source checkout's version number.
 
@@ -100,7 +101,7 @@ These additions are not files in the immutable npm `0.1.0` archive.
 ## Install into your own project
 
 Use the exact registry version above (or `pnpm add --save-exact --ignore-scripts
-@jaminzhou/codex-app-server-client@0.3.1`). To validate unpublished changes in this source checkout,
+@jaminzhou/codex-app-server-client@0.4.0`). To validate unpublished changes in this source checkout,
 run the development checks below. npm versions are immutable; never create a different archive for
 an already-published version.
 
@@ -117,7 +118,8 @@ version and update `package.json`, then follow [release preparation](./RELEASING
 The initial preview publication used `--tag next`, but the registry also assigned `latest` to it.
 At the `0.1.0` release verification, `latest` pointed to `0.1.0` and `next` retained the preview.
 Neither tag is a stability guarantee. Pin the exact version and retain your lockfile.
-See [release preparation](./RELEASING.md), the [0.3.1 release guide](./docs/releases/0.3.1.md),
+See [release preparation](./RELEASING.md), the [0.4.0 release guide](./docs/releases/0.4.0.md),
+the [0.3.1 release guide](./docs/releases/0.3.1.md),
 the [0.3.0 release guide](./docs/releases/0.3.0.md),
 and the [historical 0.2.2 release record](./docs/releases/0.2.2.md).
 
@@ -146,8 +148,8 @@ npm exec --package=@openai/codex@0.158.0 -- codex login status
 node examples/stream.mjs --live
 ```
 
-For the published client `0.3.1` archive, use its `@openai/codex@0.157.1` runtime; client `0.3.0`
-uses `0.156.1`.
+Client `0.4.0` uses `@openai/codex@0.158.0`; client `0.3.1` uses `0.157.1`, and `0.3.0` uses
+`0.156.1`.
 For `0.2.2`, use `0.155.1`, and for `0.2.1`, use `0.154.0`.
 
 For the historical client `0.1.0` archive, use its matching `@openai/codex@0.153.4` instead.

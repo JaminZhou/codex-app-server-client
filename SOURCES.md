@@ -44,8 +44,8 @@ The numbered Node examples retain the 15 public Python example groups at `rust-v
 the public [ExternalMessage and independent subscription change](https://github.com/openai/codex/commit/1a4096e273e80da30947e57fdfa45be92858ca91)
 for group 16 and its high-level behavior. The existing `0.153.4` `turn/start.toolOutput` protocol
 already preserved the tool-authority boundary; ExternalMessage itself did not require a
-generated-protocol upgrade. The unreleased source checkout verifies the current examples against
-`0.158.0`; the published client `0.3.1` archive remains on `0.157.1`.
+generated-protocol upgrade. The `0.4.0` release target verifies the current examples against
+`0.158.0`; client `0.3.1` uses `0.157.1`.
 See [the exact source, mapping and intentional differences](./docs/official-examples.md).
 No claim of parity with newer upstream examples or Python's blocking API is implied.
 

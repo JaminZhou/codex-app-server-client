@@ -25,8 +25,8 @@ checkout are development artifacts, not previously published bytes.
 
 ## Version and support policy
 
-- Client versions are independent of the Codex runtime version. This unreleased protocol-sync
-  checkout pins `@openai/codex@0.158.0`; the published client `0.3.1` archive remains on `0.157.1`,
+- Client versions are independent of the Codex runtime version. The `0.4.0` release target pins
+  `@openai/codex@0.158.0`; client `0.3.1` uses `0.157.1`,
   `0.3.0` bundles `0.156.1`, `0.2.2`
   bundles `0.155.1`, `0.2.1` bundles `0.154.0`, and `0.1.0` bundles `0.153.4`. See
   [COMPATIBILITY.md](./COMPATIBILITY.md).
@@ -34,6 +34,7 @@ checkout are development artifacts, not previously published bytes.
   Pre-1.0 APIs and generated experimental protocol types may change; consumers should pin exact
   versions and keep their lockfiles.
 - Stable releases are non-preview `0.x.y` versions and remain pre-1.0 APIs; see the
+  [0.4.0 release guide](./docs/releases/0.4.0.md) for this breaking generated-type removal, the
   [0.3.1 release guide](./docs/releases/0.3.1.md) for this additive protocol sync and the
   [0.3.0 release guide](./docs/releases/0.3.0.md) for the prior public-method removal.
   Preview commands use `--tag next`; do not deliberately promote a preview to `latest`. Always read
