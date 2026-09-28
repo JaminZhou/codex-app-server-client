@@ -193,10 +193,10 @@ describe("release workflow security contracts", () => {
   });
   it("reserves publish-job headroom for bounded read-back and earlier release steps", () => {
     const publisher = read("npm-publish").split("\n  publish:\n")[1].split("\n  registry-consumers:\n")[0];
-    // Eight attempts can each read metadata and a tarball for up to 30 seconds,
-    // plus 247 seconds of backoff. The same job also performs setup and publishing.
+    // Nine attempts can each read metadata and a tarball for up to 30 seconds,
+    // plus 487 seconds of backoff. The same job also performs setup and publishing.
     const timeoutMinutes = Number(publisher.match(/timeout-minutes: (\d+)/)?.[1]);
-    expect(timeoutMinutes).toBe(20);
-    expect(timeoutMinutes * 60 - (8 * 2 * 30 + 247)).toBeGreaterThan(7 * 60);
+    expect(timeoutMinutes).toBe(25);
+    expect(timeoutMinutes * 60 - (9 * 2 * 30 + 487)).toBeGreaterThan(7 * 60);
   });
 });

@@ -90,27 +90,27 @@ describe("bounded, read-only post-publication verification", () => {
     expect(options.sleep.mock.calls).toEqual([[2_000]]);
   });
 
-  it.each(["version", "latest", "tarball"])("stops after eight attempts when %s never becomes visible", async (kind) => {
-    const responses = Array.from({ length: 8 }, () => kind === "version" ? [json(missing())]
+  it.each(["version", "latest", "tarball"])("stops after nine attempts when %s never becomes visible", async (kind) => {
+    const responses = Array.from({ length: 9 }, () => kind === "version" ? [json(missing())]
       : kind === "latest" ? [json(visible(before.latest))]
         : [json(visible()), new Response(null, { status: 404 })]).flat();
     const options = readers(...responses);
     await expect(readPublishedRegistry(expected, manifest, before, options))
-      .rejects.toThrow("after 8 read attempts; it may already be published");
-    expect(options.fetcher).toHaveBeenCalledTimes(kind === "tarball" ? 16 : 8);
-    expect(options.sleep.mock.calls).toEqual([[2_000], [5_000], [10_000], [20_000], [30_000], [60_000], [120_000]]);
-    expect(options.onRetry).toHaveBeenCalledTimes(7);
+      .rejects.toThrow("after 9 read attempts; it may already be published");
+    expect(options.fetcher).toHaveBeenCalledTimes(kind === "tarball" ? 18 : 9);
+    expect(options.sleep.mock.calls).toEqual([[2_000], [5_000], [10_000], [20_000], [30_000], [60_000], [120_000], [240_000]]);
+    expect(options.onRetry).toHaveBeenCalledTimes(8);
     expectOnlyReads(options);
   });
 
-  it("covers registry propagation that outlasts the original one-minute budget", async () => {
+  it("covers registry propagation that outlasts the original four-minute window", async () => {
     const options = readers(
-      ...Array.from({ length: 6 }, () => json(missing())),
+      ...Array.from({ length: 8 }, () => json(missing())),
       json(visible()), new Response(bytes),
     );
     await expect(readPublishedRegistry(expected, manifest, before, options)).resolves.toMatchObject({ bytes });
-    expect(options.sleep.mock.calls).toEqual([[2_000], [5_000], [10_000], [20_000], [30_000], [60_000]]);
-    expect(options.onRetry).toHaveBeenCalledTimes(6);
+    expect(options.sleep.mock.calls).toEqual([[2_000], [5_000], [10_000], [20_000], [30_000], [60_000], [120_000], [240_000]]);
+    expect(options.onRetry).toHaveBeenCalledTimes(8);
   });
 
   it.each([
