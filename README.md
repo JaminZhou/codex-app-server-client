@@ -101,7 +101,7 @@ These additions are not files in the immutable npm `0.1.0` archive.
 ## Install into your own project
 
 Use the exact registry version above (or `pnpm add --save-exact --ignore-scripts
-@jaminzhou/codex-app-server-client@0.3.1`). To validate unpublished changes in this source checkout,
+@jaminzhou/codex-app-server-client@0.4.0`). To validate unpublished changes in this source checkout,
 run the development checks below. npm versions are immutable; never create a different archive for
 an already-published version.
 
