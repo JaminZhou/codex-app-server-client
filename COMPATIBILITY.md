@@ -1,7 +1,7 @@
 # Compatibility and upgrades
 
-**This unreleased source checkout targets `@openai/codex@0.158.0`.** The published npm `0.3.1`
-archive remains on `0.157.1`, `0.3.0` on `0.156.1`, `0.2.2` on `0.155.1`, `0.2.1` on `0.154.0`,
+**The `0.4.0` source target uses `@openai/codex@0.158.0`.** Client `0.3.1` uses `0.157.1`,
+`0.3.0` uses `0.156.1`, `0.2.2` uses `0.155.1`, `0.2.1` uses `0.154.0`,
 and the older `0.1.0` and `0.1.0-preview.0` archives on `0.153.4`; reinstalling them does not
 apply this update.
 The npm registry is authoritative for exact-version availability. Bindings and runtime validation
@@ -17,10 +17,10 @@ raw method coverage nor a successful basic smoke means all workflows work on an 
 | Scope | Versions / environment | Evidence |
 | --- | --- | --- |
 | Basic initialization, thread and goal access | Exact runtimes `0.150.1`, `0.152.1`, `0.153.4`, `0.154.0`, `0.155.0`, `0.155.1`, `0.156.1`, `0.157.1`, `0.158.0` | Real isolated stdio compatibility smoke; no model calls |
-| Streaming, explicit command decline, interruption and process-restart resume | Unreleased source checkout, bundled `0.158.0` | Shipped examples run against the real runtime with a local mock provider |
-| Official example workflows, groups 01–14 | Unreleased source checkout, bundled `0.158.0` | Real-runtime local-provider suite; [mapping and boundaries](./docs/official-examples.md), not model-quality acceptance |
-| Official login/account example, group 15 | Unreleased source checkout | Strict client + scripted RPC fixture; not real OAuth or successful sign-in |
-| ExternalMessage, group 16, and independent joined-turn consumers | Unreleased source checkout, bundled `0.158.0` | Real-runtime tool authority, restart/resume, active join, structured content and truncation; deterministic subscription races |
+| Streaming, explicit command decline, interruption and process-restart resume | `0.4.0` target, bundled `0.158.0` | Shipped examples run against the real runtime with a local mock provider |
+| Official example workflows, groups 01–14 | `0.4.0` target, bundled `0.158.0` | Real-runtime local-provider suite; [mapping and boundaries](./docs/official-examples.md), not model-quality acceptance |
+| Official login/account example, group 15 | `0.4.0` target | Strict client + scripted RPC fixture; not real OAuth or successful sign-in |
+| ExternalMessage, group 16, and independent joined-turn consumers | `0.4.0` target, bundled `0.158.0` | Real-runtime tool authority, restart/resume, active join, structured content and truncation; deterministic subscription races |
 | Packed ESM, declarations, schemas, and bundled binary | Node.js 18 on Linux, macOS, Windows | Installed-package CI; not every OS/architecture pairing |
 | Published `0.1.0-preview.0` archive without consumer build scripts | npm and pnpm 11 consumers | Historical exact-archive verification; not evidence for new candidate bytes |
 | Live account entitlement, model quality, every protocol workflow | Not established by these tests | Requires separate application-specific acceptance |
@@ -69,8 +69,8 @@ No private Codex Desktop code is a normative source or part of this package.
 The `0.158.0` upgrade adds the `promax` plan, `flexUnavailable` error, and optional
 `EnvironmentAddParams.authBearerToken` (only for secure transports or loopback destinations). It
 removes the upstream plugin-extension types and `PluginSummary.extensions`, which are breaking
-removals from this package's generated TypeScript exports. The published `0.3.1` archive remains
-unchanged; this is an unreleased source update.
+removals from this package's generated TypeScript exports. This is the `0.4.0` target; the existing
+`0.3.1` archive remains on `0.157.1` and is unchanged.
 
 The earlier `0.156.1` upgrade added typed `rollout/compress` and new account-routing, MCP app
 UI/display, model-access-program, workspace-routing, and Windows sandbox protocol shapes. It removes the

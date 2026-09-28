@@ -2,20 +2,21 @@
 
 ## Unreleased
 
-- Align the unreleased source protocol/runtime with Codex `0.158.0` (`rust-v0.158.0`), adding the
-  `promax` plan, `flexUnavailable` error, and optional executor bearer-token field. Upstream removed
-  the plugin-extension types and `PluginSummary.extensions`; this intentionally removes those
-  generated public TypeScript exports. Published archives remain unchanged.
+## 0.4.0
+
+- Align the bundled Codex runtime and public app-server protocol with `0.158.0`, adding the `promax`
+  plan, `flexUnavailable` error and optional executor bearer-token field. Upstream removed the
+  plugin-extension types and `PluginSummary.extensions`; this removes those generated public
+  TypeScript exports and is a breaking API change.
 
 ## 0.3.1
 
 - Upgrade the bundled Codex runtime and public app-server protocol to `0.157.1`, adding typed
-  mappings for the three
-  `account/gatewayOAuth/{read,login,cancel}` requests, the `account/gatewayOAuth/changed`
-  notification, and updated plugin, hosted MCP resource, realtime V3, and thread-item timestamp
-  shapes. No existing client method was removed; Schema-omittable additions remain optional in
-  TypeScript for older supported app-server versions. The generated surface maps 170 client
-  methods, validates 167 responses, and covers 85 server notifications.
+  mappings for the three `account/gatewayOAuth/{read,login,cancel}` requests, the
+  `account/gatewayOAuth/changed` notification, and updated plugin, hosted MCP resource, realtime V3,
+  and thread-item timestamp shapes. No existing client method was removed; Schema-omittable additions
+  remain optional in TypeScript for older supported app-server versions. The generated surface maps
+  170 client methods, validates 167 responses, and covers 85 server notifications.
 
 ## 0.3.0
 

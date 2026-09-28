@@ -1,8 +1,8 @@
 # Official example alignment
 
 Groups 01–15 follow the public [Python app-server SDK examples at Codex 0.153.4](https://github.com/openai/codex/tree/3d2ee51ca2d5db578f328aa75e20aa22c0197c9a/sdk/python/examples),
-the original example-alignment baseline. This unreleased source checkout now runs those examples on
-Codex `0.158.0`; the published client `0.3.1` archive remains on `0.157.1`.
+the original example-alignment baseline. The `0.4.0` release target runs those examples on Codex
+`0.158.0`; client `0.3.1` uses `0.157.1`.
 Group 16 follows the newer public Python
 SDK [ExternalMessage change](https://github.com/openai/codex/commit/1a4096e273e80da30947e57fdfa45be92858ca91),
 using protocol fields already present in that runtime. These are independently written Node.js
