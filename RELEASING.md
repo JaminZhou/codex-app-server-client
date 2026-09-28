@@ -25,8 +25,9 @@ checkout are development artifacts, not previously published bytes.
 
 ## Version and support policy
 
-- Client versions are independent of the Codex runtime version. This checkout targets client
-  `0.3.1` and pins `@openai/codex@0.157.1`; published client `0.3.0` bundles `0.156.1`, `0.2.2`
+- Client versions are independent of the Codex runtime version. This unreleased protocol-sync
+  checkout pins `@openai/codex@0.158.0`; the published client `0.3.1` archive remains on `0.157.1`,
+  `0.3.0` bundles `0.156.1`, `0.2.2`
   bundles `0.155.1`, `0.2.1` bundles `0.154.0`, and `0.1.0` bundles `0.153.4`. See
   [COMPATIBILITY.md](./COMPATIBILITY.md).
 - Future previews use a new target version and increasing `preview.N` suffix. Record changes and migration notes.
