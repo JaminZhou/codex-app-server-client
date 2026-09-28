@@ -154,9 +154,10 @@ that reader only; `interrupt()` requests a server-side interruption visible to e
 Tool-output requests require a reported CLI version of at least `0.151.0`. Unknown versions and
 prereleases at the minimum are rejected before submission, including raw `call("turn/start", ...)`
 and `protocolValidation: "off"`; disabling shape checks cannot establish this semantic capability.
-This API is included in published client `0.2.0` and in the `0.3.1` source target. The `0.2.1`
-archive bundles `0.154.0`, `0.2.2` bundles `0.155.1`, `0.3.0` bundles `0.156.1`, and the `0.3.1`
-target uses `0.157.1`; check the npm registry for exact-version availability.
+This API is included in published client `0.2.0` and later. The `0.2.1` archive bundles `0.154.0`,
+`0.2.2` bundles `0.155.1`, and `0.3.0` bundles `0.156.1`. The published `0.3.1` archive uses
+`0.157.1`; this unreleased source checkout targets `0.158.0`. Check the npm registry for exact-version
+availability.
 that runtime-upgrade qualification is separate from `ExternalMessage` availability. The original
 implementation was verified on `0.153.4`.
 

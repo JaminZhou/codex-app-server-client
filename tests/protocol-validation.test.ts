@@ -83,7 +83,9 @@ describe("generated protocol runtime validation", () => {
       IsOptional<v2.UserVerificationEnrollResponse, "algorithm">,
       IsOptional<v2.UserVerificationEnrollResponse, "publicKey">,
       IsOptional<v2.McpServerElicitationRequestParams, "_meta">,
+      IsOptional<v2.EnvironmentAddParams, "authBearerToken">,
     ] = [
+      true,
       true,
       true,
       true,
@@ -139,7 +141,7 @@ describe("generated protocol runtime validation", () => {
       true,
     ];
 
-    expect(optionalFields).toHaveLength(53);
+    expect(optionalFields).toHaveLength(54);
   });
 
   it("accepts verification elicitation requests without optional metadata", () => {

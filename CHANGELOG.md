@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Align the unreleased source protocol/runtime with Codex `0.158.0` (`rust-v0.158.0`), adding the
+  `promax` plan, `flexUnavailable` error, and optional executor bearer-token field. Upstream removed
+  the plugin-extension types and `PluginSummary.extensions`; this intentionally removes those
+  generated public TypeScript exports. Published archives remain unchanged.
+
 ## 0.3.1
 
 - Upgrade the bundled Codex runtime and public app-server protocol to `0.157.1`, adding typed

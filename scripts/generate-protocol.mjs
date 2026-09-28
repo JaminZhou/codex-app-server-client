@@ -71,7 +71,6 @@ const wireOptionalGeneratedFields = {
   "v2/PluginShareContext.ts": ["canPublishToWorkspace"],
   "v2/PluginShareSaveResponse.ts": ["canPublishToWorkspace"],
   "v2/PluginSummary.ts": [
-    "extensions",
     "mustShowInstallationInterstitial",
     "installedAt",
     "disabledReason",
