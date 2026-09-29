@@ -692,6 +692,8 @@ type CodexV2ThreadInjectItemsParamsType = import("./v2/ThreadInjectItemsParams")
 type CodexV2ThreadInjectItemsResponseType = import("./v2/ThreadInjectItemsResponse").ThreadInjectItemsResponse;
 type CodexV2ThreadItemType = import("./v2/ThreadItem").ThreadItem;
 type CodexV2ThreadItemEntryType = import("./v2/ThreadItemEntry").ThreadItemEntry;
+type CodexV2ThreadItemsListAnchorType = import("./v2/ThreadItemsListAnchor").ThreadItemsListAnchor;
+type CodexV2ThreadItemsListCursorType = import("./v2/ThreadItemsListCursor").ThreadItemsListCursor;
 type CodexV2ThreadItemsListParamsType = import("./v2/ThreadItemsListParams").ThreadItemsListParams;
 type CodexV2ThreadItemsListResponseType = import("./v2/ThreadItemsListResponse").ThreadItemsListResponse;
 type CodexV2ThreadListParamsType = import("./v2/ThreadListParams").ThreadListParams;
@@ -1465,6 +1467,8 @@ declare namespace v2 {
   export type ThreadInjectItemsResponse = CodexV2ThreadInjectItemsResponseType;
   export type ThreadItem = CodexV2ThreadItemType;
   export type ThreadItemEntry = CodexV2ThreadItemEntryType;
+  export type ThreadItemsListAnchor = CodexV2ThreadItemsListAnchorType;
+  export type ThreadItemsListCursor = CodexV2ThreadItemsListCursorType;
   export type ThreadItemsListParams = CodexV2ThreadItemsListParamsType;
   export type ThreadItemsListResponse = CodexV2ThreadItemsListResponseType;
   export type ThreadListParams = CodexV2ThreadListParamsType;

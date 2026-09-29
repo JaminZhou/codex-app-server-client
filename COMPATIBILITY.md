@@ -1,6 +1,7 @@
 # Compatibility and upgrades
 
-**The `0.4.0` source target uses `@openai/codex@0.158.0`.** Client `0.3.1` uses `0.157.1`,
+**The `0.5.0` source target uses `@openai/codex@0.159.0`.** Client `0.4.0` uses `0.158.0`,
+and client `0.3.1` uses `0.157.1`,
 `0.3.0` uses `0.156.1`, `0.2.2` uses `0.155.1`, `0.2.1` uses `0.154.0`,
 and the older `0.1.0` and `0.1.0-preview.0` archives on `0.153.4`; reinstalling them does not
 apply this update.
@@ -16,11 +17,11 @@ raw method coverage nor a successful basic smoke means all workflows work on an 
 
 | Scope | Versions / environment | Evidence |
 | --- | --- | --- |
-| Basic initialization, thread and goal access | Exact runtimes `0.150.1`, `0.152.1`, `0.153.4`, `0.154.0`, `0.155.0`, `0.155.1`, `0.156.1`, `0.157.1`, `0.158.0` | Real isolated stdio compatibility smoke; no model calls |
-| Streaming, explicit command decline, interruption and process-restart resume | `0.4.0` target, bundled `0.158.0` | Shipped examples run against the real runtime with a local mock provider |
-| Official example workflows, groups 01–14 | `0.4.0` target, bundled `0.158.0` | Real-runtime local-provider suite; [mapping and boundaries](./docs/official-examples.md), not model-quality acceptance |
-| Official login/account example, group 15 | `0.4.0` target | Strict client + scripted RPC fixture; not real OAuth or successful sign-in |
-| ExternalMessage, group 16, and independent joined-turn consumers | `0.4.0` target, bundled `0.158.0` | Real-runtime tool authority, restart/resume, active join, structured content and truncation; deterministic subscription races |
+| Basic initialization, thread and goal access | Exact runtimes `0.150.1`, `0.152.1`, `0.153.4`, `0.154.0`, `0.155.0`, `0.155.1`, `0.156.1`, `0.157.1`, `0.158.0`, `0.159.0` | Real isolated stdio compatibility smoke; no model calls |
+| Streaming, explicit command decline, interruption and process-restart resume | `0.5.0` target, bundled `0.159.0` | Shipped examples run against the real runtime with a local mock provider |
+| Official example workflows, groups 01–14 | `0.5.0` target, bundled `0.159.0` | Real-runtime local-provider suite; [mapping and boundaries](./docs/official-examples.md), not model-quality acceptance |
+| Official login/account example, group 15 | `0.5.0` target | Strict client + scripted RPC fixture; not real OAuth or successful sign-in |
+| ExternalMessage, group 16, and independent joined-turn consumers | `0.5.0` target, bundled `0.159.0` | Real-runtime tool authority, restart/resume, active join, structured content and truncation; deterministic subscription races |
 | Packed ESM, declarations, schemas, and bundled binary | Node.js 18 on Linux, macOS, Windows | Installed-package CI; not every OS/architecture pairing |
 | Published `0.1.0-preview.0` archive without consumer build scripts | npm and pnpm 11 consumers | Historical exact-archive verification; not evidence for new candidate bytes |
 | Live account entitlement, model quality, every protocol workflow | Not established by these tests | Requires separate application-specific acceptance |
@@ -59,17 +60,19 @@ Desktop functionality.
 
 | Reference | Pinned baseline | How it is used |
 | --- | --- | --- |
-| Public Codex CLI | `codex-cli 0.158.0` / `rust-v0.158.0` | Runtime binary and public app-server behavior |
+| Public Codex CLI | `codex-cli 0.159.0` / `rust-v0.159.0` | Runtime binary and public app-server behavior |
 | Generated app-server TypeScript | Generated from the pinned CLI | Request, response, notification, and server-request types |
 | Generated JSON Schema | Generated from the pinned CLI | Shipped schema artifacts and drift checks |
 | Official Python SDK | Public source at the same Codex tag | Lifecycle, routing, error, and high-level behavior reference |
 
 No private Codex Desktop code is a normative source or part of this package.
 
-The `0.158.0` upgrade adds the `promax` plan, `flexUnavailable` error, and optional
+The `0.159.0` upgrade adds the `tooManyDenials` error, optional MCP server-name filtering, and
+anchor-based `thread/items/list` pagination; it removes no public methods or generated types. This
+is the `0.5.0` target. The earlier `0.158.0` upgrade adds the `promax` plan, `flexUnavailable` error, and optional
 `EnvironmentAddParams.authBearerToken` (only for secure transports or loopback destinations). It
 removes the upstream plugin-extension types and `PluginSummary.extensions`, which are breaking
-removals from this package's generated TypeScript exports. This is the `0.4.0` target; the existing
+removals from this package's generated TypeScript exports. This was the `0.4.0` target; the existing
 `0.3.1` archive remains on `0.157.1` and is unchanged.
 
 The earlier `0.156.1` upgrade added typed `rollout/compress` and new account-routing, MCP app
@@ -122,7 +125,7 @@ experiments.
 
 The scheduled compatibility smoke covers every exact stable release in
 `compatibility-matrix.json`, currently `0.150.1`, `0.152.1`, `0.153.4`, `0.154.0`, `0.155.0`,
-`0.155.1`, `0.156.1`, `0.157.1`, and the pinned `0.158.0`. On the minimum supported Node.js 18
+`0.155.1`, `0.156.1`, `0.157.1`, `0.158.0`, and the pinned `0.159.0`. On the minimum supported Node.js 18
 runtime it installs each CLI in isolation, starts its real stdio app-server with plugins disabled, uses strict
 current-Schema validation, and exercises initialization, model and thread listing, thread creation/read,
 and thread-goal access without calling a model service. The matrix is an explicit verified window,

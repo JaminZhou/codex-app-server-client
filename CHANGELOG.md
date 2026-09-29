@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.5.0
+
+- Align the bundled Codex runtime and public app-server protocol with `0.159.0`. Add the
+  `tooManyDenials` error, MCP server-specific status filtering, and typed item-anchor pagination for
+  `thread/items/list`. No existing public method or generated type is removed.
+
 ## 0.4.0
 
 - Align the bundled Codex runtime and public app-server protocol with `0.158.0`, adding the `promax`
