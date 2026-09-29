@@ -62,6 +62,24 @@ await client.call("account/logout");
 
 For forward compatibility or deliberately untyped extensions, `request<T>(method, params)` remains available as a raw escape hatch.
 
+The `0.5.0` protocol baseline also exposes server-filtered MCP status and item-anchor pagination as
+typed raw calls:
+
+```ts
+const mcpStatus = await client.call("mcpServerStatus/list", {
+  serverName: "local-tools",
+});
+
+const page = await client.call("thread/items/list", {
+  threadId,
+  turnId,
+  cursor: { type: "item", itemId: "item-id" },
+});
+```
+
+The anchor is exclusive and requires a non-empty `turnId`. Use the returned opaque string cursor to
+continue pagination; an item anchor selects the page boundary rather than replacing that cursor.
+
 ## Runtime protocol validation
 
 Generated Schema validation is enabled by default. Before writing, known client requests and
@@ -156,7 +174,8 @@ prereleases at the minimum are rejected before submission, including raw `call("
 and `protocolValidation: "off"`; disabling shape checks cannot establish this semantic capability.
 This API is included in published client `0.2.0` and later. The `0.2.1` archive bundles `0.154.0`,
 `0.2.2` bundles `0.155.1`, `0.3.0` bundles `0.156.1`, and `0.3.1` uses `0.157.1`; the `0.4.0`
-target uses `0.158.0`. Check the npm registry for exact-version availability.
+target uses `0.158.0` and `0.5.0` targets `0.159.0`. Check the npm registry for exact-version
+availability.
 that runtime-upgrade qualification is separate from `ExternalMessage` availability. The original
 implementation was verified on `0.153.4`.
 
