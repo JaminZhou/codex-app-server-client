@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
-  "codexCliVersion": "0.159.0",
+  "codexCliVersion": "0.159.2",
   "source": {
     "repository": "https://github.com/openai/codex",
-    "tag": "rust-v0.159.0",
-    "commit": "687a119f0fcaace47e1f1abcc77cec6c813fd6da",
+    "tag": "rust-v0.159.2",
+    "commit": "ff6aec96948b70d94983af2641a6b67c94faeff5",
     "path": "codex-rs/app-server-protocol/src/protocol/common.rs"
   },
   "methods": [

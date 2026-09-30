@@ -1,7 +1,7 @@
 # Runnable examples
 
 In this source checkout, the three safety examples and numbered groups 01–14 and 16 use the
-**real bundled Codex 0.159.0 app-server**, with a local scripted Responses provider by default.
+**real bundled Codex 0.159.2 app-server**, with a local scripted Responses provider by default.
 They need no account, send no requests to a
 model service, and do not execute the command proposed in the approval fixture. Each gets a temporary
 workspace and Codex home; both are deleted on normal exit. Group 15 instead uses a scripted login RPC
@@ -123,7 +123,7 @@ before using live lifecycle, model-selection or interactive CLI examples.
 
 | Symptom | Recovery |
 | --- | --- |
-| npm returns 404 for the scoped package | Check `npm view @jaminzhou/codex-app-server-client@0.5.0 version --registry https://registry.npmjs.org/`. If unavailable, use a verified local candidate. Check network access; do not infer publication from a source version or substitute the unscoped package. |
+| npm returns 404 for the scoped package | Check `npm view @jaminzhou/codex-app-server-client@0.5.1 version --registry https://registry.npmjs.org/`. If unavailable, use a verified local candidate. Check network access; do not infer publication from a source version or substitute the unscoped package. |
 | Missing `dist/index.js` after a Git install | Build from source with Node.js 22+ or allow the exact Git source's `prepare` script in pnpm. A ready-built tarball avoids this build. |
 | Cannot resolve the bundled CLI | Reinstall with optional dependencies enabled (`npm install --include=optional`). Check the OS/architecture in the error. The client does not search global PATH. |
 | Login required / expired credentials | Run the pinned CLI's `login status`, then `login`, as the same user with the same `CODEX_HOME`. A home change selects different credentials/history. |

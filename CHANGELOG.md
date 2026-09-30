@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.5.1
+
+- Update the bundled Codex runtime to `0.159.2`. The upstream drift check found no generated
+  protocol differences from `0.159.0`; this is a runtime-only patch update with no public API changes.
+
 ## 0.5.0
 
 - Align the bundled Codex runtime and public app-server protocol with `0.159.0`. Add the
