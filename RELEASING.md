@@ -26,7 +26,7 @@ checkout are development artifacts, not previously published bytes.
 ## Version and support policy
 
 - Client versions are independent of the Codex runtime version. The `0.5.1` source target pins
-  `@openai/codex@0.159.2`; published client `0.5.0` uses `0.159.0`; client `0.4.0` uses `0.158.0`
+  `@openai/codex@0.159.3`; published client `0.5.0` uses `0.159.0`; client `0.4.0` uses `0.158.0`
   and client `0.3.1` uses `0.157.1`,
   `0.3.0` bundles `0.156.1`, `0.2.2`
   bundles `0.155.1`, `0.2.1` bundles `0.154.0`, and `0.1.0` bundles `0.153.4`. See

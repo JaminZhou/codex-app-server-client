@@ -14,7 +14,7 @@ Version `0.3.0` removed the upstream-retired `thread/rollback` method from publi
 using it must migrate. Version `0.4.0` removes upstream-retired plugin-extension types and
 `PluginSummary.extensions` from the generated public TypeScript surface. Version `0.5.0` adds the
 Codex `0.159.0` protocol surface without removing any existing public method or type. Version `0.5.1`
-updates the bundled Codex runtime to `0.159.2` without generated protocol changes. See the
+updates the bundled Codex runtime to `0.159.3` without generated protocol changes. See the
 [0.5.1 release guide](./docs/releases/0.5.1.md), the [0.5.0 release guide](./docs/releases/0.5.0.md), the
 [0.4.0 release guide](./docs/releases/0.4.0.md), the [0.3.1 release guide](./docs/releases/0.3.1.md), the
 [0.3.0 migration guide](./docs/releases/0.3.0.md), the
@@ -38,7 +38,7 @@ This package is independently maintained and has its own pre-1.0 API.
   Use a currently maintained Node.js release for a new app.
 - **Build from source / Git:** Node.js 22+ and pnpm 11.7.0. A Git install runs a build; a tarball
   already contains JavaScript, declarations, schemas, and examples.
-- **Runtime:** source target `0.5.1` uses `@openai/codex@0.159.2`; published client `0.5.0` uses
+- **Runtime:** source target `0.5.1` uses `@openai/codex@0.159.3`; published client `0.5.0` uses
   `0.159.0`; client `0.4.0` uses `0.158.0`,
   `0.3.1` uses `0.157.1`,
   `0.3.0` uses `0.156.1`, `0.2.2` uses `0.155.1`,
@@ -51,8 +51,8 @@ This package is independently maintained and has its own pre-1.0 API.
 - **Transports:** managed local stdio by default; Unix socket attachment is also available.
   TCP WebSocket remains experimental for this pinned baseline.
 - **Source version boundary:** basic runtime smoke covers `0.150.1`, `0.152.1`, `0.153.4`, `0.154.0`,
-  `0.155.0`, `0.155.1`, `0.156.1`, `0.157.1`, `0.158.0`, `0.159.0`, and `0.159.2`. Current rich turn/approval examples
-  target `0.5.1` uses `0.159.2`; client `0.5.0` uses `0.159.0`; client `0.4.0` uses `0.158.0`; clients `0.3.1`, `0.3.0` and `0.2.2` use `0.157.1`, `0.156.1` and
+  `0.155.0`, `0.155.1`, `0.156.1`, `0.157.1`, `0.158.0`, `0.159.0`, `0.159.2`, and `0.159.3`. Current rich turn/approval examples
+  target `0.5.1` uses `0.159.3`; client `0.5.0` uses `0.159.0`; client `0.4.0` uses `0.158.0`; clients `0.3.1`, `0.3.0` and `0.2.2` use `0.157.1`, `0.156.1` and
   `0.155.1`, respectively. Other releases are not implied compatible.
 
 See [compatibility and upgrade guidance](./COMPATIBILITY.md) before changing the runtime.
@@ -99,7 +99,7 @@ examples](./docs/official-examples.md),
 covering lifecycle, images, structured output, model selection, a small terminal loop, login cancellation
 and untrusted `ExternalMessage` input with independent joined-turn handles.
 Their public example references are unchanged, and this source checkout runs them on the pinned
-`0.159.2` baseline. Client `0.5.0` runs them on `0.159.0`, `0.4.0` on `0.158.0`, `0.3.1` on `0.157.1`, `0.3.0` on `0.156.1`,
+`0.159.3` baseline. Client `0.5.0` runs them on `0.159.0`, `0.4.0` on `0.158.0`, `0.3.1` on `0.157.1`, `0.3.0` on `0.156.1`,
 `0.2.2` on `0.155.1`, and `0.2.1` on `0.154.0`.
 These additions are not files in the immutable npm `0.1.0` archive.
 
@@ -150,12 +150,12 @@ the same CLI runtime bundled by the client, under the same user and `CODEX_HOME`
 your app. For this source checkout:
 
 ```bash
-npm exec --package=@openai/codex@0.159.2 -- codex login
-npm exec --package=@openai/codex@0.159.2 -- codex login status
+npm exec --package=@openai/codex@0.159.3 -- codex login
+npm exec --package=@openai/codex@0.159.3 -- codex login status
 node examples/stream.mjs --live
 ```
 
-Source target `0.5.1` uses `@openai/codex@0.159.2`; published client `0.5.0` uses `0.159.0`; client `0.4.0` uses `0.158.0`; client `0.3.1` uses `0.157.1`, and `0.3.0` uses
+Source target `0.5.1` uses `@openai/codex@0.159.3`; published client `0.5.0` uses `0.159.0`; client `0.4.0` uses `0.158.0`; client `0.3.1` uses `0.157.1`, and `0.3.0` uses
 `0.156.1`.
 For `0.2.2`, use `0.155.1`, and for `0.2.1`, use `0.154.0`.
 
