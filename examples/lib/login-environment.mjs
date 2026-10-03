@@ -6,6 +6,9 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { CodexAppServerClient } from "@jaminzhou/codex-app-server-client";
 
+const LOGIN_EXAMPLE_REQUEST_TIMEOUT_MS = 30_000;
+const LOGIN_EXAMPLE_DEADLINE_MS = 45_000;
+
 // Resolve the SDK's own declared ws dependency through its public schema export. This also
 // works when examples are copied into a pnpm consumer without a direct ws dependency.
 const require = createRequire(import.meta.url);
@@ -61,24 +64,42 @@ export async function withLoginExample(run) {
   if (args.some((arg) => arg !== "--live")) throw new Error("Usage: node 15_login_and_account.mjs [--live]");
   const live = args.includes("--live");
   let fixture, client, temporaryRoot;
+  let deadlineTimer;
   try {
     if (live) {
       temporaryRoot = mkdtempSync(join(tmpdir(), "codex-client-login-example-"));
       const codexHome = join(temporaryRoot, "codex-home");
       mkdirSync(codexHome);
-      client = new CodexAppServerClient({ cwd: temporaryRoot, requestTimeoutMs: 15_000,
+      client = new CodexAppServerClient({ cwd: temporaryRoot,
+        requestTimeoutMs: LOGIN_EXAMPLE_REQUEST_TIMEOUT_MS,
         env: { CODEX_HOME: codexHome, CODEX_APP_SERVER_DISABLE_MANAGED_CONFIG: "1",
           OPENAI_API_KEY: undefined, CODEX_API_KEY: undefined, OPENAI_BASE_URL: undefined } });
       console.log("[live-auth] Starts and immediately cancels real OAuth in an isolated home. No browser is opened.");
     } else {
       fixture = await startLoginFixture();
       client = new CodexAppServerClient({ transport: { type: "websocket", url: fixture.url },
-        protocolValidation: "strict", requestTimeoutMs: 5_000 });
+        protocolValidation: "strict", requestTimeoutMs: LOGIN_EXAMPLE_REQUEST_TIMEOUT_MS });
       console.log("[mock-rpc] Scripted login lifecycle; no real app-server, OAuth, credentials, or model calls.");
     }
-    await client.connect();
-    await run({ client, live, fixture });
+    const runExample = async () => {
+      await client.connect();
+      await run({ client, live, fixture });
+    };
+    if (live) {
+      await runExample();
+    } else {
+      await Promise.race([
+        runExample(),
+        new Promise((_, reject) => {
+          deadlineTimer = setTimeout(() => {
+            void client.close().catch(() => {});
+            reject(new Error("Non-interactive mock example exceeded its 45-second deadline"));
+          }, LOGIN_EXAMPLE_DEADLINE_MS);
+        }),
+      ]);
+    }
   } finally {
+    clearTimeout(deadlineTimer);
     try { await client?.close(); }
     finally {
       try { await fixture?.close(); }

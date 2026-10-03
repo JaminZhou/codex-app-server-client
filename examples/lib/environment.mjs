@@ -26,9 +26,10 @@ export async function withExample(scenario, run, { allowInteractive = false } = 
   let timeout;
   let timedOut = false;
   try {
-    // Interactive smoke cases run after many packaged examples on Windows, where
-    // starting a fresh app-server can exceed the shorter ordinary-example budget.
-    const options = { requestTimeoutMs: interactive ? 30_000 : 15_000, cwd: workspace };
+    // Windows hosted runners can take longer to start each fresh app-server after the
+    // preceding packaged examples. Keep RPCs bounded; non-interactive mocks also have a
+    // separate 45-second per-example deadline. Interactive examples remain open for user input.
+    const options = { requestTimeoutMs: 30_000, cwd: workspace };
     if (temporaryRoot) {
       mkdirSync(workspace);
       const codexHome = join(temporaryRoot, "codex-home");
@@ -87,7 +88,7 @@ shell_snapshot = false
         cwd: workspace, sandbox: "read-only", approvalPolicy, approvalsReviewer: "user",
       },
     });
-    if (timedOut) throw new Error("Mock example exceeded its 45-second deadline");
+    if (timedOut) throw new Error("Non-interactive mock example exceeded its 45-second deadline");
   } finally {
     clearTimeout(timeout);
     try { await client?.close(); }
