@@ -7,6 +7,7 @@ import { join } from "node:path";
 import { CodexAppServerClient } from "@jaminzhou/codex-app-server-client";
 
 const LOGIN_EXAMPLE_REQUEST_TIMEOUT_MS = 30_000;
+const LOGIN_EXAMPLE_DEADLINE_MS = 45_000;
 
 // Resolve the SDK's own declared ws dependency through its public schema export. This also
 // works when examples are copied into a pnpm consumer without a direct ws dependency.
@@ -63,6 +64,7 @@ export async function withLoginExample(run) {
   if (args.some((arg) => arg !== "--live")) throw new Error("Usage: node 15_login_and_account.mjs [--live]");
   const live = args.includes("--live");
   let fixture, client, temporaryRoot;
+  let deadlineTimer;
   try {
     if (live) {
       temporaryRoot = mkdtempSync(join(tmpdir(), "codex-client-login-example-"));
@@ -79,9 +81,25 @@ export async function withLoginExample(run) {
         protocolValidation: "strict", requestTimeoutMs: LOGIN_EXAMPLE_REQUEST_TIMEOUT_MS });
       console.log("[mock-rpc] Scripted login lifecycle; no real app-server, OAuth, credentials, or model calls.");
     }
-    await client.connect();
-    await run({ client, live, fixture });
+    const runExample = async () => {
+      await client.connect();
+      await run({ client, live, fixture });
+    };
+    if (live) {
+      await runExample();
+    } else {
+      await Promise.race([
+        runExample(),
+        new Promise((_, reject) => {
+          deadlineTimer = setTimeout(() => {
+            void client.close().catch(() => {});
+            reject(new Error("Non-interactive mock example exceeded its 45-second deadline"));
+          }, LOGIN_EXAMPLE_DEADLINE_MS);
+        }),
+      ]);
+    }
   } finally {
+    clearTimeout(deadlineTimer);
     try { await client?.close(); }
     finally {
       try { await fixture?.close(); }
