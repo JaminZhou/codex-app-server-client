@@ -1,6 +1,6 @@
 # Compatibility and upgrades
 
-**The `0.5.1` source target uses `@openai/codex@0.159.3`.** Published client `0.5.0` uses `0.159.0`;
+**The `0.5.1` source target uses `@openai/codex@0.160.0`.** Published client `0.5.0` uses `0.159.0`;
 client `0.4.0` uses `0.158.0`,
 and client `0.3.1` uses `0.157.1`,
 `0.3.0` uses `0.156.1`, `0.2.2` uses `0.155.1`, `0.2.1` uses `0.154.0`,
@@ -18,11 +18,11 @@ raw method coverage nor a successful basic smoke means all workflows work on an 
 
 | Scope | Versions / environment | Evidence |
 | --- | --- | --- |
-| Basic initialization, thread and goal access | Exact runtimes `0.150.1`, `0.152.1`, `0.153.4`, `0.154.0`, `0.155.0`, `0.155.1`, `0.156.1`, `0.157.1`, `0.158.0`, `0.159.0`, `0.159.2`, `0.159.3` | Real isolated stdio compatibility smoke; no model calls |
-| Streaming, explicit command decline, interruption and process-restart resume | `0.5.1` source target, bundled `0.159.3` | Shipped examples run against the real runtime with a local mock provider |
-| Official example workflows, groups 01–14 | `0.5.1` source target, bundled `0.159.3` | Real-runtime local-provider suite; [mapping and boundaries](./docs/official-examples.md), not model-quality acceptance |
+| Basic initialization, thread and goal access | Exact runtimes `0.150.1`, `0.152.1`, `0.153.4`, `0.154.0`, `0.155.0`, `0.155.1`, `0.156.1`, `0.157.1`, `0.158.0`, `0.159.0`, `0.159.2`, `0.159.3`, `0.160.0` | Real isolated stdio compatibility smoke; no model calls |
+| Streaming, explicit command decline, interruption and process-restart resume | `0.5.1` source target, bundled `0.160.0` | Shipped examples run against the real runtime with a local mock provider |
+| Official example workflows, groups 01–14 | `0.5.1` source target, bundled `0.160.0` | Real-runtime local-provider suite; [mapping and boundaries](./docs/official-examples.md), not model-quality acceptance |
 | Official login/account example, group 15 | `0.5.1` source target | Strict client + scripted RPC fixture; not real OAuth or successful sign-in |
-| ExternalMessage, group 16, and independent joined-turn consumers | `0.5.1` source target, bundled `0.159.3` | Real-runtime tool authority, restart/resume, active join, structured content and truncation; deterministic subscription races |
+| ExternalMessage, group 16, and independent joined-turn consumers | `0.5.1` source target, bundled `0.160.0` | Real-runtime tool authority, restart/resume, active join, structured content and truncation; deterministic subscription races |
 | Packed ESM, declarations, schemas, and bundled binary | Node.js 18 on Linux, macOS, Windows | Installed-package CI; not every OS/architecture pairing |
 | Published `0.1.0-preview.0` archive without consumer build scripts | npm and pnpm 11 consumers | Historical exact-archive verification; not evidence for new candidate bytes |
 | Live account entitlement, model quality, every protocol workflow | Not established by these tests | Requires separate application-specific acceptance |
@@ -61,7 +61,7 @@ Desktop functionality.
 
 | Reference | Pinned baseline | How it is used |
 | --- | --- | --- |
-| Public Codex CLI | `codex-cli 0.159.3` / `rust-v0.159.3` | Runtime binary and public app-server behavior |
+| Public Codex CLI | `codex-cli 0.160.0` / `rust-v0.160.0` | Runtime binary and public app-server behavior |
 | Generated app-server TypeScript | Generated from the pinned CLI | Request, response, notification, and server-request types |
 | Generated JSON Schema | Generated from the pinned CLI | Shipped schema artifacts and drift checks |
 | Official Python SDK | Public source at the same Codex tag | Lifecycle, routing, error, and high-level behavior reference |
@@ -126,7 +126,7 @@ experiments.
 
 The scheduled compatibility smoke covers every exact stable release in
 `compatibility-matrix.json`, currently `0.150.1`, `0.152.1`, `0.153.4`, `0.154.0`, `0.155.0`,
-`0.155.1`, `0.156.1`, `0.157.1`, `0.158.0`, `0.159.0`, `0.159.2`, and the pinned `0.159.3`. On the minimum supported Node.js 18
+`0.155.1`, `0.156.1`, `0.157.1`, `0.158.0`, `0.159.0`, `0.159.2`, `0.159.3`, and the pinned `0.160.0`. On the minimum supported Node.js 18
 runtime it installs each CLI in isolation, starts its real stdio app-server with plugins disabled, uses strict
 current-Schema validation, and exercises initialization, model and thread listing, thread creation/read,
 and thread-goal access without calling a model service. The matrix is an explicit verified window,

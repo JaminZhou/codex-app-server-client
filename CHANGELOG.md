@@ -4,7 +4,7 @@
 
 ## 0.5.1
 
-- Update the bundled Codex runtime to `0.159.3`. The upstream drift check found no generated
+- Update the bundled Codex runtime to `0.160.0`. The upstream drift check found no generated
   protocol differences from `0.159.0`; this is a runtime-only patch update with no public API changes.
 
 ## 0.5.0
