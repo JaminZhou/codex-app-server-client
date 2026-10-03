@@ -5,7 +5,8 @@
 - Update the bundled Codex runtime from `0.159.3` to `0.160.0`. The public generated protocol
   remains unchanged from `0.159.0`; no public API migration is required.
 - Give isolated packaged examples up to 30 seconds for app-server RPCs on slower Windows runners;
-  each mock scenario remains bounded by its separate 45-second deadline.
+  non-interactive mock scenarios also have a separate 45-second per-example deadline. Interactive
+  examples remain available for user input without that total deadline.
 
 ## 0.5.1
 

@@ -27,7 +27,8 @@ export async function withExample(scenario, run, { allowInteractive = false } = 
   let timedOut = false;
   try {
     // Windows hosted runners can take longer to start each fresh app-server after the
-    // preceding packaged examples. Keep RPCs bounded, with a separate 45-second scenario cap.
+    // preceding packaged examples. Keep RPCs bounded; non-interactive mocks also have a
+    // separate 45-second per-example deadline. Interactive examples remain open for user input.
     const options = { requestTimeoutMs: 30_000, cwd: workspace };
     if (temporaryRoot) {
       mkdirSync(workspace);
@@ -87,7 +88,7 @@ shell_snapshot = false
         cwd: workspace, sandbox: "read-only", approvalPolicy, approvalsReviewer: "user",
       },
     });
-    if (timedOut) throw new Error("Mock example exceeded its 45-second deadline");
+    if (timedOut) throw new Error("Non-interactive mock example exceeded its 45-second deadline");
   } finally {
     clearTimeout(timeout);
     try { await client?.close(); }
