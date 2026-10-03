@@ -26,9 +26,9 @@ export async function withExample(scenario, run, { allowInteractive = false } = 
   let timeout;
   let timedOut = false;
   try {
-    // Interactive smoke cases run after many packaged examples on Windows, where
-    // starting a fresh app-server can exceed the shorter ordinary-example budget.
-    const options = { requestTimeoutMs: interactive ? 30_000 : 15_000, cwd: workspace };
+    // Windows hosted runners can take longer to start each fresh app-server after the
+    // preceding packaged examples. Keep RPCs bounded, with a separate 45-second scenario cap.
+    const options = { requestTimeoutMs: 30_000, cwd: workspace };
     if (temporaryRoot) {
       mkdirSync(workspace);
       const codexHome = join(temporaryRoot, "codex-home");

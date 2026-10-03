@@ -14,8 +14,9 @@ Version `0.3.0` removed the upstream-retired `thread/rollback` method from publi
 using it must migrate. Version `0.4.0` removes upstream-retired plugin-extension types and
 `PluginSummary.extensions` from the generated public TypeScript surface. Version `0.5.0` adds the
 Codex `0.159.0` protocol surface without removing any existing public method or type. The `0.5.2`
-release target updates the bundled Codex runtime to `0.160.0` without generated protocol changes;
-the immutable `0.5.1` archive remains on `0.159.3`. See the [0.5.2 release guide](./docs/releases/0.5.2.md),
+release target updates the bundled Codex runtime to `0.160.0` without generated protocol
+changes, and gives mock examples additional startup headroom on slower Windows systems; the
+immutable `0.5.1` archive remains on `0.159.3`. See the [0.5.2 release guide](./docs/releases/0.5.2.md),
 the [0.5.1 release guide](./docs/releases/0.5.1.md), the [0.5.0 release guide](./docs/releases/0.5.0.md), the
 [0.4.0 release guide](./docs/releases/0.4.0.md), the [0.3.1 release guide](./docs/releases/0.3.1.md), the
 [0.3.0 migration guide](./docs/releases/0.3.0.md), the
