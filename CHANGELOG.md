@@ -1,9 +1,9 @@
 # Changelog
 
-## Unreleased
+## 0.5.2
 
-- Advance the unreleased source checkout's bundled Codex runtime to `0.160.0`. The public
-  generated protocol remains unchanged from `0.159.0`.
+- Update the bundled Codex runtime from `0.159.3` to `0.160.0`. The public generated protocol
+  remains unchanged from `0.159.0`; no public API migration is required.
 
 ## 0.5.1
 

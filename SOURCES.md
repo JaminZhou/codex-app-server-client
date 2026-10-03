@@ -45,7 +45,7 @@ the public [ExternalMessage and independent subscription change](https://github.
 for group 16 and its high-level behavior. The existing `0.153.4` `turn/start.toolOutput` protocol
 already preserved the tool-authority boundary; ExternalMessage itself did not require a
 generated-protocol upgrade. The `0.5.0` release target verified the examples against `0.159.0`.
-The current source checkout uses `0.160.0`; published client `0.5.1` uses `0.159.3`. Client
+The current source checkout and `0.5.2` release target use `0.160.0`; client `0.5.1` uses `0.159.3`. Client
 `0.4.0` uses `0.158.0` and client `0.3.1` uses `0.157.1`.
 See [the exact source, mapping and intentional differences](./docs/official-examples.md).
 No claim of parity with newer upstream examples or Python's blocking API is implied.
