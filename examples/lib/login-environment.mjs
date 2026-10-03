@@ -6,6 +6,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { CodexAppServerClient } from "@jaminzhou/codex-app-server-client";
 
+const LOGIN_EXAMPLE_REQUEST_TIMEOUT_MS = 30_000;
+
 // Resolve the SDK's own declared ws dependency through its public schema export. This also
 // works when examples are copied into a pnpm consumer without a direct ws dependency.
 const require = createRequire(import.meta.url);
@@ -66,14 +68,15 @@ export async function withLoginExample(run) {
       temporaryRoot = mkdtempSync(join(tmpdir(), "codex-client-login-example-"));
       const codexHome = join(temporaryRoot, "codex-home");
       mkdirSync(codexHome);
-      client = new CodexAppServerClient({ cwd: temporaryRoot, requestTimeoutMs: 15_000,
+      client = new CodexAppServerClient({ cwd: temporaryRoot,
+        requestTimeoutMs: LOGIN_EXAMPLE_REQUEST_TIMEOUT_MS,
         env: { CODEX_HOME: codexHome, CODEX_APP_SERVER_DISABLE_MANAGED_CONFIG: "1",
           OPENAI_API_KEY: undefined, CODEX_API_KEY: undefined, OPENAI_BASE_URL: undefined } });
       console.log("[live-auth] Starts and immediately cancels real OAuth in an isolated home. No browser is opened.");
     } else {
       fixture = await startLoginFixture();
       client = new CodexAppServerClient({ transport: { type: "websocket", url: fixture.url },
-        protocolValidation: "strict", requestTimeoutMs: 5_000 });
+        protocolValidation: "strict", requestTimeoutMs: LOGIN_EXAMPLE_REQUEST_TIMEOUT_MS });
       console.log("[mock-rpc] Scripted login lifecycle; no real app-server, OAuth, credentials, or model calls.");
     }
     await client.connect();
