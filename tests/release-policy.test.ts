@@ -7,13 +7,25 @@ const manifest = (version: string, tag: string) => ({
   version, publishConfig: { tag, access: "public", registry: "https://registry.npmjs.org/" },
 });
 describe("candidate packaging policy", () => {
-  it("keeps shipped exact-version installation and troubleshooting aligned with the package", () => {
+  it("keeps published installation guidance distinct from the source candidate", () => {
     const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
     const examples = readFileSync(new URL("../examples/README.md", import.meta.url), "utf8");
     const row = examples.split("\n").find((line) => line.startsWith("| npm returns 404"));
-    expect(row).toContain(`npm view ${pkg.name}@${pkg.version} version`);
+    const registryCheck = row?.match(
+      new RegExp(`npm view ${pkg.name.replace("/", "\\/")}@([0-9]+\\.[0-9]+\\.[0-9]+) version`),
+    );
+    expect(registryCheck).toBeTruthy();
+    const publishedVersion = registryCheck?.[1];
     const readme = readFileSync(new URL("../README.md", import.meta.url), "utf8");
-    expect(readme).toContain(`npm view ${pkg.name}@${pkg.version} version`);
+    if (publishedVersion === pkg.version) {
+      expect(readme).not.toContain("(unpublished candidate)");
+    } else {
+      expect(readme).toContain(`**Source version:** \`${pkg.version}\` (unpublished candidate);`);
+    }
+    expect(readme).toContain(`npm view ${pkg.name}@${publishedVersion} version`);
+    expect(readme).toContain(
+      `npm install --save-exact --ignore-scripts --include=optional ${pkg.name}@${publishedVersion}`,
+    );
     expect(readme).toContain("pnpm package:smoke");
     expect(readme).not.toContain("pnpm release:pack");
     expect(readme).not.toContain(`codex-app-server-client-${pkg.version}.tgz`);

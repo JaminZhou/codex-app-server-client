@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.3 (unpublished source candidate)
+
+- Update the bundled Codex runtime from `0.160.0` to `0.160.1`. The public generated protocol
+  remains unchanged; no public API migration is required. This source entry does not imply npm
+  publication or release authorization.
+
 ## 0.5.2
 
 - Update the bundled Codex runtime from `0.159.3` to `0.160.0`. The public generated protocol

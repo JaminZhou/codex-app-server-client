@@ -8,15 +8,17 @@ app-server process, typed requests, and event routing so you can focus on your a
 > endorsed by OpenAI. Codex and OpenAI are trademarks of OpenAI.
 
 **Package:** `@jaminzhou/codex-app-server-client`.
-**Version target:** `0.5.2`, a non-preview 0.x API, not a 1.0 stability commitment.
+**Source version:** `0.5.3` (unpublished candidate); a non-preview 0.x API, not a 1.0
+stability commitment.
 Check exact registry availability; a source checkout or local rebuild is not proof of publication.
 Version `0.3.0` removed the upstream-retired `thread/rollback` method from public types; callers
 using it must migrate. Version `0.4.0` removes upstream-retired plugin-extension types and
 `PluginSummary.extensions` from the generated public TypeScript surface. Version `0.5.0` adds the
-Codex `0.159.0` protocol surface without removing any existing public method or type. The `0.5.2`
-release target updates the bundled Codex runtime to `0.160.0` without generated protocol
-changes, and gives mock examples additional startup headroom on slower Windows systems; the
-immutable `0.5.1` archive remains on `0.159.3`. See the [0.5.2 release guide](./docs/releases/0.5.2.md),
+Codex `0.159.0` protocol surface without removing any existing public method or type. This source
+candidate updates the bundled runtime from `0.160.0` to `0.160.1` without generated protocol
+changes. The published `0.5.2` release target remains on `0.160.0` and gives mock examples
+additional startup headroom on slower Windows systems; the immutable `0.5.1` archive remains on
+`0.159.3`. See the [0.5.2 release guide](./docs/releases/0.5.2.md),
 the [0.5.1 release guide](./docs/releases/0.5.1.md), the [0.5.0 release guide](./docs/releases/0.5.0.md), the
 [0.4.0 release guide](./docs/releases/0.4.0.md), the [0.3.1 release guide](./docs/releases/0.3.1.md), the
 [0.3.0 migration guide](./docs/releases/0.3.0.md), the
@@ -40,7 +42,8 @@ This package is independently maintained and has its own pre-1.0 API.
   Use a currently maintained Node.js release for a new app.
 - **Build from source / Git:** Node.js 22+ and pnpm 11.7.0. A Git install runs a build; a tarball
   already contains JavaScript, declarations, schemas, and examples.
-- **Runtime:** the current source checkout and `0.5.2` release target use `@openai/codex@0.160.0`; client `0.5.1`
+- **Runtime:** this unpublished `0.5.3` source candidate uses `@openai/codex@0.160.1`; published
+  client `0.5.2` uses `0.160.0`, and client `0.5.1`
   uses `0.159.3`, client `0.5.0` uses `0.159.0`, and client `0.4.0` uses `0.158.0`,
   `0.3.1` uses `0.157.1`,
   `0.3.0` uses `0.156.1`, `0.2.2` uses `0.155.1`,
@@ -53,8 +56,9 @@ This package is independently maintained and has its own pre-1.0 API.
 - **Transports:** managed local stdio by default; Unix socket attachment is also available.
   TCP WebSocket remains experimental for this pinned baseline.
 - **Source version boundary:** basic runtime smoke covers `0.150.1`, `0.152.1`, `0.153.4`, `0.154.0`,
-  `0.155.0`, `0.155.1`, `0.156.1`, `0.157.1`, `0.158.0`, `0.159.0`, `0.159.2`, `0.159.3`, and `0.160.0`.
-  Current rich turn/approval examples use the source checkout's `0.160.0`; published client `0.5.1`
+  `0.155.0`, `0.155.1`, `0.156.1`, `0.157.1`, `0.158.0`, `0.159.0`, `0.159.2`, `0.159.3`, `0.160.0`, and `0.160.1`.
+  Current rich turn/approval examples use the source candidate's `0.160.1`; published client `0.5.2`
+  uses `0.160.0`, client `0.5.1`
   uses `0.159.3`, client `0.5.0` uses `0.159.0`, client `0.4.0` uses `0.158.0`; clients `0.3.1`, `0.3.0` and `0.2.2` use `0.157.1`, `0.156.1` and
   `0.155.1`, respectively. Other releases are not implied compatible.
 
@@ -101,8 +105,9 @@ The package includes [16 numbered equivalents of the official Python app-server
 examples](./docs/official-examples.md),
 covering lifecycle, images, structured output, model selection, a small terminal loop, login cancellation
 and untrusted `ExternalMessage` input with independent joined-turn handles.
-Their public example references are unchanged, and this source checkout and `0.5.2` release target run
-them on the pinned `0.160.0` baseline. Published client `0.5.1` runs them on `0.159.3`, client `0.5.0` on `0.159.0`,
+Their public example references are unchanged, and this source candidate runs them on the pinned
+`0.160.1` baseline. Published client `0.5.2` runs them on `0.160.0`, client `0.5.1` on `0.159.3`,
+client `0.5.0` on `0.159.0`,
 `0.4.0` on `0.158.0`, `0.3.1` on `0.157.1`, `0.3.0` on `0.156.1`,
 `0.2.2` on `0.155.1`, and `0.2.1` on `0.154.0`.
 These additions are not files in the immutable npm `0.1.0` archive.
@@ -155,12 +160,14 @@ the same CLI runtime bundled by the client, under the same user and `CODEX_HOME`
 your app. For this source checkout:
 
 ```bash
-npm exec --package=@openai/codex@0.160.0 -- codex login
-npm exec --package=@openai/codex@0.160.0 -- codex login status
+npm exec --package=@openai/codex@0.160.1 -- codex login
+npm exec --package=@openai/codex@0.160.1 -- codex login status
 node examples/stream.mjs --live
 ```
 
-The current source checkout and `0.5.2` release target use `@openai/codex@0.160.0`; client `0.5.1` uses `0.159.3`,
+The unpublished `0.5.3` source candidate uses `@openai/codex@0.160.1`; published client `0.5.2`
+uses `0.160.0`,
+client `0.5.1` uses `0.159.3`,
 client `0.5.0` uses `0.159.0`, client `0.4.0` uses `0.158.0`, client `0.3.1` uses `0.157.1`, and `0.3.0` uses
 `0.156.1`.
 For `0.2.2`, use `0.155.1`, and for `0.2.1`, use `0.154.0`.
