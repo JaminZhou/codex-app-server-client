@@ -2,9 +2,10 @@
 
 Groups 01–15 follow the public [Python app-server SDK examples at Codex 0.153.4](https://github.com/openai/codex/tree/3d2ee51ca2d5db578f328aa75e20aa22c0197c9a/sdk/python/examples),
 the original example-alignment baseline. The `0.5.0` release target ran those examples on Codex
-`0.159.0`; client `0.5.1` uses `0.159.3`. The current source checkout and `0.5.2` release target
-use `0.160.0`,
-with no generated protocol differences from `0.159.0`. Client `0.4.0` uses `0.158.0` and client
+`0.159.0`; client `0.5.1` uses `0.159.3`. The unpublished `0.5.3` source candidate uses `0.160.1`,
+with no generated protocol differences from `0.160.0`. Published client `0.5.2` remains on
+`0.160.0`.
+Client `0.4.0` uses `0.158.0` and client
 `0.3.1` uses `0.157.1`.
 Group 16 follows the newer public Python
 SDK [ExternalMessage change](https://github.com/openai/codex/commit/1a4096e273e80da30947e57fdfa45be92858ca91),
@@ -74,7 +75,7 @@ baseline upgrades track other upstream protocol changes, not a new requirement f
 
 The official minimum is CLI `0.151.0`; tool-output requests reject unknown/older reported versions
 and prereleases of that minimum, even with Schema checks off. Actual external-message integration
-was initially verified on `0.153.4` and is reverified on the source checkout's `0.160.0`. Text and
+was initially verified on `0.153.4` and is reverified on the source candidate's `0.160.1`. Text and
 structured function-output content retain tool authority through restart/resume and runtime truncation.
 External messages cannot be mixed into
 user-input lists, sent through `steer()`, or used as an approval grant. Python's `source` option is
