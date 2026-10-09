@@ -45,7 +45,8 @@ describe("candidate packaging policy", () => {
       "utf8",
     );
     expect(releaseGuide).toContain(`@jaminzhou/codex-app-server-client@${pkg.version}`);
-    expect(releaseGuide).toMatch(/source record alone does not prove the\s+version has been published/);
+    expect(releaseGuide).toMatch(/unpublished source\s+candidate/);
+    expect(releaseGuide).toContain("Check the npm registry");
     expect(releaseGuide).toContain("thread/rollback");
     const security = readFileSync(new URL("../SECURITY.md", import.meta.url), "utf8");
     expect(security).toContain("Check the registry's current `latest` metadata");

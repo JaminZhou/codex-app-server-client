@@ -63,6 +63,7 @@ export const serverNotificationMethods = [
   "thread/goal/cleared",
   "thread/goal/updated",
   "thread/name/updated",
+  "thread/prediction/updated",
   "thread/project/updated",
   "thread/queue/changed",
   "thread/realtime/closed",

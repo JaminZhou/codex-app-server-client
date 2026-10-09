@@ -1,10 +1,17 @@
 # Changelog
 
-## 0.5.3 (unpublished source candidate)
+## 0.6.0 (unpublished source candidate)
+
+- Align the bundled runtime and generated public protocol with Codex `0.162.0` / `rust-v0.162.0`.
+  Add three typed client methods and 13 exported protocol types; all prior client methods and
+  exported types remain available. Keep fields that may be absent on older supported app-servers
+  optional, and retain the removed `namespaceTools` capability as a deprecated optional field.
+
+## 0.5.3
 
 - Update the bundled Codex runtime from `0.160.0` to `0.160.1`. The public generated protocol
-  remains unchanged; no public API migration is required. This source entry does not imply npm
-  publication or release authorization.
+  remains unchanged; no public API migration is required. This version was published as `latest` on
+  2026-10-08; see the [release record](./docs/releases/0.5.3.md).
 
 ## 0.5.2
 
