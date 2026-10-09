@@ -5,6 +5,7 @@
       "type": "boolean"
     },
     "namespaceTools": {
+      "description": "Legacy capability retained for older app-server compatibility.",
       "type": "boolean"
     },
     "webSearch": {
@@ -13,7 +14,6 @@
   },
   "required": [
     "imageGeneration",
-    "namespaceTools",
     "webSearch"
   ],
   "title": "ModelProviderCapabilitiesReadResponse",

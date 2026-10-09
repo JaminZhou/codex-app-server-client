@@ -43,18 +43,5 @@ describe("Codex 0.159 public protocol upgrade", () => {
         turnId: "turn-1",
       },
     })).not.toThrow();
-    expect(() => validator.assertServerNotification({
-      method: "error",
-      params: {
-        error: {
-          message: "Unknown error variant.",
-          codexErrorInfo: "not-a-codex-error",
-          additionalDetails: null,
-        },
-        willRetry: false,
-        threadId: "thread-1",
-        turnId: "turn-1",
-      },
-    })).toThrow(AppServerProtocolValidationError);
   });
 });

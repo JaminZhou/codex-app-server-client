@@ -25,9 +25,9 @@ checkout are development artifacts, not previously published bytes.
 
 ## Version and support policy
 
-- Client versions are independent of the Codex runtime version. This unpublished `0.5.3` source
-  candidate pins `@openai/codex@0.160.1`; published client `0.5.2` remains on `0.160.0`, and
-  client `0.5.1` uses `0.159.3`. The [0.5.3 source-candidate record](./docs/releases/0.5.3.md)
+- Client versions are independent of the Codex runtime version. This unpublished `0.6.0` source
+  candidate pins `@openai/codex@0.162.0`; published client `0.5.3` uses `0.160.1`, client `0.5.2`
+  uses `0.160.0`, and client `0.5.1` uses `0.159.3`. The [0.6.0 candidate record](./docs/releases/0.6.0.md)
   documents scope without implying publication. Client
   `0.5.0` uses `0.159.0`, and client `0.4.0` uses `0.158.0`
   and client `0.3.1` uses `0.157.1`,
@@ -38,6 +38,8 @@ checkout are development artifacts, not previously published bytes.
   Pre-1.0 APIs and generated experimental protocol types may change; consumers should pin exact
   versions and keep their lockfiles.
 - Stable releases are non-preview `0.x.y` versions and remain pre-1.0 APIs; see the
+  [0.6.0 candidate record](./docs/releases/0.6.0.md) for the current additive protocol update, the
+  [0.5.3 release record](./docs/releases/0.5.3.md) for the previous runtime-only update, the
   [0.5.2 release guide](./docs/releases/0.5.2.md) for the previous runtime-only update, the
   [0.5.1 release guide](./docs/releases/0.5.1.md) for the previous runtime patch, the
   [0.5.0 release guide](./docs/releases/0.5.0.md) for the previous protocol update, the

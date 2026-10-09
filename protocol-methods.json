@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
-  "codexCliVersion": "0.160.1",
+  "codexCliVersion": "0.162.0",
   "source": {
     "repository": "https://github.com/openai/codex",
-    "tag": "rust-v0.160.1",
-    "commit": "d27764b82f7118f674371e6d6e76271d9d606edb",
+    "tag": "rust-v0.162.0",
+    "commit": "c1382380de69521303b416720a52f42d51af6248",
     "path": "codex-rs/app-server-protocol/src/protocol/common.rs"
   },
   "methods": [
@@ -137,6 +137,14 @@
       "variant": "ThreadSetName"
     },
     {
+      "method": "thread/prediction/request",
+      "response": {
+        "module": "v2/ThreadPredictionRequestResponse",
+        "name": "ThreadPredictionRequestResponse"
+      },
+      "variant": "ThreadPredictionRequest"
+    },
+    {
       "method": "thread/goal/set",
       "response": {
         "module": "v2/ThreadGoalSetResponse",
@@ -231,6 +239,14 @@
         "name": "ThreadAttachmentListResponse"
       },
       "variant": "ThreadAttachmentList"
+    },
+    {
+      "method": "thread/attachmentOwner/list",
+      "response": {
+        "module": "v2/ThreadAttachmentOwnerListResponse",
+        "name": "ThreadAttachmentOwnerListResponse"
+      },
+      "variant": "ThreadAttachmentOwnerList"
     },
     {
       "method": "thread/attachment/remove",
@@ -1111,6 +1127,14 @@
         "name": "BedrockSetupResponse"
       },
       "variant": "BedrockSetup"
+    },
+    {
+      "method": "account/bedrock/checkGovCloudRequirements",
+      "response": {
+        "module": "v2/BedrockCheckGovCloudRequirementsResponse",
+        "name": "BedrockCheckGovCloudRequirementsResponse"
+      },
+      "variant": "BedrockCheckGovCloudRequirements"
     },
     {
       "method": "account/login/cancel",

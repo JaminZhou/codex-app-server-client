@@ -19,6 +19,7 @@ type AgentMessageItem = Extract<v2.ThreadItem, { type: "agentMessage" }>;
 type AppConfig = NonNullable<v2.AppsConfig["example"]>;
 type CommandExecutionItem = Extract<v2.ThreadItem, { type: "commandExecution" }>;
 type McpToolCallItem = Extract<v2.ThreadItem, { type: "mcpToolCall" }>;
+type SubAgentActivityItem = Extract<v2.ThreadItem, { type: "subAgentActivity" }>;
 
 describe("generated protocol runtime validation", () => {
   it("includes the legacy Windows sandbox field in the combined protocol schema", () => {
@@ -37,6 +38,7 @@ describe("generated protocol runtime validation", () => {
       IsOptional<v2.AppToolSummary, "disabledReason">,
       IsOptional<v2.AppToolSummary, "isReadOnly">,
       IsOptional<v2.BrowserUseRequirements, "disableAutoReview">,
+      IsOptional<v2.BrowserUseRequirements, "extension">,
       IsOptional<v2.ConfigRequirements, "browserUse">,
       IsOptional<v2.ConfigRequirements, "sqliteHome">,
       IsOptional<v2.ConfigRequirements, "logDir">,
@@ -71,6 +73,10 @@ describe("generated protocol runtime validation", () => {
       IsOptional<v2.Thread, "model">,
       IsOptional<v2.Thread, "reasoningEffort">,
       IsOptional<v2.ToolRequestUserInputParams, "isBlocking">,
+      IsOptional<v2.Turn, "rootTurnId">,
+      IsOptional<SubAgentActivityItem, "model">,
+      IsOptional<SubAgentActivityItem, "reasoningEffort">,
+      IsOptional<v2.ModelProviderCapabilitiesReadResponse, "namespaceTools">,
       IsOptional<AgentMessageItem, "questions">,
       IsOptional<McpToolCallItem, "mcpAppUi">,
       IsOptional<CommandExecutionItem, "pluginId">,
@@ -139,9 +145,14 @@ describe("generated protocol runtime validation", () => {
       true,
       true,
       true,
+      true,
+      true,
+      true,
+      true,
+      true,
     ];
 
-    expect(optionalFields).toHaveLength(54);
+    expect(optionalFields).toHaveLength(59);
   });
 
   it("accepts verification elicitation requests without optional metadata", () => {
@@ -377,9 +388,9 @@ describe("generated protocol runtime validation", () => {
     expect(protocolValidationMetadata).toMatchObject({
       defaultMode: "strict",
       validatedClientNotifications: 1,
-      validatedClientRequests: 170,
-      validatedClientResponses: 167,
-      validatedServerNotifications: 85,
+      validatedClientRequests: 173,
+      validatedClientResponses: 170,
+      validatedServerNotifications: 86,
       validatedServerRequests: 11,
       unavailableResponseSchemas: [
         "getAuthStatus",
@@ -401,6 +412,40 @@ describe("generated protocol runtime validation", () => {
         requirements: { windowsSandboxPrivateDesktop: value },
       })).toThrow(AppServerProtocolValidationError);
     }
+  });
+
+  it("preserves the removed namespaceTools capability for older runtimes", async () => {
+    const validator = await loadProtocolValidator();
+    const definition = combinedProtocolSchema.definitions.v2.ModelProviderCapabilitiesReadResponse;
+
+    expect(definition.properties.namespaceTools).toMatchObject({ type: "boolean" });
+    expect(definition.required).not.toContain("namespaceTools");
+    expect(() =>
+      validator.assertResponse("modelProvider/capabilities/read", {
+        imageGeneration: false,
+        namespaceTools: true,
+        webSearch: true,
+      }),
+    ).not.toThrow();
+  });
+
+  it("accepts open-ended Codex error strings from the current protocol", async () => {
+    const validator = await loadProtocolValidator();
+    expect(() =>
+      validator.assertServerNotification({
+        method: "error",
+        params: {
+          error: {
+            message: "An error variant unknown to this client.",
+            codexErrorInfo: "futureCodexErrorVariant",
+            additionalDetails: null,
+          },
+          willRetry: false,
+          threadId: "thread-1",
+          turnId: "turn-1",
+        },
+      }),
+    ).not.toThrow();
   });
 
   it("validates the Codex 0.156 rollout compression method", async () => {

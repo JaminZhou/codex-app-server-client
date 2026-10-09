@@ -30,7 +30,7 @@ const wireOptionalGeneratedFields = {
     "disabledReason",
     "isReadOnly",
   ],
-  "v2/BrowserUseRequirements.ts": ["disableAutoReview", "allowWebmcp"],
+  "v2/BrowserUseRequirements.ts": ["disableAutoReview", "allowWebmcp", "extension"],
   "v2/ConfigRequirements.ts": [
     "application",
     "browserUse",
@@ -91,6 +91,7 @@ const wireOptionalGeneratedFields = {
     "model",
     "reasoningEffort",
   ],
+  "v2/Turn.ts": ["rootTurnId"],
   "v2/ThreadAttachmentListResponse.ts": ["nextCursor"],
   "v2/ThreadForkResponse.ts": ["disabledPluginIds"],
   "v2/ThreadItem.ts": ["mcpAppUi", "questions"],
@@ -130,6 +131,20 @@ const compatibilityGeneratedTypeReplacements = {
   // Its Schema declares int64 despite the upstream TypeScript number override.
   // Let the normal lossless-integer pass below produce number | bigint.
   "v2/UserVerificationRpcError.ts": [["code: number,", "code: bigint,"]],
+  "v2/ModelProviderCapabilitiesReadResponse.ts": [
+    [
+      "export type ModelProviderCapabilitiesReadResponse = { imageGeneration: boolean, webSearch: boolean, };",
+      [
+        "export type ModelProviderCapabilitiesReadResponse = {",
+        "/**",
+        " * Legacy capability retained for older app-server compatibility.",
+        " *",
+        " * @deprecated Codex 0.162.0 removed this capability.",
+        " */",
+        "namespaceTools?: boolean, imageGeneration: boolean, webSearch: boolean, };",
+      ].join("\n"),
+    ],
+  ],
   "v2/Thread.ts": [
     [
       "ephemeral: boolean,\n/**\n * The independently persisted section selected for this thread, if any.",
@@ -147,6 +162,14 @@ const compatibilityGeneratedTypeReplacements = {
     ],
   ],
   "v2/ThreadItem.ts": [
+    [
+      '"type": "subAgentActivity",\n/**\n * Resolved model at sub-agent creation; absent from older records and other activities.\n */\nmodel: string | null,',
+      '"type": "subAgentActivity",\n/**\n * Resolved model at sub-agent creation; absent from older records and other activities.\n */\nmodel?: string | null,',
+    ],
+    [
+      ' * Resolved reasoning effort at sub-agent creation, when known.\n */\nreasoningEffort: ReasoningEffort | null,',
+      ' * Resolved reasoning effort at sub-agent creation, when known.\n */\nreasoningEffort?: ReasoningEffort | null,',
+    ],
     [
       "pluginId: string | null,\n/**\n * Safe plugin-relative path",
       "pluginId?: string | null,\n/**\n * Safe plugin-relative path",
@@ -418,6 +441,18 @@ function normalizeProtocolSchemaRanges(value) {
     // app-server semantic range in every generated schema copy, including ClientRequest.json.
     field.minimum = 1;
     field.maximum = 4096;
+  }
+  if (
+    value.title === "ModelProviderCapabilitiesReadResponse" &&
+    isRecord(value.properties) &&
+    !Object.hasOwn(value.properties, "namespaceTools")
+  ) {
+    // Older supported runtimes still return this capability. Keep the field accepted and
+    // typed without claiming it is part of the current 0.162.0 protocol.
+    value.properties.namespaceTools = {
+      description: "Legacy capability retained for older app-server compatibility.",
+      type: "boolean",
+    };
   }
   for (const item of Object.values(value)) normalizeProtocolSchemaRanges(item);
 }
