@@ -44,6 +44,7 @@ const wireOptionalGeneratedFields = {
     "allowLoginShell",
     "feedback",
   ],
+  "v2/ConfigRequirementsReadResponse.ts": ["supportsIndependentSpeedModes"],
   "v2/ConnectorMetadata.ts": [
     "description",
     "distributionChannel",

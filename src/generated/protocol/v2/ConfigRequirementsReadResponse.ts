@@ -8,7 +8,7 @@ export type ConfigRequirementsReadResponse = {
  * Whether Fast and Ultra Fast requirements are enforced independently.
  * Older servers omit this field and use Fast mode as a shared speed gate.
  */
-supportsIndependentSpeedModes: boolean | null,
+supportsIndependentSpeedModes?: boolean | null,
 /**
  * Null if no requirements are configured (e.g. no requirements.toml/MDM entries).
  */

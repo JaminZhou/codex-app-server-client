@@ -50,6 +50,7 @@ describe("generated protocol runtime validation", () => {
       IsOptional<v2.ConfigRequirements, "modelProviders">,
       IsOptional<v2.ConfigRequirements, "allowedLoginMethods">,
       IsOptional<v2.ConfigRequirements, "windowsSandboxPrivateDesktop">,
+      IsOptional<v2.ConfigRequirementsReadResponse, "supportsIndependentSpeedModes">,
       IsOptional<v2.ExternalAgentConfigImportHistory, "providerId">,
       IsOptional<v2.ExternalAgentConfigDetectResponse, "connectors">,
       IsOptional<v2.ExternalAgentConfigImportItemTypeSuccess, "title">,
@@ -150,9 +151,10 @@ describe("generated protocol runtime validation", () => {
       true,
       true,
       true,
+      true,
     ];
 
-    expect(optionalFields).toHaveLength(59);
+    expect(optionalFields).toHaveLength(60);
   });
 
   it("accepts verification elicitation requests without optional metadata", () => {
@@ -412,6 +414,22 @@ describe("generated protocol runtime validation", () => {
         requirements: { windowsSandboxPrivateDesktop: value },
       })).toThrow(AppServerProtocolValidationError);
     }
+  });
+
+  it("accepts config requirement responses from older servers without independent speed modes", async () => {
+    const validator = await loadProtocolValidator();
+    for (const response of [
+      { requirements: null },
+      { supportsIndependentSpeedModes: true, requirements: null },
+      { supportsIndependentSpeedModes: false, requirements: null },
+      { supportsIndependentSpeedModes: null, requirements: null },
+    ]) {
+      expect(() => validator.assertResponse("configRequirements/read", response)).not.toThrow();
+    }
+    expect(() => validator.assertResponse("configRequirements/read", {
+      supportsIndependentSpeedModes: "true",
+      requirements: null,
+    })).toThrow(AppServerProtocolValidationError);
   });
 
   it("preserves the removed namespaceTools capability for older runtimes", async () => {
