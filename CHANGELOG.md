@@ -1,11 +1,20 @@
 # Changelog
 
-## 0.6.0 (unpublished source candidate)
+## 0.6.1 (unpublished source candidate)
+
+- Update the bundled Codex runtime from `0.162.0` to `0.162.1` and refresh public-tag provenance.
+  The generated public protocol is unchanged; no public API migration is required. Extend the
+  basic compatibility matrix through `0.162.1` and retain the `0.162.0` runtime check.
+- Record the verified `0.6.0` publication and use it for exact-version registry installation
+  examples while this source version is awaiting publication.
+
+## 0.6.0
 
 - Align the bundled runtime and generated public protocol with Codex `0.162.0` / `rust-v0.162.0`.
   Add three typed client methods and 13 exported protocol types; all prior client methods and
   exported types remain available. Keep fields that may be absent on older supported app-servers
   optional, and retain the removed `namespaceTools` capability as a deprecated optional field.
+  Published via OIDC on 2026-10-09 (UTC); see the [release record](./docs/releases/0.6.0.md).
 
 ## 0.5.3
 
