@@ -12,9 +12,9 @@ This repository is an independently written client for public Codex interfaces.
 
 ## Pinned protocol provenance
 
-- CLI package: `@openai/codex@0.162.0`
-- Open-source tag: `rust-v0.162.0`
-- Open-source commit: `c1382380de69521303b416720a52f42d51af6248`
+- CLI package: `@openai/codex@0.162.1`
+- Open-source tag: `rust-v0.162.1`
+- Open-source commit: `092d3acd6bec3e3a14bdc7e7a2810ab628ab759d`
 - Method-map source: `codex-rs/app-server-protocol/src/protocol/common.rs`
 
 The CLI generates `src/generated/protocol/` and `schemas/`. A deterministic post-generation
@@ -45,8 +45,8 @@ the public [ExternalMessage and independent subscription change](https://github.
 for group 16 and its high-level behavior. The existing `0.153.4` `turn/start.toolOutput` protocol
 already preserved the tool-authority boundary; ExternalMessage itself did not require a
 generated-protocol upgrade. The `0.5.0` release target verified the examples against `0.159.0`.
-The published `0.5.3` client uses `0.160.1`; the unpublished `0.6.0` source candidate uses
-`0.162.0`; published client `0.5.2` remains on `0.160.0`, and client `0.5.1` uses `0.159.3`. Client
+The unpublished `0.6.1` source candidate uses `0.162.1`; published client `0.6.0` uses `0.162.0`,
+and `0.5.3` uses `0.160.1`. Published client `0.5.2` remains on `0.160.0`, and client `0.5.1` uses `0.159.3`. Client
 `0.4.0` uses `0.158.0` and client `0.3.1` uses `0.157.1`.
 See [the exact source, mapping and intentional differences](./docs/official-examples.md).
 No claim of parity with newer upstream examples or Python's blocking API is implied.
