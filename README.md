@@ -29,6 +29,14 @@ the [0.5.1 release guide](./docs/releases/0.5.1.md), the [0.5.0 release guide](.
 [migration notes from 0.1.0](./docs/api-diff-0.2.0.md).
 The unscoped npm name belongs to a different project.
 
+## Maintenance and checks
+
+This project is in on-demand maintenance and does not promise to track every upstream Codex release.
+CI still runs for pushes to `main` and pull requests. The `codex drift` and `codex compatibility`
+workflows are manual-only: use **Run workflow** when a concrete use case or issue warrants checking
+the pinned baseline. Dependency security alerts remain enabled. This policy does not change any
+published package, runtime pin, or release authorization gate.
+
 ## Is this for your app?
 
 Use this package for a long-lived Node.js host, terminal tool, or Electron **main process** that needs
