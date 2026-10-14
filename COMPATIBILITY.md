@@ -53,8 +53,8 @@ the new runtime compatible.
 
 Maintainers update the exact runtime, lockfile, public-tag provenance, generated types/schemas and
 compatibility matrix together, then run the required checks described in [CONTRIBUTING.md](./CONTRIBUTING.md).
-The scheduled drift alarm means an upstream stable release differs; it does not by itself mean
-the current client is broken. Candidate preparation and publication are covered by [RELEASING.md](./RELEASING.md).
+The manual drift check reports whether an upstream stable release differs; a difference does not by
+itself mean the current client is broken. Candidate preparation and publication are covered by [RELEASING.md](./RELEASING.md).
 
 The detailed tables below describe this pinned public baseline, not parity with private Codex
 Desktop functionality.
@@ -129,7 +129,7 @@ experiments.
 
 ## Cross-version verification
 
-The scheduled compatibility smoke covers every exact stable release in
+The manual compatibility smoke covers every exact stable release in
 `compatibility-matrix.json`, currently `0.150.1`, `0.152.1`, `0.153.4`, `0.154.0`, `0.155.0`,
 `0.155.1`, `0.156.1`, `0.157.1`, `0.158.0`, `0.159.0`, `0.159.2`, `0.159.3`, `0.160.0`,
 `0.160.1`, `0.162.0`, and the pinned `0.162.1`. On the minimum supported Node.js 18
