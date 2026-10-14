@@ -29,13 +29,17 @@ on Node.js 18 in every platform job. Windows additionally holds a real file hand
 sharing to exercise bounded native filesystem retries. Persistent cleanup errors still fail CI,
 both errors are retained if the consumer also fails, and a smoke reports success only after cleanup.
 
-A separate scheduled workflow runs `pnpm protocol:latest-check` against npm's latest stable Codex
+Upstream checks are manual-only during on-demand maintenance. Open GitHub Actions, select
+`codex drift` or `codex compatibility`, and choose **Run workflow** when a concrete use case or issue
+warrants checking the pinned baseline. Push/PR CI and the required `check` context remain enabled.
+
+The manual drift workflow runs `pnpm protocol:latest-check` against npm's latest stable Codex
 release. It always verifies that the pinned public Rust tag still resolves to the recorded commit
 and method map. It also fails when the pinned runtime is behind and reports whether the newer
 release changes the generated public protocol, without making a time-dependent registry lookup part
 of the required pull-request check.
 
-A weekly compatibility workflow reads `compatibility-matrix.json`, installs each exact Codex CLI
+The manual compatibility workflow reads `compatibility-matrix.json`, installs each exact Codex CLI
 version in isolation, and exercises initialization, strict protocol validation, model and thread
 listing, thread creation/read, and thread-goal access against the real app-server on Node.js 18.
 The regular `pnpm check` validates that the ordered matrix contains at least two stable releases and

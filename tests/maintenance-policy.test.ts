@@ -28,4 +28,11 @@ describe("on-demand maintenance policy", () => {
     expect(workflow).toMatch(/^  check:/m);
     expect(workflow).toContain("needs: [linux-check, macos-package-smoke, windows-package-smoke]");
   });
+
+  it("keeps contributor guidance consistent with manual-only upstream checks", () => {
+    const guidance = readFileSync(new URL("../CONTRIBUTING.md", import.meta.url), "utf8");
+    expect(guidance).toContain("manual-only");
+    expect(guidance).toContain("**Run workflow**");
+    expect(guidance).not.toMatch(/scheduled workflow|weekly compatibility workflow/i);
+  });
 });
